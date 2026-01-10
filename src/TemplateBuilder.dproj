@@ -92,6 +92,7 @@
         </DelphiCompile>
         <DCCReference Include="builders\unBuildFiles.pas"/>
         <DCCReference Include="services\unParseYAML.pas"/>
+        <DCCReference Include="types\unFileType.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

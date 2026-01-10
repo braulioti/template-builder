@@ -1,21 +1,37 @@
-unit unBuildFiles;
+unit unFileBuilder;
 
 interface
 
 uses
-  System.IOUtils, System.SysUtils, System.Classes, unFileType;
+  System.IOUtils, System.SysUtils, System.Classes, unFileType, unPromptBuilder;
 
 type
-  TBuildFile = class
+  TFileBuilder = class
+  private
+    FPromptBuilder: TPromptBuilder;
   public
+    constructor Create;
+    destructor Destroy; override;
     procedure Build(const AFile: TFileData);
   end;
 
 implementation
 
-{ TBuildFile }
+{ TFileBuilder }
 
-procedure TBuildFile.Build(const AFile: TFileData);
+constructor TFileBuilder.Create;
+begin
+  inherited Create;
+  FPromptBuilder := TPromptBuilder.Create;
+end;
+
+destructor TFileBuilder.Destroy;
+begin
+  FPromptBuilder.Free;
+  inherited;
+end;
+
+procedure TFileBuilder.Build(const AFile: TFileData);
 var
   FullPath: string;
   Directory: string;
@@ -35,7 +51,11 @@ begin
 
   FileContent := TStringList.Create;
   try
-    FileContent.Text := AFile.Content;
+    if AFile.Prompt = nil then
+      FileContent.Text := AFile.Content
+    else
+      FileContent.Text := FPromptBuilder.Build(AFile.Prompt);
+
     FileContent.SaveToFile(FullPath, TEncoding.UTF8);
   finally
     FileContent.Free;

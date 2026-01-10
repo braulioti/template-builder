@@ -3,7 +3,8 @@
 interface
 
 uses
-  System.SysUtils, VSoft.YAML, StrUtils;
+  System.SysUtils, System.Generics.Collections, VSoft.YAML, StrUtils,
+  unFileType, unBuildFiles;
 
 type
   EUnsupportedTemplateVersion = class(Exception);
@@ -12,11 +13,18 @@ type TParserYAML = class
 private
   FVersion: string;
   FDoc: IYAMLDocument;
+  FFiles: TObjectList<TFileData>;
+  FFileBuilder: TBuildFile;
   procedure ValidateVersion;
+  procedure LoadFiles;
+  procedure Initializer;
 public
   constructor Create(const FileName: string);
+  destructor Destroy; override;
+  procedure BuildAll;
   property Version: string read FVersion;
   property Document: IYAMLDocument read FDoc;
+  property Files: TObjectList<TFileData> read FFiles;
 end;
 
 implementation
@@ -47,8 +55,61 @@ begin
 
   FVersion := FDoc.Root.Values['version'].AsString;
 
-  // Validate version
   ValidateVersion;
+  Initializer;
+  LoadFiles;
+end;
+
+destructor TParserYAML.Destroy;
+begin
+  FFileBuilder.Free;
+  FFiles.Free;
+  inherited;
+end;
+
+procedure TParserYAML.Initializer;
+begin
+  FFiles := TObjectList<TFileData>.Create(True);
+  FFileBuilder := TBuildFile.Create;
+end;
+
+procedure TParserYAML.LoadFiles;
+var
+  FilesNode: IYAMLValue;
+  FileArray: IYAMLSequence;
+  FileItem: IYAMLValue;
+  FileObj: TFileData;
+  i: Integer;
+begin
+  FilesNode := FDoc.Root.Values['files'];
+  if FilesNode = nil then
+    Exit; // No files section, list remains empty
+
+  if not FilesNode.IsSequence then
+    raise Exception.Create('"files" must be a sequence (array) in YAML.');
+
+  FileArray := FilesNode.AsSequence;
+  for i := 0 to FileArray.Count - 1 do
+  begin
+    FileItem := FileArray[i];
+
+    FileObj := TFileData.Create(
+      FileItem.Values['path'].AsString,
+      FileItem.Values['content'].AsString
+    );
+    FFiles.Add(FileObj);
+  end;
+end;
+
+procedure TParserYAML.BuildAll;
+var
+  FileItem: TFileData;
+begin
+  for FileItem in FFiles do
+  begin
+    FFileBuilder.Build(FileItem);
+    Writeln(Format('Created %s', [FileItem.Path]));
+  end;
 end;
 
 procedure TParserYAML.ValidateVersion;

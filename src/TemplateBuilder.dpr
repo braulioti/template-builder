@@ -7,9 +7,12 @@ program TemplateBuilder;
 uses
   System.SysUtils,
   System.IOUtils,
-  unBuildFiles in 'builders\unBuildFiles.pas',
+  unFileBuilder in 'builders\unFileBuilder.pas',
   unParseYAML in 'services\unParseYAML.pas',
-  unFileType in 'types\unFileType.pas';
+  unFileType in 'types\unFileType.pas',
+  unVariableType in 'types\unVariableType.pas',
+  unPromptType in 'types\unPromptType.pas',
+  unPromptBuilder in 'builders\unPromptBuilder.pas';
 
 var
   YAMLParser: TParserYAML;

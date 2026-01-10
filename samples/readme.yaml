@@ -1,0 +1,106 @@
+version: 1.0
+
+variables:
+  - name: projectName
+    type: string
+  - name: version
+    type: string
+    value: 1.0
+  - name: projectDescription
+    type: string
+  - name: badges
+    type: string
+  - name: author
+    type: string
+  - name: authorWebsite
+    type: string
+  - name: authorEmail
+    type: string
+  - name: technologies
+    type: string
+
+prompts:
+  - name: promptReadme
+    inputs:
+      - variable: projectName
+        input: "Enter your project name: "
+        type: InputString
+      - variable: version
+        input: "Enter your project version: "
+        type: InputString
+      - variable: projectDescription
+        input: "Enter your project description: "
+        type: InputString
+      - variable: badges
+        input: "Select your project badges: "
+        type: CheckList
+        options:
+          - name: "Delphi"
+            value: "[![Delphi](https://img.shields.io/badge/Delphi-d92a30?style=for-the-badge&logo=delphi&logoColor=white)](https://www.embarcadero.com//)"
+          - name: "Python"
+            value: "[![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)](https://www.python.org/)"
+          - name: "Flask"
+            value: "[![Flask](https://img.shields.io/badge/flask-%23000.svg?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/en/stable/)"
+          - name: "Postgres"
+            value: "[![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)"
+          - name: "SQLite"
+            value: "[![SQLite](https://img.shields.io/badge/sqlite-%2307405e.svg?style=for-the-badge&logo=sqlite&logoColor=white)](https://sqlite.org/)"
+          - name: "Docker"
+            value: "[![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)"
+          - name: "Swagger"
+            value: "[![Swagger](https://img.shields.io/badge/-Swagger-%23Clojure?style=for-the-badge&logo=swagger&logoColor=white)](https://swagger.io/)"
+          - name: "Licence"
+            value: "[![Licence](https://img.shields.io/github/license/Ileriayo/markdown-badges?style=for-the-badge)](./LICENSE)"
+      - variable: author
+        input: "Author: "
+        type: InputString
+      - variable: authorWebsite
+        input: "Author Website: "
+        type: InputString
+      - variable: authorEmail
+        input: "Author E-mail: "
+        type: InputString
+      - variable: technologies
+        input: "Technologies: "
+        type: ArrayList
+    result: |
+      # {{projectName}} - Version: {{version}}
+      
+      {{badges}}
+      
+      {{projectDescription}}
+      
+      {{projectDescription}} is created and maintained by [{{author}}]({{authorWebsite}}).
+      
+      ## Table of Contents
+
+      - [Technologies](#technologies)
+      - [Versioning](#versioning)
+      - [Author](#author)
+
+      ## Technologies
+      
+      {{"- " | technologies}}
+
+      ## Versioning
+      
+      {{projectDescription}} "Semantic Versioning" guidelines whenever possible.
+      Updates are numbered as follows:
+  
+      `<major>.<minor>.<patch>`
+
+      Built on the following guidelines:
+  
+      * Breaking compatibility with the previous version will be updated in "major"
+      * New implementations and features in "minor"
+      * Bug fixes in "patch"
+      
+      For more information about SemVer, please visit http://semver.org.
+
+      ## Author
+      - Email: {{authorEmail}}
+      - Website: {{authorWebsite}}      
+
+files:
+  - path: "README.md"
+    prompt: promptReadme

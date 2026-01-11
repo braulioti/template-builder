@@ -4,7 +4,7 @@ interface
 
 uses
   System.SysUtils, System.Generics.Collections, VSoft.YAML, StrUtils,
-  unFileType, unFileBuilder, unPromptType, unVariableType, VSoft.YAML.Classes;
+  unFileType, unFileBuilder, unFolderBuilder, unPromptType, unVariableType, VSoft.YAML.Classes;
 
 type
   EUnsupportedTemplateVersion = class(Exception);
@@ -14,11 +14,14 @@ private
   FVersion: string;
   FDoc: IYAMLDocument;
   FFiles: TObjectList<TFileData>;
+  FFolders: TObjectList<TFileData>;
   FVariables: TObjectList<TVariable>;
   FPrompts: TObjectList<TPrompt>;
   FFileBuilder: TFileBuilder;
+  FFolderBuilder: TFolderBuilder;
   procedure ValidateVersion;
   procedure LoadFiles;
+  procedure LoadFolders;
   procedure LoadVariables;
   procedure LoadPrompts;
   procedure Initializer;
@@ -30,6 +33,7 @@ public
   property Version: string read FVersion;
   property Document: IYAMLDocument read FDoc;
   property Files: TObjectList<TFileData> read FFiles;
+  property Folders: TObjectList<TFileData> read FFolders;
   property Variables: TObjectList<TVariable> read FVariables;
   property Prompts: TObjectList<TPrompt> read FPrompts;
 end;
@@ -67,27 +71,34 @@ begin
   LoadVariables;
   LoadPrompts;
   LoadFiles;
+  LoadFolders;
 end;
 
 destructor TParserYAML.Destroy;
 begin
   if Assigned(FFileBuilder) then
     FFileBuilder.Free;
+  if Assigned(FFolderBuilder) then
+    FFolderBuilder.Free;
   if Assigned(FVariables) then
     FVariables.Free;
   if Assigned(FPrompts) then
     FPrompts.Free;
   if Assigned(FFiles) then
     FFiles.Free;
+  if Assigned(FFolders) then
+    FFolders.Free;
   inherited;
 end;
 
 procedure TParserYAML.Initializer;
 begin
   FFiles := TObjectList<TFileData>.Create(True);
+  FFolders := TObjectList<TFileData>.Create(True);
   FVariables := TObjectList<TVariable>.Create(True);
   FPrompts := TObjectList<TPrompt>.Create(True);
   FFileBuilder := TFileBuilder.Create;
+  FFolderBuilder := TFolderBuilder.Create;
 end;
 
 procedure TParserYAML.LoadVariables;
@@ -246,11 +257,8 @@ var
   i, j: Integer;
 begin
   FilesNode := FDoc.Root.Values['files'];
-  if FilesNode = nil then
+  if (FilesNode = nil) or (not FilesNode.IsSequence) then
     Exit; // No files section, list remains empty
-
-  if not FilesNode.IsSequence then
-    raise Exception.Create('"files" must be a sequence (array) in YAML.');
 
   FileArray := FilesNode.AsSequence;
   for i := 0 to FileArray.Count - 1 do
@@ -261,6 +269,9 @@ begin
       FileItem.Values['path'].AsString,
       FileItem.Values['content'].AsString
     );
+
+    // Assign variables reference to file
+    FileObj.Variables := FVariables;
 
     // Check if prompt is specified in YAML
     PromptNode := FileItem.Values['prompt'];
@@ -279,9 +290,6 @@ begin
         end;
       end;
 
-      if FoundPrompt = nil then
-        raise Exception.CreateFmt('Prompt "%s" not found for file at index %d.', [PromptName, i]);
-
       FileObj.Prompt := FoundPrompt;
     end;
 
@@ -289,14 +297,51 @@ begin
   end;
 end;
 
+procedure TParserYAML.LoadFolders;
+var
+  FoldersNode: IYAMLValue;
+  FolderArray: IYAMLSequence;
+  FolderItem: IYAMLValue;
+  FolderObj: TFileData;
+  i: Integer;
+begin
+  FoldersNode := FDoc.Root.Values['folders'];
+  if (FoldersNode = nil) or (not FoldersNode.IsSequence) then
+    Exit; // No folders section, list remains empty
+
+  FolderArray := FoldersNode.AsSequence;
+  for i := 0 to FolderArray.Count - 1 do
+  begin
+    FolderItem := FolderArray[i];
+
+    // Folders only need path, content is empty
+    FolderObj := TFileData.Create(
+      FolderItem.Values['path'].AsString,
+      ''
+    );
+
+    FFolders.Add(FolderObj);
+  end;
+end;
+
 procedure TParserYAML.BuildAll;
 var
   FileItem: TFileData;
+  FolderItem: TFileData;
 begin
+
+  // Then build files
   for FileItem in FFiles do
   begin
     FFileBuilder.Build(FileItem);
-    Writeln(Format('Created %s', [FileItem.Path]));
+    Writeln(Format('Created file %s', [FileItem.Path]));
+  end;
+
+  // Build aditional folders
+  for FolderItem in FFolders do
+  begin
+    FFolderBuilder.Build(FolderItem);
+    Writeln(Format('Created folder %s', [FolderItem.Path]));
   end;
 end;
 

@@ -1,0 +1,347 @@
+version: 1.0
+
+variables:
+  - name: projectName
+    type: string
+  - name: version
+    type: string
+    value: 1.0
+  - name: projectURI
+    type: string
+  - name: description
+    type: string
+  - name: author
+    type: string
+  - name: authorURI
+    type: string
+
+prompts:
+  - name: promptCustomizeRegister
+    inputs:
+      - variable: projectName
+        input: "Enter your project name: "
+        type: InputString
+      - variable: version
+        input: "Enter your project version: "
+        type: InputString
+      - variable: projectURI
+        input: "Enter project URI: "
+        type: InputString
+    result: |
+      <?php
+      /**
+      * Customizer additions
+      *
+      * @package {{replace(" ", "_", projectName)}}
+      * @since {{projectName}} {{version}}
+      */
+        
+      // Prevent direct access
+      if (!defined('ABSPATH')) {
+        exit;
+      }   
+  
+      /**
+      * Add postMessage support for site title and description for the Theme Customizer
+      */
+      function {{lower(replace(" ", "_", projectName))}}_customize_register($wp_customize) {
+      }
+  - name: promptStyle
+    inputs:
+      - variable: description
+        input: "Enter the description: "
+        type: InputString
+      - variable: author
+        input: "Author: "
+        type: InputString
+      - variable: authorURI
+        input: "Author URI: "
+        type: InputString
+    result: |
+      /*
+      Theme Name: {{projectName}}
+      Theme URI: {{projectURI}}
+      Author: {{author}}
+      Author URI: {{authorURI}}
+      Description: {{description}}
+      Requires at least: 6.1
+      Tested up to: 6.4
+      Requires PHP: 7.4
+      Version: {{version}}
+      License: GNU General Public License v2 or later
+      License URI: http://www.gnu.org/licenses/gpl-2.0.html
+      Text Domain: {{lower(replace(" ", "-", projectName))}}
+      Tags: 
+      */
+
+files:
+  - path: "inc/customize-register.php"
+    prompt: promptCustomizeRegister
+  - path: "style.css"
+    prompt: promptStyle
+  - path: "assets/main.js"
+  - path: "search.php"
+  - path: "searchform.php"
+  - path: "comments.php"
+  - path: "inc/load-scripts.php"
+    content: |
+      <?php
+      /**
+      * Customizer additions
+      *
+      * @package {{replace(" ", "_", projectName)}}
+      * @since {{projectName}} {{version}}
+      */
+      
+      // Prevent direct access
+      if (!defined('ABSPATH')) {
+        exit;
+      }  
+      /**
+      * Enqueue scripts and styles
+      */
+      function {{lower(replace(" ", "_", projectName))}}_scripts() {
+        // Enqueue main stylesheet
+        wp_enqueue_style('{{lower(replace(" ", "-", projectName))}}-style', get_stylesheet_uri(), array(), '{{version}}');
+        
+        wp_enqueue_script('{{lower(replace(" ", "-", projectName))}}-main', get_template_directory_uri() . '/assets/js/main.js', array('jquery'), '{{version}}', true);
+      }
+      add_action('wp_enqueue_scripts', '{{lower(replace(" ", "_", projectName))}}_scripts');
+  - path: "inc/widget.php"
+    content: |
+      <?php
+      /**
+      * Widget areas
+      *
+      * @package {{replace(" ", "_", projectName)}}
+      * @since {{projectName}} {{version}}
+      */
+      
+      // Prevent direct access
+      if (!defined('ABSPATH')) {
+        exit;
+      }
+      
+      /**
+      * Register widget areas
+      */
+      function {{lower(replace(" ", "_", projectName))}}_widgets_init() {
+      }
+      add_action('widgets_init', '{{lower(replace(" ", "_", projectName))}}_widgets_init');
+  - path: "template-parts/page.php"
+    content: |
+      <?php
+      /**
+      * Template part for displaying pages
+      *
+      * @package {{replace(" ", "_", projectName)}}
+      */
+      ?>
+  - path: "404.php"
+    content: |
+      <?php
+      /**
+      * Not Found Error Page 404
+      *
+      * @package {{replace(" ", "_", projectName)}}
+      * @since {{projectName}} {{version}}
+      */
+      
+      get_header();
+      ?>
+  
+      <?php
+      get_footer();
+      ?>
+  - path: "category.php"
+    content: |
+      <?php
+      /**
+      * Template Name: Category Page
+      *
+      * @package {{replace(" ", "_", projectName)}}
+      * @since {{projectName}} {{version}}
+      */
+      
+      get_header();
+      ?>
+  
+      <?php
+      get_footer();
+      ?>
+  - path: "footer.php"
+    content: |
+      <!-- Footer -->
+        <footer class="site-footer">
+        </footer>
+      
+      </div>
+      
+      <?php wp_footer(); ?>
+      
+      </body>
+      </html>
+  - path: "front-page.php"
+    content: |
+      <?php
+      /**
+      * Front Page Template
+      *
+      * This template is used for the front page (home page) of the site.
+      * It includes the index.php template to maintain the home page design.
+      *
+      * @package {{replace(" ", "_", projectName)}}
+      * @since {{projectName}} {{version}}
+      */
+      
+      // Include the index.php template
+      require get_template_directory() . '/index.php';
+  - path: "functions.php"
+    content: |
+      <?php
+      /**
+      * {{projectName}} functions and definitions
+      *
+      * @link {{projectURI}}
+      *
+      * @package {{replace(" ", "_", projectName)}}
+      * @since {{projectName}} {{version}}
+      */
+      
+      // Prevent direct access
+      if (!defined('ABSPATH')) {
+        exit;
+      }
+  
+      // Include all theme functionality files
+      require_once get_template_directory() . '/inc/load-scripts.php';
+      require_once get_template_directory() . '/inc/customize-register.php';
+      require_once get_template_directory() . '/inc/widget.php';
+  - path: "header.php"
+    content: |
+      <?php
+      /**
+      * Template header do {{projectName}}
+      *
+      * @package {{replace(" ", "_", projectName)}}
+      * @since {{projectName}} {{version}}
+      */
+      ?>
+
+      <!DOCTYPE html>
+      <html <?php language_attributes(); ?>>
+      <head>
+      <meta charset="<?php bloginfo('charset'); ?>">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <!-- Utilizar o title do Yoast SEO -->
+      <!-- <title><?php wp_title('|', true, 'right'); ?><?php bloginfo('name'); ?></title> -->
+      <link rel="profile" href="https://gmpg.org/xfn/11">
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+      <?php wp_head(); ?>
+      </head>
+      
+      <body <?php body_class(); ?>>
+  - path: "home.php"
+    content: |
+      <?php
+      /**
+      * Template Name: Home Page
+      *
+      * @package {{replace(" ", "_", projectName)}}
+      * @since {{projectName}} {{version}}
+      */
+      
+      get_header();
+      ?>
+      
+      <?php
+      get_footer();
+      ?>
+  - path: "index.php"
+    content: |
+      <?php
+      /**
+      * Template Name: Index Page
+      *
+      * @package {{replace(" ", "_", projectName)}}
+      * @since {{projectName}} {{version}}
+      */
+      
+      get_header();
+      ?>
+      
+      <?php
+      get_footer();
+      ?>
+  - path: "template-custom.php"
+    content: |
+      <?php
+      /**
+      * Template Name: Custom Page
+      *
+      * @package {{replace(" ", "_", projectName)}}
+      * @since {{projectName}} {{version}}
+      */
+      
+      get_header();
+      ?>
+      
+      <?php
+      get_footer();
+      ?>
+  - path: "tag.php"
+    content: |
+      <?php
+      /**
+      * Template Name: Tag Page
+      *
+      * @package {{replace(" ", "_", projectName)}}
+      * @since {{projectName}} {{version}}
+      */
+      
+      get_header();
+      ?>
+      
+      <?php
+      get_footer();
+      ?>
+  - path: "single.php"
+    content: |
+      <?php
+      /**
+      * Template Name: Single Page
+      *
+      * @package {{replace(" ", "_", projectName)}}
+      * @since {{projectName}} {{version}}
+      */
+      
+      get_header();
+      ?>
+      
+      <?php
+      get_footer();
+      ?>
+  - path: "page.php"
+    content: |
+      <?php
+      /**
+      * Template Name: Page
+      *
+      * @package {{replace(" ", "_", projectName)}}
+      * @since {{projectName}} {{version}}
+      */
+      
+      get_header();
+      ?>
+      
+      <?php
+      get_footer();
+      ?>
+      
+
+folders:
+  - path: "assets/images"
+  - path: "assets/js"
+  - path: "languages"
+  - path: "plugins"

@@ -3,7 +3,7 @@ unit unFileType;
 interface
 
 uses
-  unPromptType;
+  System.Generics.Collections, unPromptType, unVariableType;
 
 type
   TFileData = class
@@ -11,16 +11,18 @@ type
     FPath: string;
     FContent: string;
     FPrompt: TPrompt;
+    FVariables: TObjectList<TVariable>;
   public
     constructor Create(const APath, AContent: string);
     property Path: string read FPath write FPath;
     property Content: string read FContent write FContent;
     property Prompt: TPrompt read FPrompt write FPrompt;
+    property Variables: TObjectList<TVariable> read FVariables write FVariables;
   end;
 
 implementation
 
-{ TFile }
+{ TFileData }
 
 constructor TFileData.Create(const APath, AContent: string);
 begin
@@ -28,5 +30,6 @@ begin
   FPath := APath;
   FContent := AContent;
 end;
+
 
 end.

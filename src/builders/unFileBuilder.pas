@@ -52,9 +52,9 @@ begin
   FileContent := TStringList.Create;
   try
     if AFile.Prompt = nil then
-      FileContent.Text := AFile.Content
+      FileContent.Text := FPromptBuilder.GetContent(AFile.Content, AFile.Variables)
     else
-      FileContent.Text := FPromptBuilder.Build(AFile.Prompt);
+      FileContent.Text := FPromptBuilder.Build(AFile.Prompt, AFile.Variables);
 
     FileContent.SaveToFile(FullPath, TEncoding.UTF8);
   finally

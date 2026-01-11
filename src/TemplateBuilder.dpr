@@ -12,7 +12,8 @@ uses
   unFileType in 'types\unFileType.pas',
   unVariableType in 'types\unVariableType.pas',
   unPromptType in 'types\unPromptType.pas',
-  unPromptBuilder in 'builders\unPromptBuilder.pas';
+  unPromptBuilder in 'builders\unPromptBuilder.pas',
+  unFolderBuilder in 'builders\unFolderBuilder.pas';
 
 var
   YAMLParser: TParserYAML;

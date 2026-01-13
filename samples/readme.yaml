@@ -70,7 +70,7 @@ prompts:
       
       {{projectDescription}}
       
-      {{projectDescription}} is created and maintained by [{{author}}]({{authorWebsite}}).
+      {{projectName}} is created and maintained by [{{author}}]({{authorWebsite}}).
       
       ## Table of Contents
 
@@ -84,7 +84,7 @@ prompts:
 
       ## Versioning
       
-      {{projectDescription}} "Semantic Versioning" guidelines whenever possible.
+      {{projectName}} "Semantic Versioning" guidelines whenever possible.
       Updates are numbered as follows:
   
       `<major>.<minor>.<patch>`

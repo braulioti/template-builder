@@ -28,7 +28,7 @@ jobs:
         run: |
           $exePath = "bin\${{ matrix.config }}\TemplateBuilder.exe"
           if (Test-Path $exePath) {
-            .\$exePath
+            & $exePath
           }
 
   build-windows-mingw:

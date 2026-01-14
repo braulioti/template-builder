@@ -4,9 +4,9 @@
 
 # Ignore all .dll files except sqlite3.dll in desktop/dll/
 *.dll
-!src/
-!src/dll/
-!src/dll/sqlite3.dll
+!old_src/
+!old_src/dll/
+!old_src/dll/sqlite3.dll
 
 # Delphi compiler-generated binaries (safe to delete)
 *.exe

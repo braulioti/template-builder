@@ -31,34 +31,6 @@ jobs:
             & $exePath
           }
 
-  build-windows-mingw:
-    name: Build Windows (MinGW)
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        config: [Debug, Release]
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup MinGW
-        uses: egor-tensin/setup-mingw@v2
-        with:
-          platform: x64
-      
-      - name: Configure CMake
-        run: |
-          cmake -B build -S . -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DBUILD_TESTS=OFF
-      
-      - name: Build
-        run: cmake --build build --config ${{ matrix.config }}
-      
-      - name: Test
-        working-directory: build
-        run: |
-          if (Test-Path bin/TemplateBuilder.exe) {
-            .\bin\TemplateBuilder.exe
-          }
-
   build-linux-gcc:
     name: Build Linux (GCC)
     runs-on: ubuntu-latest

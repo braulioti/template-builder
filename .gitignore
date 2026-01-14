@@ -1,4 +1,6 @@
+# IDEs
 .idea
+.cursor
 
 # Ignore all .dll files except sqlite3.dll in desktop/dll/
 *.dll

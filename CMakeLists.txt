@@ -100,23 +100,17 @@ target_include_directories(${PROJECT_NAME}
 )
 
 # Platform-specific compiler options (applied to target)
+# Note: Generator expressions only work with multi-config generators (like Visual Studio)
+# For single-config generators (Makefiles, Ninja), CMake handles Debug/Release flags automatically
 if(MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE /W4 /permissive-)
     target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:/Od>)
     target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:/Zi>)
     target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:/O2>)
-elseif(MINGW)
+else()
+    # For single-config generators, CMake automatically uses CMAKE_CXX_FLAGS_<CONFIG>
+    # Just add the common flags here
     target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic)
-    target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:-g -O0>)
-    target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:-O3>)
-elseif(UNIX AND NOT APPLE)
-    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic)
-    target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:-g -O0>)
-    target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:-O3 -DNDEBUG>)
-elseif(APPLE)
-    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic)
-    target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:-g -O0>)
-    target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:-O3 -DNDEBUG>)
 endif()
 
 # Link libraries

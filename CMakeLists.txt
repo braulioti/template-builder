@@ -31,53 +31,37 @@ if(WIN32)
     if(MSVC)
         # Set runtime library
         set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
-    elseif(MINGW)
-        # MinGW compiler options
-        add_compile_options(-Wall -Wextra -pedantic)
-        add_compile_options($<$<CONFIG:Debug>:-g -O0>)
-        add_compile_options($<$<CONFIG:Release>:-O3>)
     endif()
-elseif(UNIX AND NOT APPLE)
-    # Linux
-    add_compile_options(-Wall -Wextra -pedantic)
-    add_compile_options($<$<CONFIG:Debug>:-g -O0>)
-    add_compile_options($<$<CONFIG:Release>:-O3 -DNDEBUG>)
 elseif(APPLE)
-    # macOS (supports both x64 and ARM64)
-    add_compile_options(-Wall -Wextra -pedantic)
-    add_compile_options($<$<CONFIG:Debug>:-g -O0>)
-    add_compile_options($<$<CONFIG:Release>:-O3 -DNDEBUG>)
-    
     # Handle universal binaries if needed (x64 + ARM64)
-    if(CMAKE_OSX_ARCHITECTURES STREQUAL "")
+    if(CMAKE_OSX_ARCHITECTURES STREQUAL "") 
         # Default to native architecture
         set(CMAKE_OSX_ARCHITECTURES ${CMAKE_SYSTEM_PROCESSOR})
     endif()
 endif()
 
 # Find yaml-cpp
-# Note: yaml-cpp is disabled for now since it's not needed for the Hello World app
-# It will be enabled when ParseYAML service is implemented
-# find_package(yaml-cpp QUIET)
+find_package(yaml-cpp QUIET)
 
-# if(NOT yaml-cpp_FOUND)
-#     # If yaml-cpp is not found, use FetchContent to download it
-#     include(FetchContent)
-#     
-#     FetchContent_Declare(
-#         yaml-cpp
-#         GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
-#         GIT_TAG yaml-cpp-0.8.0
-#     )
-#     
-#     set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "Disable yaml-cpp tests")
-#     set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "Disable yaml-cpp tools")
-#     set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "Disable yaml-cpp contrib")
-#     
-#     FetchContent_MakeAvailable(yaml-cpp)
-#     set(yaml-cpp_VERSION "0.8.0")
-# endif()
-set(yaml-cpp_VERSION "N/A (not used yet)")
+if(NOT yaml-cpp_FOUND)
+    # If yaml-cpp is not found, use FetchContent to download it
+    include(FetchContent)
+    
+    FetchContent_Declare(
+        yaml-cpp
+        GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
+        GIT_TAG yaml-cpp-0.8.0
+    )
+    
+    set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "Disable yaml-cpp tests")
+    set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "Disable yaml-cpp tools")
+    set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "Disable yaml-cpp contrib")
+    
+    FetchContent_MakeAvailable(yaml-cpp)
+    set(yaml-cpp_VERSION "0.8.0")
+else()
+    set(yaml-cpp_VERSION ${yaml-cpp_VERSION})
+endif()
 
 # Source files
 # Note: Additional source files will be added as the code is converted from Pascal

@@ -29,10 +29,6 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 if(WIN32)
     add_definitions(-D_WIN32_WINNT=0x0601)  # Windows 7+
     if(MSVC)
-        # MSVC compiler options
-        add_compile_options(/W4 /permissive-)
-        add_compile_options($<$<CONFIG:Debug>:/Od /Zi>)
-        add_compile_options($<$<CONFIG:Release>:/O2>)
         # Set runtime library
         set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
     elseif(MINGW)
@@ -102,6 +98,26 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
+
+# Platform-specific compiler options (applied to target)
+if(MSVC)
+    target_compile_options(${PROJECT_NAME} PRIVATE /W4 /permissive-)
+    target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:/Od>)
+    target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:/Zi>)
+    target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:/O2>)
+elseif(MINGW)
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic)
+    target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:-g -O0>)
+    target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:-O3>)
+elseif(UNIX AND NOT APPLE)
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic)
+    target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:-g -O0>)
+    target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:-O3 -DNDEBUG>)
+elseif(APPLE)
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic)
+    target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:-g -O0>)
+    target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:-O3 -DNDEBUG>)
+endif()
 
 # Link libraries
 # yaml-cpp will be linked when ParseYAML is implemented

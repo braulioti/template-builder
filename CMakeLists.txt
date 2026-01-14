@@ -50,7 +50,8 @@ if(NOT yaml-cpp_FOUND)
     FetchContent_Declare(
         yaml-cpp
         GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
-        GIT_TAG yaml-cpp-0.8.0
+        GIT_TAG master
+        GIT_SHALLOW TRUE
     )
     
     set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "Disable yaml-cpp tests")
@@ -58,7 +59,7 @@ if(NOT yaml-cpp_FOUND)
     set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "Disable yaml-cpp contrib")
     
     FetchContent_MakeAvailable(yaml-cpp)
-    set(yaml-cpp_VERSION "0.8.0")
+    set(yaml-cpp_VERSION "master (latest)")
 else()
     set(yaml-cpp_VERSION ${yaml-cpp_VERSION})
 endif()
@@ -98,11 +99,10 @@ else()
 endif()
 
 # Link libraries
-# yaml-cpp will be linked when ParseYAML is implemented
-# target_link_libraries(${PROJECT_NAME}
-#     PRIVATE
-#         yaml-cpp
-# )
+target_link_libraries(${PROJECT_NAME}
+    PRIVATE
+        yaml-cpp
+)
 
 # C++17 filesystem library (required on some compilers)
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.0")

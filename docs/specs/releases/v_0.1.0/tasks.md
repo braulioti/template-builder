@@ -5,6 +5,7 @@
 - [x] Set up directory structure for C++ code
 - [x] Create main CMakeLists.txt file
 - [x] Configure YAML library (yaml-cpp or alternative)
+- [ ] Resolve yaml-cpp dependency issue (tag format and version validation)
 - [x] Configure build system for multiple platforms
 - [x] Create unit test structure
 - [x] Configure CI/CD for multiple platforms using GitHub Actions

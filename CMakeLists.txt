@@ -60,30 +60,33 @@ elseif(APPLE)
 endif()
 
 # Find yaml-cpp
-find_package(yaml-cpp QUIET)
+# Note: yaml-cpp is disabled for now since it's not needed for the Hello World app
+# It will be enabled when ParseYAML service is implemented
+# find_package(yaml-cpp QUIET)
 
-if(NOT yaml-cpp_FOUND)
-    # If yaml-cpp is not found, use FetchContent to download it
-    include(FetchContent)
-    
-    FetchContent_Declare(
-        yaml-cpp
-        GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
-        GIT_TAG yaml-cpp-0.8.0
-    )
-    
-    set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "Disable yaml-cpp tests")
-    set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "Disable yaml-cpp tools")
-    set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "Disable yaml-cpp contrib")
-    
-    FetchContent_MakeAvailable(yaml-cpp)
-    set(yaml-cpp_VERSION "0.8.0")
-endif()
+# if(NOT yaml-cpp_FOUND)
+#     # If yaml-cpp is not found, use FetchContent to download it
+#     include(FetchContent)
+#     
+#     FetchContent_Declare(
+#         yaml-cpp
+#         GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
+#         GIT_TAG yaml-cpp-0.8.0
+#     )
+#     
+#     set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "Disable yaml-cpp tests")
+#     set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "Disable yaml-cpp tools")
+#     set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "Disable yaml-cpp contrib")
+#     
+#     FetchContent_MakeAvailable(yaml-cpp)
+#     set(yaml-cpp_VERSION "0.8.0")
+# endif()
+set(yaml-cpp_VERSION "N/A (not used yet)")
 
 # Source files
 # Note: Additional source files will be added as the code is converted from Pascal
 set(SOURCES
-    src/main.cpp
+    src/template-builder.cpp
 )
 
 # Headers

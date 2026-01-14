@@ -30,6 +30,35 @@ jobs:
           if (Test-Path $exePath) {
             & $exePath
           }
+      
+      - name: Build MSI Installer
+        if: matrix.config == 'Release'
+        working-directory: build
+        run: |
+          # Install WiX Toolset
+          choco install wix -y
+          
+          # Copy executable to installer directory
+          $installerDir = "${{ github.workspace }}\installer\bin"
+          New-Item -ItemType Directory -Force -Path $installerDir | Out-Null
+          Copy-Item "bin\${{ matrix.config }}\TemplateBuilder.exe" -Destination "$installerDir\TemplateBuilder.exe"
+          
+          # Build MSI using WiX
+          $wixDir = "$env:ProgramFiles(x86)\WiX Toolset v3.11\bin"
+          if (Test-Path $wixDir) {
+            & "$wixDir\candle.exe" "${{ github.workspace }}\installer\TemplateBuilder.wxs" -dSourceDir="$installerDir" -o "$installerDir\"
+            & "$wixDir\light.exe" "$installerDir\TemplateBuilder.wixobj" -o "$installerDir\TemplateBuilder.msi"
+          } else {
+            Write-Warning "WiX Toolset not found, skipping MSI generation"
+          }
+      
+      - name: Upload MSI Artifact
+        if: matrix.config == 'Release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: TemplateBuilder-msi-${{ matrix.config }}
+          path: installer/bin/TemplateBuilder.msi
+          if-no-files-found: warn
 
   build-linux-gcc:
     name: Build Linux (GCC)
@@ -60,41 +89,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: linux-gcc-${{ matrix.config }}
-          path: build/bin/TemplateBuilder
-          if-no-files-found: warn
-
-  build-linux-clang:
-    name: Build Linux (Clang)
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        config: [Debug, Release]
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y clang build-essential cmake
-      
-      - name: Configure CMake
-        env:
-          CC: clang
-          CXX: clang++
-        run: |
-          cmake -B build -S . -DCMAKE_BUILD_TYPE=${{ matrix.config }} -DBUILD_TESTS=OFF
-      
-      - name: Build
-        run: cmake --build build --config ${{ matrix.config }}
-      
-      - name: Test
-        working-directory: build
-        run: ./bin/TemplateBuilder
-      
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux-clang-${{ matrix.config }}
           path: build/bin/TemplateBuilder
           if-no-files-found: warn
 

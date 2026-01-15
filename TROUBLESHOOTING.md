@@ -1,4 +1,6 @@
-# Troubleshooting – Instalação do yaml-cpp (Windows + CMake + MSVC)
+# Troubleshooting
+
+
 
 Este documento descreve **do zero** como instalar e configurar a biblioteca **yaml-cpp** em um projeto C++ utilizando **CMake**, **MSVC** e **vcpkg**, além de resolver os erros mais comuns encontrados durante o processo.
 
@@ -272,19 +274,4 @@ target_link_libraries(seu_projeto PRIVATE yaml-cpp)
 
 O projeto compila e executa corretamente, imprimindo:
 
-```
-value
-```
 
----
-
-## 📌 Próximos Passos
-
-* Leitura de YAML a partir de arquivo
-* Validação de schema
-* Integração com CLI
-* Geração de arquivos a partir de templates
-
----
-
-📄 **Arquivo sugerido:** `docs/troubleshooting-yaml-cpp.md`

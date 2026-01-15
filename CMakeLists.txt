@@ -68,11 +68,17 @@ endif()
 # Note: Additional source files will be added as the code is converted from Pascal
 set(SOURCES
     src/template-builder.cpp
+    src/types/VariableType.cpp
+    src/types/PromptType.cpp
+    src/types/FileType.cpp
 )
 
 # Headers
 # Note: Header files will be added as the code is converted from Pascal
 set(HEADERS
+    src/types/VariableType.hpp
+    src/types/PromptType.hpp
+    src/types/FileType.hpp
 )
 
 # Create executable

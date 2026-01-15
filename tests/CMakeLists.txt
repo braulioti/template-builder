@@ -39,6 +39,24 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
             yaml-cpp
     )
     
+    # Link source files needed for the test
+    if(${TEST_NAME} STREQUAL "test_VariableType")
+        target_sources(${TEST_NAME} PRIVATE
+            ${CMAKE_SOURCE_DIR}/src/types/VariableType.cpp
+        )
+    elseif(${TEST_NAME} STREQUAL "test_PromptType")
+        target_sources(${TEST_NAME} PRIVATE
+            ${CMAKE_SOURCE_DIR}/src/types/PromptType.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/VariableType.cpp
+        )
+    elseif(${TEST_NAME} STREQUAL "test_FileType")
+        target_sources(${TEST_NAME} PRIVATE
+            ${CMAKE_SOURCE_DIR}/src/types/FileType.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/PromptType.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/VariableType.cpp
+        )
+    endif()
+    
     # Include directories
     target_include_directories(${TEST_NAME}
         PRIVATE
@@ -59,9 +77,9 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
 endfunction()
 
 # Individual test executables (to be uncommented as tests are written)
-# add_unit_test(test_VariableType types/test_VariableType.cpp)
-# add_unit_test(test_PromptType types/test_PromptType.cpp)
-# add_unit_test(test_FileType types/test_FileType.cpp)
+add_unit_test(test_VariableType test_VariableType.cpp)
+add_unit_test(test_PromptType test_PromptType.cpp)
+add_unit_test(test_FileType test_FileType.cpp)
 # add_unit_test(test_FileBuilder builders/test_FileBuilder.cpp)
 # add_unit_test(test_FolderBuilder builders/test_FolderBuilder.cpp)
 # add_unit_test(test_PromptBuilder builders/test_PromptBuilder.cpp)

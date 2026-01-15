@@ -97,7 +97,7 @@ jobs:
             Write-Host "Output directory: $installerDir"
             Write-Host "SourceDir variable: $installerDir"
             
-            & $candle "$workspace\installer\TemplateBuilder.wxs" "-dSourceDir=$installerDir" "-out=$wixobjPath"
+            & $candle "$workspace\installer\TemplateBuilder.wxs" "-dSourceDir=$installerDir" "-out" "$installerDir"
             $candleExitCode = $LASTEXITCODE
             
             if ($candleExitCode -ne 0) {
@@ -115,7 +115,7 @@ jobs:
             $msiPath = "$workspace\TemplateBuilder.msi"
             Write-Host "Running light to create MSI at: $msiPath"
             
-            & $light "$wixobjPath" "-out=$msiPath"
+            & $light "$wixobjPath" "-out" "$msiPath"
             $lightExitCode = $LASTEXITCODE
             
             if ($lightExitCode -ne 0) {

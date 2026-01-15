@@ -27,8 +27,17 @@ jobs:
         working-directory: build
         run: |
           $exePath = "bin\${{ matrix.config }}\TemplateBuilder.exe"
+          $yamlPath = "${{ github.workspace }}\samples\sample.yaml"
           if (Test-Path $exePath) {
-            & $exePath
+            if (Test-Path $yamlPath) {
+              & $exePath $yamlPath
+            } else {
+              Write-Warning "YAML file not found: $yamlPath"
+              exit 1
+            }
+          } else {
+            Write-Warning "Executable not found: $exePath"
+            exit 1
           }
       
       - name: Build MSI Installer
@@ -85,7 +94,7 @@ jobs:
       
       - name: Test
         working-directory: build
-        run: ./bin/TemplateBuilder
+        run: ./bin/TemplateBuilder ${{ github.workspace }}/samples/sample.yaml
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -112,7 +121,7 @@ jobs:
       
       - name: Test
         working-directory: build
-        run: ./bin/TemplateBuilder
+        run: ./bin/TemplateBuilder ${{ github.workspace }}/samples/sample.yaml
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -139,7 +148,7 @@ jobs:
       
       - name: Test
         working-directory: build
-        run: ./bin/TemplateBuilder
+        run: ./bin/TemplateBuilder ${{ github.workspace }}/samples/sample.yaml
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

@@ -1,0 +1,142 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+
+      - name: Build
+        run: |
+          cmake --build build --config Release
+
+      - name: Build MSI
+        continue-on-error: true
+        run: |
+          # Install WiX Toolset
+          choco install wixtoolset -y
+          
+          # Copy executable to installer directory
+          $installerDir = "${{ github.workspace }}\installer\bin"
+          New-Item -ItemType Directory -Force -Path $installerDir | Out-Null
+          Copy-Item "build\bin\Release\TemplateBuilder.exe" -Destination "$installerDir\TemplateBuilder.exe"
+          
+          # Build MSI using WiX
+          $wixDir = "$env:ProgramFiles(x86)\WiX Toolset v3.11\bin"
+          if (Test-Path $wixDir) {
+            & "$wixDir\candle.exe" "${{ github.workspace }}\installer\TemplateBuilder.wxs" -dSourceDir="$installerDir" -o "$installerDir\"
+            & "$wixDir\light.exe" "$installerDir\TemplateBuilder.wixobj" -o "$installerDir\TemplateBuilder.msi"
+          } else {
+            Write-Warning "WiX Toolset not found, creating zip instead"
+            Compress-Archive -Path "$installerDir\TemplateBuilder.exe" -DestinationPath "$installerDir\TemplateBuilder-windows.zip"
+          }
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: |
+            build/bin/Release/TemplateBuilder.exe
+            installer/bin/*.msi
+            installer/bin/*.zip
+          if-no-files-found: warn
+
+  linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential
+
+      - name: Build
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+          cmake --build build
+
+      - name: Package (.tar.gz)
+        run: |
+          cd build
+          tar -czvf ../template-builder-linux.tar.gz bin/TemplateBuilder
+          cd ..
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: |
+            template-builder-linux.tar.gz
+            build/bin/TemplateBuilder
+          if-no-files-found: warn
+
+  macos:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+          cmake --build build
+
+      - name: Package (.tar.gz)
+        run: |
+          cd build
+          tar -czvf ../template-builder-macos.tar.gz bin/TemplateBuilder
+          cd ..
+
+      - name: Build PKG
+        continue-on-error: true
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          pkgbuild \
+            --root build/bin \
+            --identifier com.templatebuilder.app \
+            --version "$VERSION" \
+            --install-location /usr/local/bin \
+            template-builder.pkg
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: |
+            template-builder-macos.tar.gz
+            template-builder.pkg
+            build/bin/TemplateBuilder
+          if-no-files-found: warn
+
+  release:
+    needs: [windows, linux, macos]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release/windows/*
+            release/linux/*
+            release/macos/*
+          generate_release_notes: true

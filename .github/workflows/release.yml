@@ -32,13 +32,16 @@ jobs:
           # Refresh environment variables
           $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
           
-          # Copy executable to installer directory
-          $installerDir = "${{ github.workspace }}\installer\bin"
+          # Setup directories
           $workspace = "${{ github.workspace }}"
+          $installerDir = "$workspace\installer\bin"
+          $buildDir = "$workspace\build-temp"
           
-          Write-Host "Creating installer directory: $installerDir"
+          Write-Host "Creating directories..."
           New-Item -ItemType Directory -Force -Path $installerDir | Out-Null
+          New-Item -ItemType Directory -Force -Path $buildDir | Out-Null
           
+          # Copy executable to installer directory (for WiX SourceDir variable)
           $exeSource = "build\bin\Release\TemplateBuilder.exe"
           $exeDest = "$installerDir\TemplateBuilder.exe"
           
@@ -91,13 +94,13 @@ jobs:
             Write-Host "Candle: $candle"
             Write-Host "Light: $light"
             
-            # Compile WXS file with Candle
-            $wixobjPath = "$installerDir\TemplateBuilder.wixobj"
+            # Compile WXS file with Candle (output to build-temp directory to avoid permission issues)
+            $wixobjPath = "$buildDir\TemplateBuilder.wixobj"
             Write-Host "Running candle on: $workspace\installer\TemplateBuilder.wxs"
-            Write-Host "Output directory: $installerDir"
+            Write-Host "Output directory: $buildDir"
             Write-Host "SourceDir variable: $installerDir"
             
-            & $candle "$workspace\installer\TemplateBuilder.wxs" "-dSourceDir=$installerDir" "-out" "$installerDir"
+            & $candle "$workspace\installer\TemplateBuilder.wxs" "-dSourceDir=$installerDir" "-out" "$buildDir\"
             $candleExitCode = $LASTEXITCODE
             
             if ($candleExitCode -ne 0) {

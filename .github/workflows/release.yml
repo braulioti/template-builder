@@ -21,7 +21,6 @@ jobs:
           cmake --build build --config Release
 
       - name: Build MSI
-        continue-on-error: true
         run: |
           # Install WiX Toolset
           choco install wixtoolset -y
@@ -31,15 +30,62 @@ jobs:
           New-Item -ItemType Directory -Force -Path $installerDir | Out-Null
           Copy-Item "build\bin\Release\TemplateBuilder.exe" -Destination "$installerDir\TemplateBuilder.exe"
           
-          # Build MSI using WiX
-          $wixDir = "$env:ProgramFiles(x86)\WiX Toolset v3.11\bin"
-          if (Test-Path $wixDir) {
-            & "$wixDir\candle.exe" "${{ github.workspace }}\installer\TemplateBuilder.wxs" -dSourceDir="$installerDir" -o "$installerDir\"
-            & "$wixDir\light.exe" "$installerDir\TemplateBuilder.wixobj" -o "$installerDir\TemplateBuilder.msi"
+          # Find WiX Toolset installation
+          $wixPaths = @(
+            "$env:ProgramFiles(x86)\WiX Toolset v3.11\bin",
+            "$env:ProgramFiles\WiX Toolset v3.11\bin"
+          )
+          
+          $wixDir = $null
+          foreach ($path in $wixPaths) {
+            if (Test-Path $path) {
+              $wixDir = $path
+              Write-Host "Found WiX at: $wixDir"
+              break
+            }
+          }
+          
+          if ($wixDir) {
+            # Build MSI using WiX
+            $candle = "$wixDir\candle.exe"
+            $light = "$wixDir\light.exe"
+            
+            Write-Host "Running candle..."
+            & $candle "${{ github.workspace }}\installer\TemplateBuilder.wxs" -dSourceDir="$installerDir" -o "$installerDir\"
+            
+            if ($LASTEXITCODE -ne 0) {
+              Write-Error "Candle failed with exit code $LASTEXITCODE"
+              exit 1
+            }
+            
+            Write-Host "Running light..."
+            & $light "$installerDir\TemplateBuilder.wixobj" -o "$installerDir\TemplateBuilder.msi"
+            
+            if ($LASTEXITCODE -ne 0) {
+              Write-Error "Light failed with exit code $LASTEXITCODE"
+              exit 1
+            }
+            
+            # Verify MSI was created
+            $msiPath = "$installerDir\TemplateBuilder.msi"
+            if (Test-Path $msiPath) {
+              Write-Host "MSI created successfully at: $msiPath"
+              Get-Item $msiPath | Select-Object Name, Length
+            } else {
+              Write-Error "MSI file not found after build"
+              exit 1
+            }
           } else {
-            Write-Warning "WiX Toolset not found, creating zip instead"
+            Write-Warning "WiX Toolset not found in standard locations, creating zip instead"
             Compress-Archive -Path "$installerDir\TemplateBuilder.exe" -DestinationPath "$installerDir\TemplateBuilder-windows.zip"
           }
+
+      - name: List files before upload
+        run: |
+          Write-Host "Files in installer/bin:"
+          Get-ChildItem -Path "installer\bin" -Recurse | ForEach-Object { Write-Host $_.FullName }
+          Write-Host "Files in build/bin/Release:"
+          Get-ChildItem -Path "build\bin\Release" | ForEach-Object { Write-Host $_.FullName }
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -47,9 +93,9 @@ jobs:
           name: windows
           path: |
             build/bin/Release/TemplateBuilder.exe
-            installer/bin/*.msi
+            installer/bin/TemplateBuilder.msi
             installer/bin/*.zip
-          if-no-files-found: warn
+          if-no-files-found: error
 
   linux:
     runs-on: ubuntu-latest
@@ -132,11 +178,21 @@ jobs:
         with:
           path: release
 
+      - name: List downloaded files
+        run: |
+          echo "Files in release directory:"
+          find release -type f | sort
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            release/windows/*
-            release/linux/*
-            release/macos/*
+            release/windows/TemplateBuilder.exe
+            release/windows/TemplateBuilder.msi
+            release/windows/*.zip
+            release/linux/template-builder-linux.tar.gz
+            release/linux/TemplateBuilder
+            release/macos/template-builder-macos.tar.gz
+            release/macos/template-builder.pkg
+            release/macos/TemplateBuilder
           generate_release_notes: true

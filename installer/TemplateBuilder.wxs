@@ -28,13 +28,13 @@
     
     <Fragment>
         <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDERBIN">
-            <Component Id="ApplicationFiles" Guid="A1B2C3D4-E5F6-4A3B-8C9D-0E1F2A3B4C5D">
+            <Component Id="ApplicationFiles" Guid="A1B2C3D4-E5F6-4A3B-8C9D-0E1F2A3B4C5D" Win64="yes">
                 <File Id="TemplateBuilderExe" Source="$(var.SourceDir)\TemplateBuilder.exe" KeyPath="yes" />
             </Component>
         </ComponentGroup>
         
         <ComponentGroup Id="EnvironmentComponents" Directory="INSTALLFOLDER">
-            <Component Id="EnvironmentPath" Guid="F9E8D7C6-B5A4-3C2D-1E0F-9A8B7C6D5E4F">
+            <Component Id="EnvironmentPath" Guid="F9E8D7C6-B5A4-3C2D-1E0F-9A8B7C6D5E4F" Win64="yes">
                 <CreateFolder />
                 <Environment Id="PathEnvironment" 
                     Name="PATH" 
@@ -47,11 +47,11 @@
         </ComponentGroup>
         
         <ComponentGroup Id="ShortcutComponents" Directory="ApplicationProgramsFolder">
-            <Component Id="ApplicationShortcut" Guid="1A2B3C4D-5E6F-7A8B-9C0D-1E2F3A4B5C6D">
+            <Component Id="ApplicationShortcut" Guid="1A2B3C4D-5E6F-7A8B-9C0D-1E2F3A4B5C6D" Win64="yes">
                 <Shortcut Id="ApplicationStartMenuShortcut"
                     Name="TemplateBuilder"
                     Description="Template Builder CLI Tool"
-                    Target="[#TemplateBuilderExe]"
+                    Target="[INSTALLFOLDERBIN]TemplateBuilder.exe"
                     WorkingDirectory="INSTALLFOLDERBIN" />
                 <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall" />
                 <RegistryValue Root="HKCU" Key="Software\TemplateBuilder" Name="installed" Type="integer" Value="1" KeyPath="yes" />

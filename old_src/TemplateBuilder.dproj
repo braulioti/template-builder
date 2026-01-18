@@ -98,6 +98,8 @@
         <DCCReference Include="types\unPromptType.pas"/>
         <DCCReference Include="builders\unPromptBuilder.pas"/>
         <DCCReference Include="builders\unFolderBuilder.pas"/>
+        <DCCReference Include="types\unRemoteFileType.pas"/>
+        <DCCReference Include="builders\unRemoteFileBuilder.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

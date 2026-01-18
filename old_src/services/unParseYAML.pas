@@ -4,7 +4,7 @@ interface
 
 uses
   System.SysUtils, System.Generics.Collections, VSoft.YAML, StrUtils,
-  unFileType, unFileBuilder, unFolderBuilder, unPromptType, unVariableType, VSoft.YAML.Classes;
+  unFileType, unFileBuilder, unFolderBuilder, unPromptType, unVariableType, unRemoteFileType, unRemoteFileBuilder, VSoft.YAML.Classes;
 
 type
   EUnsupportedTemplateVersion = class(Exception);
@@ -15,13 +15,16 @@ private
   FDoc: IYAMLDocument;
   FFiles: TObjectList<TFileData>;
   FFolders: TObjectList<TFileData>;
+  FRemoteFiles: TObjectList<TRemoteFile>;
   FVariables: TObjectList<TVariable>;
   FPrompts: TObjectList<TPrompt>;
   FFileBuilder: TFileBuilder;
   FFolderBuilder: TFolderBuilder;
+  FRemoteFileBuilder: TRemoteFileBuilder;
   procedure ValidateVersion;
   procedure LoadFiles;
   procedure LoadFolders;
+  procedure LoadRemoteFiles;
   procedure LoadVariables;
   procedure LoadPrompts;
   procedure Initializer;
@@ -34,6 +37,7 @@ public
   property Document: IYAMLDocument read FDoc;
   property Files: TObjectList<TFileData> read FFiles;
   property Folders: TObjectList<TFileData> read FFolders;
+  property RemoteFiles: TObjectList<TRemoteFile> read FRemoteFiles;
   property Variables: TObjectList<TVariable> read FVariables;
   property Prompts: TObjectList<TPrompt> read FPrompts;
 end;
@@ -72,6 +76,7 @@ begin
   LoadPrompts;
   LoadFiles;
   LoadFolders;
+  LoadRemoteFiles;
 end;
 
 destructor TParserYAML.Destroy;
@@ -80,6 +85,8 @@ begin
     FFileBuilder.Free;
   if Assigned(FFolderBuilder) then
     FFolderBuilder.Free;
+  if Assigned(FRemoteFileBuilder) then
+    FRemoteFileBuilder.Free;
   if Assigned(FVariables) then
     FVariables.Free;
   if Assigned(FPrompts) then
@@ -88,6 +95,8 @@ begin
     FFiles.Free;
   if Assigned(FFolders) then
     FFolders.Free;
+  if Assigned(FRemoteFiles) then
+    FRemoteFiles.Free;
   inherited;
 end;
 
@@ -95,10 +104,12 @@ procedure TParserYAML.Initializer;
 begin
   FFiles := TObjectList<TFileData>.Create(True);
   FFolders := TObjectList<TFileData>.Create(True);
+  FRemoteFiles := TObjectList<TRemoteFile>.Create(True);
   FVariables := TObjectList<TVariable>.Create(True);
   FPrompts := TObjectList<TPrompt>.Create(True);
   FFileBuilder := TFileBuilder.Create;
   FFolderBuilder := TFolderBuilder.Create;
+  FRemoteFileBuilder := TRemoteFileBuilder.Create;
 end;
 
 procedure TParserYAML.LoadVariables;
@@ -324,10 +335,37 @@ begin
   end;
 end;
 
+procedure TParserYAML.LoadRemoteFiles;
+var
+  RemoteNode: IYAMLValue;
+  RemoteArray: IYAMLSequence;
+  RemoteItem: IYAMLValue;
+  RemoteObj: TRemoteFile;
+  i: Integer;
+begin
+  RemoteNode := FDoc.Root.Values['remote'];
+  if (RemoteNode = nil) or (not RemoteNode.IsSequence) then
+    Exit; // No remote section, list remains empty
+
+  RemoteArray := RemoteNode.AsSequence;
+  for i := 0 to RemoteArray.Count - 1 do
+  begin
+    RemoteItem := RemoteArray[i];
+
+    RemoteObj := TRemoteFile.Create(
+      RemoteItem.Values['uri'].AsString,
+      RemoteItem.Values['path'].AsString
+    );
+
+    FRemoteFiles.Add(RemoteObj);
+  end;
+end;
+
 procedure TParserYAML.BuildAll;
 var
   FileItem: TFileData;
   FolderItem: TFileData;
+  RemoteFileItem: TRemoteFile;
 begin
 
   // Then build files
@@ -342,6 +380,12 @@ begin
   begin
     FFolderBuilder.Build(FolderItem);
     Writeln(Format('Created folder %s', [FolderItem.Path]));
+  end;
+
+  // Download remote files
+  for RemoteFileItem in FRemoteFiles do
+  begin
+    FRemoteFileBuilder.Build(RemoteFileItem);
   end;
 end;
 

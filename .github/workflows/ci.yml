@@ -324,9 +324,18 @@ jobs:
       
       - name: Upload coverage to Codacy
         if: always()
-        uses: codacy/codacy-coverage-reporter-action@89d6c85cfafaec52c72b6c5e8b2878d33104c699
         continue-on-error: true
-        with:
-          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: build-coverage/coverage.info
-          fail-if-coverage-decreases: false
+        run: |
+          if [ -z "${{ secrets.CODACY_PROJECT_TOKEN }}" ]; then
+            echo "⚠️  CODACY_PROJECT_TOKEN not configured. Skipping coverage upload."
+            exit 0
+          fi
+          
+          # Download codacy-coverage-reporter
+          curl -Ls https://raw.githubusercontent.com/codacy/codacy-coverage-reporter/master/get.sh | bash
+          
+          # Upload coverage report (final, not partial)
+          bash ~/.cache/codacy/coverage-reporter/latest/codacy-coverage-reporter report \
+            --project-token "${{ secrets.CODACY_PROJECT_TOKEN }}" \
+            --language CPP \
+            -r build-coverage/coverage.info

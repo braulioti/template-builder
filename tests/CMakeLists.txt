@@ -101,6 +101,10 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
             ${CMAKE_SOURCE_DIR}/src/types/PromptType.cpp
             ${CMAKE_SOURCE_DIR}/src/types/VariableType.cpp
         )
+    elseif(${TEST_NAME} STREQUAL "test_template-builder")
+        target_sources(${TEST_NAME} PRIVATE
+            ${CMAKE_SOURCE_DIR}/src/template-builder.cpp
+        )
     endif()
     
     # Include directories
@@ -129,6 +133,7 @@ endfunction()
 add_unit_test(test_VariableType test_VariableType.cpp)
 add_unit_test(test_PromptType test_PromptType.cpp)
 add_unit_test(test_FileType test_FileType.cpp)
+add_unit_test(test_template-builder test_template-builder.cpp)
 # add_unit_test(test_FileBuilder builders/test_FileBuilder.cpp)
 # add_unit_test(test_FolderBuilder builders/test_FolderBuilder.cpp)
 # add_unit_test(test_PromptBuilder builders/test_PromptBuilder.cpp)

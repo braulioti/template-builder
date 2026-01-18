@@ -3,43 +3,42 @@
 #include <string>
 #include <filesystem>
 #include <yaml-cpp/yaml.h>
+#include "template-builder.hpp"
 
 void showUsage(const char* programName) {
     std::cout << "Usage: " << programName << " <arquivo.yaml>" << std::endl;
 }
 
-void printVariable(const YAML::Node& variable) {
-    if (!variable.IsMap()) {
-        return;
-    }
-
-    std::string name;
-    std::string type;
-
-    if (variable["name"].IsDefined()) {
-        name = variable["name"].as<std::string>();
-    }
-
-    if (variable["type"].IsDefined()) {
-        type = variable["type"].as<std::string>();
-    }
-
-    if (!name.empty() && !type.empty()) {
-        std::cout << "Name: " << name << " | Type: " << type << std::endl;
-    }
+bool validateArguments(int argc) {
+    return argc >= 2;
 }
 
-void printVariables(const YAML::Node& variablesNode) {
-    if (!variablesNode.IsDefined() || !variablesNode.IsSequence()) {
-        std::cout << "No variables found or variables is not a sequence." << std::endl;
-        return;
-    }
+bool fileExists(const std::string& filePath) {
+    return std::filesystem::exists(filePath);
+}
 
-    std::cout << "Variables:" << std::endl;
-    std::cout << "----------" << std::endl;
+int processYamlFile(const std::string& yamlFilePath) {
+    try {
+        // Load YAML file
+        YAML::Node config = YAML::LoadFile(yamlFilePath);
 
-    for (const auto& variable : variablesNode) {
-        printVariable(variable);
+        // Basic validation - file was loaded successfully
+        if (!config.IsDefined()) {
+            std::cerr << "Error: Failed to load YAML file." << std::endl;
+            return 1;
+        }
+
+        std::cout << std::endl;
+        std::cout << "Template Builder execution completed successfully." << std::endl;
+        std::cout << std::endl;
+        return 0;
+
+    } catch (const YAML::Exception& e) {
+        std::cerr << "Error parsing YAML: " << e.what() << std::endl;
+        return 1;
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 1;
     }
 }
 
@@ -52,7 +51,7 @@ int main(int argc, char* argv[]) {
     std::cout << std::endl;
 
     // Check if YAML file path was provided
-    if (argc < 2) {
+    if (!validateArguments(argc)) {
         showUsage(argv[0]);
         return 1;
     }
@@ -60,35 +59,10 @@ int main(int argc, char* argv[]) {
     std::string yamlFilePath = argv[1];
 
     // Check if file exists
-    if (!std::filesystem::exists(yamlFilePath)) {
+    if (!fileExists(yamlFilePath)) {
         std::cerr << "Error: File not found: " << yamlFilePath << std::endl;
         return 1;
     }
 
-    try {
-        // Load YAML file
-        YAML::Node config = YAML::LoadFile(yamlFilePath);
-
-        // Check if variables section exists
-        if (!config["variables"].IsDefined()) {
-            std::cout << "No 'variables' section found in YAML file." << std::endl;
-            return 0;
-        }
-
-        // Print variables
-        printVariables(config["variables"]);
-
-        std::cout << std::endl;
-        std::cout << "Template Builder execution completed successfully." << std::endl;
-        std::cout << std::endl;
-
-    } catch (const YAML::Exception& e) {
-        std::cerr << "Error parsing YAML: " << e.what() << std::endl;
-        return 1;
-    } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
-        return 1;
-    }
-
-    return 0;
+    return processYamlFile(yamlFilePath);
 }

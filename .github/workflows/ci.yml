@@ -2,7 +2,6 @@ name: CI
 
 on:
   push:
-    branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
   workflow_dispatch:
@@ -156,3 +155,60 @@ jobs:
           name: macos-arm64-${{ matrix.config }}
           path: build/bin/TemplateBuilder
           if-no-files-found: warn
+
+  coverage:
+    name: Code Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake lcov
+      
+      - name: Configure CMake with coverage
+        run: |
+          cmake -B build-coverage -S . \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DBUILD_TESTS=ON \
+            -DCMAKE_CXX_FLAGS="--coverage -fprofile-arcs -ftest-coverage" \
+            -DCMAKE_C_FLAGS="--coverage -fprofile-arcs -ftest-coverage" \
+            -DCMAKE_EXE_LINKER_FLAGS="--coverage"
+      
+      - name: Build with coverage
+        run: cmake --build build-coverage
+      
+      - name: Run tests
+        working-directory: build-coverage
+        run: ctest --output-on-failure || true
+      
+      - name: Generate coverage report
+        working-directory: build-coverage
+        run: |
+          # Capture coverage data
+          lcov --capture --directory . --output-file coverage.info
+          # Remove system includes and dependencies
+          lcov --remove coverage.info '/usr/*' --output-file coverage.info
+          lcov --remove coverage.info '*/tests/*' --output-file coverage.info
+          lcov --remove coverage.info '*/_deps/*' --output-file coverage.info
+          lcov --remove coverage.info '*/googletest/*' --output-file coverage.info
+          lcov --remove coverage.info '*/yaml-cpp-src/*' --output-file coverage.info
+          # Generate summary
+          lcov --list coverage.info
+      
+      - name: Check coverage file exists
+        working-directory: build-coverage
+        run: |
+          if [ ! -f coverage.info ]; then
+            echo "Coverage file not found!"
+            exit 1
+          fi
+          echo "Coverage file size: $(wc -c < coverage.info) bytes"
+      
+      - name: Upload coverage to Codacy
+        uses: codacy/codacy-coverage-reporter-action@v1.3.0
+        if: always()
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: build-coverage/coverage.info

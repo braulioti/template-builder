@@ -339,7 +339,7 @@ jobs:
           fi
       
       - name: Upload coverage to Codacy
-        if: always() && secrets.CODACY_PROJECT_TOKEN != ''
+        if: always()
         uses: codacy/codacy-coverage-reporter-action@v1.3.0
         continue-on-error: true
         with:

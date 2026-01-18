@@ -4,38 +4,77 @@
 # Enable testing
 enable_testing()
 
-# Find Google Test
+# Include FetchContent before using it
+include(FetchContent)
+
+# Find Google Test first (might be installed system-wide)
 find_package(GTest QUIET)
 
 if(NOT GTest_FOUND)
     # Use FetchContent to download Google Test
-    include(FetchContent)
+    message(STATUS "Google Test not found, downloading via FetchContent...")
     
-    FetchContent_Declare(
-        googletest
-        GIT_REPOSITORY https://github.com/google/googletest.git
-        GIT_TAG v1.14.0
-    )
-    
-    # Disable Google Test's own tests and samples
+    # Set options BEFORE declaring and making available
     set(BUILD_GMOCK ON CACHE BOOL "Build gmock")
     set(gtest_build_tests OFF CACHE BOOL "Disable gtest tests")
     set(gtest_build_samples OFF CACHE BOOL "Disable gtest samples")
     set(gtest_build_benchmarks OFF CACHE BOOL "Disable gtest benchmarks")
     set(gtest_force_shared_crt ON CACHE BOOL "Force shared CRT on Windows")
     
+    FetchContent_Declare(
+        googletest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG v1.14.0
+        GIT_SHALLOW TRUE
+    )
+    
     FetchContent_MakeAvailable(googletest)
+    
+    # Verify that GTest targets are available
+    # Google Test provides both the old-style targets (gtest, gtest_main) 
+    # and the new-style imported targets (GTest::gtest, GTest::gtest_main)
+    if(TARGET GTest::gtest AND TARGET GTest::gtest_main)
+        message(STATUS "Google Test downloaded and configured successfully")
+    elseif(TARGET gtest AND TARGET gtest_main)
+        message(STATUS "Google Test downloaded (using legacy targets)")
+    else()
+        message(FATAL_ERROR "Failed to configure Google Test - targets not found")
+    endif()
+else()
+    message(STATUS "Using system-installed Google Test")
 endif()
 
 # Helper function to add a test executable
 function(add_unit_test TEST_NAME TEST_SOURCE)
     add_executable(${TEST_NAME} ${TEST_SOURCE})
     
+    # Determine which GTest targets to use (check inside function to access parent scope variables)
+    # Try modern imported targets first, fall back to legacy targets
+    if(TARGET GTest::gtest)
+        set(GTEST_TARGET GTest::gtest)
+        set(GTEST_MAIN_TARGET GTest::gtest_main)
+        if(TARGET GTest::gmock)
+            set(GMOCK_TARGET GTest::gmock)
+        else()
+            set(GMOCK_TARGET GTest::gtest)  # Fallback if gmock not available
+        endif()
+    elseif(TARGET gtest)
+        set(GTEST_TARGET gtest)
+        set(GTEST_MAIN_TARGET gtest_main)
+        if(TARGET gmock)
+            set(GMOCK_TARGET gmock)
+        else()
+            set(GMOCK_TARGET gtest)
+        endif()
+    else()
+        message(FATAL_ERROR "Google Test targets not found for ${TEST_NAME}. Please check GTest configuration.")
+    endif()
+    
     target_link_libraries(${TEST_NAME}
         PRIVATE
-            GTest::gtest
-            GTest::gtest_main
-            GTest::gmock
+            ${GTEST_TARGET}
+            ${GTEST_MAIN_TARGET}
+            ${GMOCK_TARGET}
             yaml-cpp
     )
     
@@ -67,7 +106,10 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
     # For now, tests will link against the main executable or libraries when created
     
     # Add test to CTest
-    add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+    # Use generator expressions to handle both single-config and multi-config generators
+    # For single-config generators (Unix Makefiles, Ninja): $<TARGET_FILE:target>
+    # For multi-config generators (Visual Studio): $<TARGET_FILE:target> works with -C flag
+    add_test(NAME ${TEST_NAME} COMMAND $<TARGET_FILE:${TEST_NAME}>)
     
     # Set test properties
     set_tests_properties(${TEST_NAME} PROPERTIES

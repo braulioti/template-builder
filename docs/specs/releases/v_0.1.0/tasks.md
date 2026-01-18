@@ -104,22 +104,22 @@
 
 ## Documentation
 
-- [ ] Update README.md with C++ build instructions
-- [ ] Document dependencies
-- [ ] Document build process for each platform
-- [ ] Create installation guide
-- [ ] Document public APIs (if applicable)
-- [ ] Update usage documentation
+- [x] Update README.md with C++ build instructions
+- [x] Document dependencies
+- [x] Document build process for each platform
+- [x] Create installation guide
+- [x] Document public APIs (if applicable)
+- [x] Update usage documentation
 
 ## Build and Distribution
 
-- [ ] Configure release build for Windows
-- [ ] Configure release build for Linux
-- [ ] Configure release build for macOS
-- [ ] Fix MSI installer generation for Windows (WiX configuration and workflow)
-- [ ] Create packaging scripts (optional)
-- [ ] Test generated binaries
-- [ ] Prepare release notes
+- [x] Configure release build for Windows
+- [x] Configure release build for Linux
+- [x] Configure release build for macOS
+- [x] Fix MSI installer generation for Windows (WiX configuration and workflow)
+- [x] Create packaging scripts (optional)
+- [x] Test generated binaries
+- [x] Prepare release notes
 
 ## Cleanup and Finalization
 
@@ -127,5 +127,6 @@
 - [ ] Apply consistent formatting (clang-format)
 - [ ] Remove commented/debug code
 - [ ] Validate no memory leaks
+- [ ] Retest the generated MSI file (install, uninstall, and functionality)
 - [ ] Review and update tasks.md marking completed
 - [ ] Prepare PR/Merge for main branch

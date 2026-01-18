@@ -2,6 +2,7 @@
 
 [![X: @_brau_io](https://img.shields.io/badge/contact-@_brau_io-blue.svg?style=flat)](https://x.com/_brau_io)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/f69823e9d31f443d89212528e308c716)](https://app.codacy.com/gh/braulioti/template-builder/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?logo=github-actions&logoColor=white)](./.github)
 [![C++](https://img.shields.io/badge/C++-00599C?style=flat-square&logo=C%2B%2B&logoColor=white)](https://visualstudio.microsoft.com/vs/features/cplusplus/)
 [![Licence](https://img.shields.io/github/license/Ileriayo/markdown-badges?style=for-the-badge)](./LICENSE)
 
@@ -11,7 +12,7 @@ Template Builder is created and maintained by [Bráulio Figueiredo](https://brau
 
 ## Table of Contents
 
-- [Project structure](#project-structure)
+- [Project Structure](#project-structure)
 - [Release Calendar](#release-calendar)
 - [Technologies](#technologies)
 - [Build and Run](#build-and-run)
@@ -19,18 +20,23 @@ Template Builder is created and maintained by [Bráulio Figueiredo](https://brau
   - [Building the Project](#building-the-project)
   - [Running the Application](#running-the-application)
 - [Tests](#tests)
+  - [Running Tests](#running-tests)
+- [Generating Windows MSI Installer](#generating-windows-msi-installer)
+- [Troubleshooting](#troubleshooting)
 - [Versioning](#versioning)
 - [Author](#author)
 
-## Project structure
+## Project Structure
 
 ```
 template-builder/
+├── .github/                   # GitHub Actions workflows (CI/CD)
 ├── src/                       # Source code (C++)
 ├── tests/                     # Unit tests
 ├── samples/                   # Example YAML templates
 ├── docs/                      # Project documentation
 ├── installer/                 # Installation scripts and configurations
+├── libs/                      # Files necessary for generating Windows installer
 ├── old_src/                   # Legacy Pascal source code (reference)
 ├── CMakeLists.txt            # CMake build configuration
 ├── README.md                 # Main documentation
@@ -54,6 +60,7 @@ template-builder/
 - CMake (minimum version 3.10)
 - Google Test (v1.14.0)
 - YAML Library: yaml-cpp
+- WIX Toolset V6.0
 
 ## Build and Run
 
@@ -154,6 +161,25 @@ The project uses Google Test framework for unit testing. This section explains h
    ./tests/test_PromptType
    ./tests/test_FileType
    ```
+
+## Generating Windows MSI Installer
+
+After building the application, you can generate the Windows MSI installer using the provided PowerShell script.
+
+**Prerequisites:**
+- WiX Toolset installed on your system
+- The application must be built before generating the installer
+
+**Steps:**
+
+1. Ensure the application build is complete (see [Building the Project](#building-the-project))
+
+2. Run the build script from the project root:
+   ```powershell
+   .\installer\build-msi.ps1
+   ```
+
+The script will generate the MSI installer file in the `installer/` directory.
 ## Troubleshooting
 
 [Click here](TROUBLESHOOTING.md) for solutions to the main compilation and deployment problems you may encounter while working with this project.

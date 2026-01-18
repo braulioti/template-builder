@@ -70,6 +70,13 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
         message(FATAL_ERROR "Google Test targets not found for ${TEST_NAME}. Please check GTest configuration.")
     endif()
     
+    # Apply coverage flags if they are set in CMAKE_CXX_FLAGS
+    # This ensures coverage data is generated when tests run
+    if(CMAKE_CXX_FLAGS MATCHES "coverage|--coverage|-fprofile-arcs|-ftest-coverage")
+        target_compile_options(${TEST_NAME} PRIVATE --coverage -fprofile-arcs -ftest-coverage)
+        target_link_options(${TEST_NAME} PRIVATE --coverage)
+    endif()
+    
     target_link_libraries(${TEST_NAME}
         PRIVATE
             ${GTEST_TARGET}

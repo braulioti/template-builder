@@ -8,6 +8,27 @@ void showUsage(const char* programName) {
     std::cout << "Usage: " << programName << " <arquivo.yaml>" << std::endl;
 }
 
+void printVariable(const YAML::Node& variable) {
+    if (!variable.IsMap()) {
+        return;
+    }
+
+    std::string name;
+    std::string type;
+
+    if (variable["name"].IsDefined()) {
+        name = variable["name"].as<std::string>();
+    }
+
+    if (variable["type"].IsDefined()) {
+        type = variable["type"].as<std::string>();
+    }
+
+    if (!name.empty() && !type.empty()) {
+        std::cout << "Name: " << name << " | Type: " << type << std::endl;
+    }
+}
+
 void printVariables(const YAML::Node& variablesNode) {
     if (!variablesNode.IsDefined() || !variablesNode.IsSequence()) {
         std::cout << "No variables found or variables is not a sequence." << std::endl;
@@ -18,24 +39,7 @@ void printVariables(const YAML::Node& variablesNode) {
     std::cout << "----------" << std::endl;
 
     for (const auto& variable : variablesNode) {
-        if (!variable.IsMap()) {
-            continue;
-        }
-
-        std::string name;
-        std::string type;
-
-        if (variable["name"].IsDefined()) {
-            name = variable["name"].as<std::string>();
-        }
-
-        if (variable["type"].IsDefined()) {
-            type = variable["type"].as<std::string>();
-        }
-
-        if (!name.empty() && !type.empty()) {
-            std::cout << "Name: " << name << " | Type: " << type << std::endl;
-        }
+        printVariable(variable);
     }
 }
 

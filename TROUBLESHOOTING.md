@@ -1,277 +1,152 @@
 # Troubleshooting
 
+## About this file
 
+This file contains solutions to the main compilation and deployment problems you may encounter while working with this project.
 
-Este documento descreve **do zero** como instalar e configurar a biblioteca **yaml-cpp** em um projeto C++ utilizando **CMake**, **MSVC** e **vcpkg**, além de resolver os erros mais comuns encontrados durante o processo.
+## Build Errors
 
----
+### CMake Error: CMAKE_CXX_COMPILER not set or No C++ compiler found
 
-## 🎯 Objetivo
+**Solution:**
 
-Fazer com que o seguinte include compile sem erros:
+Install a C++ compiler with C++17 support:
 
-```cpp
-#include <yaml-cpp/yaml.h>
+1. **Windows**: Install Visual Studio 2022 with "Desktop development with C++" workload, or install Visual C++ Build Tools
+2. **Linux**: Install GCC or Clang: `sudo apt-get install build-essential` (Ubuntu/Debian)
+3. **macOS**: Install Xcode Command Line Tools: `xcode-select --install`
+
+Verify installation:
+```bash
+# Windows
+where.exe cl
+
+# Linux/macOS
+g++ --version
 ```
 
 ---
 
-## 🧠 Conceito Fundamental
+### yaml-cpp/yaml.h: No such file or directory
 
-Em C++:
+**Solution:**
 
-* `#include` **não instala bibliotecas**
-* É necessário:
+The project uses CMake FetchContent to automatically download yaml-cpp. If you still get this error:
 
-    1. Instalar a biblioteca
-    2. Configurar o CMake para encontrá-la
-    3. Linkar a biblioteca ao target
+1. Ensure CMake version 3.10 or higher is installed
+2. Reconfigure CMake:
+   ```bash
+   cmake -B build -S .
+   ```
 
----
-
-## ✅ Abordagem Recomendada
-
-Utilizar **vcpkg**, o gerenciador de dependências oficial da Microsoft para C++ no Windows.
-
-Benefícios:
-
-* Integração nativa com MSVC
-* Compatível com CMake
-* Funciona localmente e em CI (GitHub Actions)
-
----
-
-## 1️⃣ Pré-requisitos
-
-* Windows 10 ou superior
-* **Compilador C++** (escolha uma opção):
-  * Visual Studio 2022 (com C++ Desktop Development), ou
-  * **Visual C++ Build Tools** ([Download aqui](https://visualstudio.microsoft.com/pt-br/visual-cpp-build-tools/)) - Ferramentas independentes de compilação sem o IDE completo
-    * ⚠️ **Importante:** Ao instalar, na aba "Componentes individuais", marque:
-      * ✅ MSVC v143 – VS 2022 C++ x64/x86 build tools
-      * ✅ Windows 10 SDK ou Windows 11 SDK
-      * ✅ CMake tools for Windows
-* CMake ≥ 3.20 (ou use o CMake tools incluído nas Build Tools)
-* Git
-* PowerShell
-
----
-
-## 2️⃣ Instalação do vcpkg
-
-Abra o **PowerShell**:
-
-```powershell
-git clone https://github.com/microsoft/vcpkg.git
-cd vcpkg
-.\bootstrap-vcpkg.bat
-```
-
-Verifique a instalação:
-
-```powershell
-.\vcpkg version
+If using vcpkg instead, pass the toolchain file:
+```bash
+cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake
 ```
 
 ---
 
-## 3️⃣ Instalação do yaml-cpp
+### Could not find a package configuration file provided by "yaml-cpp"
 
-Ainda dentro da pasta do vcpkg:
+**Solution:**
 
-```powershell
-.\vcpkg install yaml-cpp
-```
+The project automatically downloads yaml-cpp via FetchContent. If you're using vcpkg and see this error:
 
-Isso irá:
+1. Install yaml-cpp via vcpkg:
+   ```bash
+   vcpkg install yaml-cpp
+   ```
 
-* Compilar o yaml-cpp
-* Instalar headers e libs para MSVC
-
-Diretório típico após a instalação:
-
-```
-vcpkg/installed/x64-windows/
-```
+2. Configure CMake with vcpkg toolchain:
+   ```bash
+   cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake
+   ```
 
 ---
 
-## 4️⃣ Estrutura Mínima do Projeto
+### Linker errors (unresolved external symbol)
 
-```
-seu-projeto/
-│
-├── CMakeLists.txt
-└── src/
-    └── main.cpp
-```
+**Solution:**
 
----
-
-## 5️⃣ Configuração do CMake
-
-### `CMakeLists.txt`
+Ensure yaml-cpp is properly linked in your CMakeLists.txt. The main CMakeLists.txt already includes this:
 
 ```cmake
-cmake_minimum_required(VERSION 3.20)
-project(seu_projeto LANGUAGES CXX)
+target_link_libraries(${PROJECT_NAME} PRIVATE yaml-cpp)
+```
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-add_executable(seu_projeto
-    src/main.cpp
-)
-
-find_package(yaml-cpp CONFIG REQUIRED)
-
-target_link_libraries(seu_projeto
-    PRIVATE yaml-cpp
-)
+If you're creating a new target, make sure to link yaml-cpp:
+```cmake
+target_link_libraries(your_target PRIVATE yaml-cpp)
 ```
 
 ---
 
-## 6️⃣ Código de Teste
+### Tests fail to build or run
 
-### `src/main.cpp`
+**Solution:**
 
-```cpp
-#include <yaml-cpp/yaml.h>
-#include <iostream>
+1. Enable tests when configuring CMake:
+   ```bash
+   cmake -B build -S . -DBUILD_TESTS=ON
+   ```
 
-int main() {
-    YAML::Node node = YAML::Load("key: value");
-    std::cout << node["key"].as<std::string>() << std::endl;
-    return 0;
-}
-```
+2. Build the project:
+   ```bash
+   cmake --build build
+   ```
+
+3. Run tests:
+   ```bash
+   cd build
+   ctest --output-on-failure
+   ```
+
+Ensure Google Test is available. The project automatically downloads it via FetchContent when `BUILD_TESTS=ON`.
 
 ---
 
-## 7️⃣ Gerando o Build (Passo CRÍTICO)
+### Build succeeds locally but fails in CI/CD
 
-⚠️ **O CMake PRECISA do toolchain do vcpkg**
+**Solution:**
 
-```powershell
-cmake -S . -B build ^
-  -DCMAKE_TOOLCHAIN_FILE=C:/caminho/para/vcpkg/scripts/buildsystems/vcpkg.cmake
-```
+Check that your CI/CD pipeline:
+1. Has all required dependencies installed (CMake, C++ compiler)
+2. Configures CMake correctly for the platform
+3. Uses the correct build commands
 
-Depois:
+For GitHub Actions, the provided workflows in `.github/workflows/` already handle this correctly.
 
-```powershell
+---
+
+## Common Issues
+
+### Project compiles but executable is not found
+
+**Solution:**
+
+Check the executable location:
+- **Linux/macOS**: `build/bin/TemplateBuilder`
+- **Windows (Release)**: `build/bin/Release/TemplateBuilder.exe`
+- **Windows (Debug)**: `build/bin/Debug/TemplateBuilder.exe`
+
+Ensure you built the project successfully:
+```bash
 cmake --build build
 ```
 
 ---
 
-## 8️⃣ Erros Comuns e Soluções
+### Permission denied when running tests
 
-### ❌ `CMake Error: CMAKE_CXX_COMPILER not set` ou `No C++ compiler found`
+**Solution:**
 
-**Causa:**
-
-* Nenhum compilador C++ está instalado ou não está no PATH do sistema
-
-**Solução:**
-
-1. **Instalar Visual C++ Build Tools** (recomendado para desenvolvimento sem IDE):
-   * Download: [Visual C++ Build Tools](https://visualstudio.microsoft.com/pt-br/visual-cpp-build-tools/)
-   * Execute o instalador
-   * Na aba "Componentes individuais", certifique-se de marcar **TODOS** os seguintes itens obrigatórios:
-     * ✅ **MSVC v143 – VS 2022 C++ x64/x86 build tools** (obrigatório)
-     * ✅ **Windows 10 SDK** ou **Windows 11 SDK** (obrigatório)
-     * ✅ **CMake tools for Windows** (obrigatório)
-     * ⬜ Ferramentas de teste C++ (opcional)
-   * ⚠️ **ATENÇÃO:** Se faltar qualquer um dos componentes obrigatórios, o erro continuará ocorrendo.
-   * Instale e reinicie o terminal
-
-2. **Ou instalar Visual Studio 2022** (IDE completo):
-   * Durante a instalação, certifique-se de marcar "Desktop development with C++"
-
-3. **Verificar instalação:**
-   ```powershell
-   where.exe cl
-   ```
-   Se retornar um caminho, o compilador está instalado corretamente.
-
-4. **Reconfigure o CMake após instalar:**
-   ```powershell
-   cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=C:/caminho/para/vcpkg/scripts/buildsystems/vcpkg.cmake
-   ```
-
----
-
-### ❌ `yaml-cpp/yaml.h: No such file or directory`
-
-**Causa:**
-
-* vcpkg não foi integrado ao CMake
-
-**Solução:**
-
-* Usar `-DCMAKE_TOOLCHAIN_FILE=...` ao rodar o CMake
-
----
-
-### ❌ `Could not find a package configuration file provided by "yaml-cpp"`
-
-**Causa:**
-
-* yaml-cpp não instalado no vcpkg
-
-**Solução:**
-
-```powershell
-.\vcpkg install yaml-cpp
+Make sure test executables have execute permissions (Linux/macOS):
+```bash
+chmod +x build/tests/test_*
 ```
 
----
-
-### ❌ Erros de linker (`unresolved external symbol`)
-
-**Causa:**
-
-* Biblioteca não foi linkada ao target
-
-**Solução:**
-
-```cmake
-target_link_libraries(seu_projeto PRIVATE yaml-cpp)
+Or run tests directly from the build directory:
+```bash
+cd build
+./tests/test_VariableType
 ```
-
----
-
-### ❌ Compila localmente, mas falha no CI
-
-**Causa:**
-
-* vcpkg não configurado no pipeline
-
-**Solução (GitHub Actions):**
-
-```yaml
-- name: Install dependencies
-  uses: lukka/run-vcpkg@v11
-  with:
-    vcpkgArguments: yaml-cpp
-```
-
----
-
-## 9️⃣ Checklist Final
-
-* [ ] vcpkg instalado
-* [ ] yaml-cpp instalado via vcpkg
-* [ ] `find_package(yaml-cpp CONFIG REQUIRED)` no CMake
-* [ ] `target_link_libraries(... yaml-cpp)` configurado
-* [ ] CMake executado com `CMAKE_TOOLCHAIN_FILE`
-
----
-
-## ✅ Resultado Esperado
-
-O projeto compila e executa corretamente, imprimindo:
-
-

@@ -242,49 +242,70 @@ jobs:
       - name: Generate coverage report
         working-directory: build-coverage
         run: |
-          # Find all directories with .gcda files
-          echo "Searching for .gcda files..."
-          GCDA_DIRS=$(find . -name "*.gcda" -type f -exec dirname {} \; | sort -u)
+          # Find all directories with .gcda files from our source code only
+          echo "Searching for .gcda files in source directories..."
+          GCDA_FILES=$(find . -path "*/_deps/*" -prune -o -name "*.gcda" -type f -print | grep -v "_deps" | grep -v "googletest")
           
-          if [ -z "$GCDA_DIRS" ]; then
-            echo "WARNING: No .gcda files found!"
-            echo "Searching in common locations..."
-            find . -type d -name "CMakeFiles" | head -10
-            find tests -type d 2>/dev/null | head -10
+          if [ -z "$GCDA_FILES" ]; then
+            echo "WARNING: No .gcda files found in source directories!"
+            echo "Searching all .gcda files..."
+            find . -name "*.gcda" -type f | head -10
           else
-            echo "Found .gcda files in:"
-            echo "$GCDA_DIRS"
+            echo "Found .gcda files in source directories:"
+            echo "$GCDA_FILES" | head -10
           fi
           
-          # Try to capture from the build root first
+          # Capture coverage using workspace as base directory
+          # This ensures paths in the report match source file locations
           echo ""
-          echo "Attempting to capture coverage data..."
-          lcov --capture --directory . \
-            --base-directory ${{ github.workspace }} \
-            --output-file coverage.info \
-            --no-external \
-            --ignore-errors empty \
-            --quiet || echo "Warning: lcov capture from root failed"
+          echo "Capturing coverage data..."
+          WORKSPACE_ROOT="${{ github.workspace }}"
           
-          # If that didn't work, try capturing from source files directory
-          if [ ! -f coverage.info ] || [ ! -s coverage.info ]; then
-            echo "Trying alternative capture method..."
-            # Try capturing from where source files are compiled
-            for dir in $GCDA_DIRS; do
-              echo "Trying to capture from: $dir"
-              lcov --capture --directory "$dir" \
-                --base-directory ${{ github.workspace }} \
-                --output-file coverage_part.info \
-                --no-external \
-                --ignore-errors empty \
-                --quiet || true
-              
-              if [ -f coverage_part.info ] && [ -s coverage_part.info ]; then
-                if [ -f coverage.info ] && [ -s coverage.info ]; then
-                  lcov --add-tracefile coverage.info --add-tracefile coverage_part.info \
-                    --output-file coverage.info --quiet || true
-                else
-                  mv coverage_part.info coverage.info
+          # First try capturing from build directory with workspace as base
+          lcov --capture --directory . \
+            --base-directory "$WORKSPACE_ROOT" \
+            --output-file coverage.info \
+            --ignore-errors gcov \
+            --quiet 2>&1 | grep -v "skipping" | head -10 || echo "Capture completed with some warnings"
+          
+          # Filter to only include our source files
+          if [ -f coverage.info ] && [ -s coverage.info ]; then
+            echo "Filtering coverage to source files only..."
+            # Remove external dependencies and test files
+            lcov --remove coverage.info \
+              '/usr/*' \
+              '*/_deps/*' \
+              '*/googletest*/*' \
+              '*/tests/*' \
+              '*/CMakeFiles/*' \
+              --output-file coverage.info \
+              --quiet || true
+          fi
+          
+          # If still no coverage, try capturing from specific source directories
+          if [ ! -f coverage.info ] || [ ! -s coverage.info ] || [ $(wc -l < coverage.info) -lt 5 ]; then
+            echo "Trying alternative capture method from source directories..."
+            
+            # Find directories with source .gcda files
+            SOURCE_GCDA_DIRS=$(echo "$GCDA_FILES" | xargs -n1 dirname | sort -u | grep -v "_deps" | grep -v "googletest")
+            
+            for dir in $SOURCE_GCDA_DIRS; do
+              if [ -d "$dir" ]; then
+                echo "Capturing from: $dir"
+                lcov --capture --directory "$dir" \
+                  --base-directory ${{ github.workspace }} \
+                  --output-file coverage_part.info \
+                  --ignore-errors gcov,source,empty \
+                  --quiet || true
+                
+                if [ -f coverage_part.info ] && [ -s coverage_part.info ]; then
+                  if [ -f coverage.info ] && [ -s coverage.info ]; then
+                    lcov --add-tracefile coverage.info --add-tracefile coverage_part.info \
+                      --output-file coverage.info --quiet || true
+                    rm -f coverage_part.info
+                  else
+                    mv coverage_part.info coverage.info
+                  fi
                 fi
               fi
             done
@@ -340,7 +361,7 @@ jobs:
       
       - name: Upload coverage to Codacy
         if: always()
-        uses: codacy/codacy-coverage-reporter-action@v1.3.0
+        uses: codacy/codacy-coverage-reporter-action@89d6c85cfafaec52c72b6c5e8b2878d33104c699
         continue-on-error: true
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}

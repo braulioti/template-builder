@@ -76,6 +76,7 @@ set(SOURCES
 # Headers
 # Note: Header files will be added as the code is converted from Pascal
 set(HEADERS
+    src/template-builder.hpp
     src/types/VariableType.hpp
     src/types/PromptType.hpp
     src/types/FileType.hpp

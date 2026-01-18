@@ -1,7 +1,8 @@
-﻿# Template Builder - Version: 1.0.0
+﻿# Template Builder - Version: 0.1.0
 
 [![X: @_brau_io](https://img.shields.io/badge/contact-@_brau_io-blue.svg?style=flat)](https://x.com/_brau_io)
-[![Delphi](https://img.shields.io/badge/Delphi-d92a30?style=for-the-badge&logo=delphi&logoColor=white)](https://www.embarcadero.com//)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/f69823e9d31f443d89212528e308c716)](https://app.codacy.com/gh/braulioti/template-builder/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![C++](https://img.shields.io/badge/C++-00599C?style=flat-square&logo=C%2B%2B&logoColor=white)](https://visualstudio.microsoft.com/vs/features/cplusplus/)
 [![Licence](https://img.shields.io/github/license/Ileriayo/markdown-badges?style=for-the-badge)](./LICENSE)
 
 Generate Wizard CLI for build templates using YAML files
@@ -11,41 +12,10 @@ Template Builder is created and maintained by [Bráulio Figueiredo](https://brau
 ## Table of Contents
 
 - [Technologies](#technologies)
-- [VSoft.YAML](#vsoftyaml)
-  - [Instalação](#instalação)
-  - [Documentação](#documentação)
 - [Versioning](#versioning)
 - [Author](#author)
 
 ## Technologies
-
-- Delphi 12 Community Edition
-- VSoft.YAML
-
-## VSoft.YAML
-
-VSoft.YAML é uma biblioteca open-source para Delphi que permite trabalhar com arquivos YAML de forma simples e eficiente.
-
-### Instalação
-
-Para usar o Template Builder, é necessário fazer o download e configurar a biblioteca VSoft.YAML no seu projeto Delphi:
-
-1. Clone o repositório da biblioteca:
-   ```bash
-   git clone https://github.com/VSoftTechnologies/VSoft.YAML.git
-   ```
-
-2. Adicione a pasta `VSoft.YAML\Source` ao search path do seu projeto Delphi:
-   - No Delphi IDE, vá em **Project > Options > Delphi Compiler > Search Path**
-   - Adicione o caminho completo para a pasta `Source` do VSoft.YAML
-
-3. Certifique-se de que todas as units necessárias estão disponíveis no search path
-
-### Documentação
-
-Para mais informações sobre como usar a biblioteca VSoft.YAML, consulte a documentação oficial:
-
-📖 [Documentação VSoft.YAML](https://www.finalbuilder.com/resources/blogs/using-yaml-with-delphi-vsoftyaml)
 
 ## Versioning
 

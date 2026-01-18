@@ -1,44 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-    <Product Id="*" Name="Template Builder" Language="1033" Version="0.1.0" Manufacturer="Template Builder" UpgradeCode="B2D5C2F3-8E4A-4F1D-9C3B-7A6E5D4C3B2A">
-        <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" Platform="x64" />
-        
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+    <Package Name="Template Builder" Language="1033" Version="0.1.0" Manufacturer="Template Builder" UpgradeCode="B2D5C2F3-8E4A-4F1D-9C3B-7A6E5D4C3B2A">
         <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
-        <MediaTemplate />
+        <MediaTemplate EmbedCab="yes" />
+        
+        <StandardDirectory Id="ProgramFiles64Folder">
+            <Directory Id="INSTALLFOLDER" Name="TemplateBuilder" />
+        </StandardDirectory>
+        
+        <StandardDirectory Id="ProgramMenuFolder">
+            <Directory Id="ApplicationProgramsFolder" Name="TemplateBuilder" />
+        </StandardDirectory>
         
         <Feature Id="ProductFeature" Title="TemplateBuilder" Level="1">
             <ComponentGroupRef Id="ProductComponents" />
             <ComponentGroupRef Id="EnvironmentComponents" />
             <ComponentGroupRef Id="ShortcutComponents" />
         </Feature>
-    </Product>
+    </Package>
     
     <Fragment>
-        <Directory Id="TARGETDIR" Name="SourceDir">
-            <Directory Id="ProgramFiles64Folder">
-                <Directory Id="INSTALLFOLDER" Name="TemplateBuilder">
-                    <Directory Id="INSTALLFOLDERBIN" Name="bin" />
-                </Directory>
-            </Directory>
-            <Directory Id="ProgramMenuFolder">
-                <Directory Id="ApplicationProgramsFolder" Name="TemplateBuilder" />
-            </Directory>
-        </Directory>
-    </Fragment>
-    
-    <Fragment>
-        <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDERBIN">
-            <Component Id="ApplicationFiles" Guid="A1B2C3D4-E5F6-4A3B-8C9D-0E1F2A3B4C5D" Win64="yes">
+        <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+            <Component Id="ApplicationFiles" Guid="A1B2C3D4-E5F6-4A3B-8C9D-0E1F2A3B4C5D">
                 <File Id="TemplateBuilderExe" Source="$(var.SourceDir)\TemplateBuilder.exe" KeyPath="yes" />
+            </Component>
+            <!-- MinGW/GCC runtime DLLs (copied by build-msi.ps1 if the executable depends on them) -->
+            <Component Id="MinGWDlls" Guid="A2B3C4D5-E6F7-4A8B-9C0D-1E2F3A4B5C6D">
+                <File Id="LibGccDll" Source="$(var.SourceDir)\libgcc_s_seh-1.dll" />
+                <File Id="LibStdCppDll" Source="$(var.SourceDir)\libstdc++-6.dll" />
+                <File Id="LibWinPthreadDll" Source="$(var.SourceDir)\libwinpthread-1.dll" />
             </Component>
         </ComponentGroup>
         
         <ComponentGroup Id="EnvironmentComponents" Directory="INSTALLFOLDER">
-            <Component Id="EnvironmentPath" Guid="F9E8D7C6-B5A4-3C2D-1E0F-9A8B7C6D5E4F" Win64="yes">
+            <Component Id="EnvironmentPath" Guid="F9E8D7C6-B5A4-3C2D-1E0F-9A8B7C6D5E4F">
                 <CreateFolder />
                 <Environment Id="PathEnvironment" 
                     Name="PATH" 
-                    Value="[INSTALLFOLDERBIN]" 
+                    Value="[INSTALLFOLDER]" 
                     Permanent="no" 
                     Part="last" 
                     Action="set" 
@@ -47,12 +46,12 @@
         </ComponentGroup>
         
         <ComponentGroup Id="ShortcutComponents" Directory="ApplicationProgramsFolder">
-            <Component Id="ApplicationShortcut" Guid="1A2B3C4D-5E6F-7A8B-9C0D-1E2F3A4B5C6D" Win64="yes">
+            <Component Id="ApplicationShortcut" Guid="1A2B3C4D-5E6F-7A8B-9C0D-1E2F3A4B5C6D">
                 <Shortcut Id="ApplicationStartMenuShortcut"
                     Name="TemplateBuilder"
                     Description="Template Builder CLI Tool"
-                    Target="[INSTALLFOLDERBIN]TemplateBuilder.exe"
-                    WorkingDirectory="INSTALLFOLDERBIN" />
+                    Target="[INSTALLFOLDER]TemplateBuilder.exe"
+                    WorkingDirectory="INSTALLFOLDER" />
                 <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall" />
                 <RegistryValue Root="HKCU" Key="Software\TemplateBuilder" Name="installed" Type="integer" Value="1" KeyPath="yes" />
             </Component>

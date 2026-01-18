@@ -27,6 +27,7 @@ This release marks the initial C++ port of the Template Builder project, convert
 - Added support for C++17 filesystem library for cross-platform file operations.
 - Configured build output directories and platform-specific compiler options.
 - Set up MSI installer generation for Windows using WiX Toolset.
+- Created PowerShell script (build-msi.ps1) for generating MSI installer on Windows.
 - Created release workflow for building artifacts across all platforms (Windows MSI, Linux tar.gz, macOS tar.gz and PKG).
 
 ### Deprecated

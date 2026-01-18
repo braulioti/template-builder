@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:bal="http://wixtoolset.org/schemas/v4/wxs/bal">
+    <Bundle Name="Template Builder 1.0"
+            Version="1.0"
+            Manufacturer="Template Builder"
+            UpgradeCode="B3D6C3F4-9F5B-5G2E-0D4C-8B7F6E5D4C3B">
+        <bal:WixStandardBootstrapperApplication />
+        
+        <Chain>
+            <!-- Visual C++ 2015-2022 Redistributable (x64) -->
+            <ExePackage Id="VCRedist_x64"
+                       DisplayName="Visual C++ 2015-2022 Redistributable (x64)"
+                       Cache="no"
+                       Compressed="yes"
+                       PerMachine="yes"
+                       Permanent="yes"
+                       Vital="yes"
+                       SourceFile="E:\projetos\pessoal\template-builder\libs\vcredist_x64.exe"
+                       DetectCondition="Installed"
+                       InstallCommand="/quiet /norestart" />
+            
+            <!-- Main MSI package -->
+            <MsiPackage SourceFile="E:\projetos\pessoal\template-builder\installer\bin\TemplateBuilder.msi"
+                       ForcePerMachine="yes"
+                       Visible="yes" />
+        </Chain>
+    </Bundle>
+</Wix>

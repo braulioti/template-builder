@@ -1,0 +1,2 @@
+# template-builder
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/11fb419a064a4e4495cbd75b4bfd527d)](https://app.codacy.com/gh/braulioti/template-builder?utm_source=github.com&utm_medium=referral&utm_content=braulioti/template-builder&utm_campaign=Badge_Grade)

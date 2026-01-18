@@ -324,18 +324,37 @@ jobs:
       
       - name: Upload coverage to Codacy
         if: always()
-        continue-on-error: true
         run: |
           if [ -z "${{ secrets.CODACY_PROJECT_TOKEN }}" ]; then
             echo "⚠️  CODACY_PROJECT_TOKEN not configured. Skipping coverage upload."
             exit 0
           fi
           
-          # Download codacy-coverage-reporter
+          # Download and install codacy-coverage-reporter
           curl -Ls https://raw.githubusercontent.com/codacy/codacy-coverage-reporter/master/get.sh | bash
           
-          # Upload coverage report (final, not partial)
-          bash ~/.cache/codacy/coverage-reporter/latest/codacy-coverage-reporter report \
+          if [ $? -ne 0 ]; then
+            echo "ERROR: Failed to download codacy-coverage-reporter"
+            exit 1
+          fi
+          
+          # Find the reporter binary
+          REPORTER_BIN=$(find ~/.cache/codacy/coverage-reporter -name "codacy-coverage-reporter*" -type f | head -1)
+          
+          if [ -z "$REPORTER_BIN" ]; then
+            echo "ERROR: codacy-coverage-reporter not found"
+            exit 1
+          fi
+          
+          # Upload coverage report (final, not partial) for single report
+          chmod +x "$REPORTER_BIN"
+          "$REPORTER_BIN" report \
             --project-token "${{ secrets.CODACY_PROJECT_TOKEN }}" \
             --language CPP \
             -r build-coverage/coverage.info
+          
+          # Exit with error if reporter failed
+          if [ $? -ne 0 ]; then
+            echo "ERROR: Failed to upload coverage to Codacy"
+            exit 1
+          fi

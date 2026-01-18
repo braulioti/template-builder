@@ -193,9 +193,6 @@ jobs:
       
       - name: Run tests
         working-directory: build-coverage
-        env:
-          # Set environment variable to ensure coverage data is written
-          GCOV_PREFIX: build-coverage
         run: |
           # Find and run all test executables
           echo "Finding test executables..."
@@ -242,31 +239,34 @@ jobs:
       - name: Generate coverage report
         working-directory: build-coverage
         run: |
-          # Find all directories with .gcda files from our source code only
-          echo "Searching for .gcda files in source directories..."
-          GCDA_FILES=$(find . -path "*/_deps/*" -prune -o -name "*.gcda" -type f -print | grep -v "_deps" | grep -v "googletest")
-          
-          if [ -z "$GCDA_FILES" ]; then
-            echo "WARNING: No .gcda files found in source directories!"
-            echo "Searching all .gcda files..."
-            find . -name "*.gcda" -type f | head -10
-          else
-            echo "Found .gcda files in source directories:"
-            echo "$GCDA_FILES" | head -10
-          fi
-          
-          # Capture coverage using workspace as base directory
-          # This ensures paths in the report match source file locations
-          echo ""
+          # Capture coverage data using lcov
+          # The --directory option tells lcov where to find .gcda files
+          # The --base-directory option tells lcov where the source files are
           echo "Capturing coverage data..."
           WORKSPACE_ROOT="${{ github.workspace }}"
           
-          # First try capturing from build directory with workspace as base
+          # Capture coverage from the build directory
+          # lcov will automatically find .gcda files and their corresponding .gcno files
           lcov --capture --directory . \
             --base-directory "$WORKSPACE_ROOT" \
             --output-file coverage.info \
-            --ignore-errors gcov \
-            --quiet 2>&1 | grep -v "skipping" | head -10 || echo "Capture completed with some warnings"
+            --ignore-errors gcov,gcov \
+            --quiet || true
+          
+          # If no coverage data, check what files exist
+          if [ ! -f coverage.info ] || [ ! -s coverage.info ]; then
+            echo "WARNING: Initial capture produced no data. Checking for .gcda and .gcno files..."
+            echo "Found .gcda files:"
+            find . -name "*.gcda" -type f | head -10
+            echo "Found .gcno files:"
+            find . -name "*.gcno" -type f | head -10
+            
+            # Try capturing from root directory without base directory
+            lcov --capture --directory . \
+              --output-file coverage.info \
+              --ignore-errors gcov,gcov,source,empty \
+              --quiet || true
+          fi
           
           # Filter to only include our source files
           if [ -f coverage.info ] && [ -s coverage.info ]; then
@@ -278,51 +278,15 @@ jobs:
               '*/googletest*/*' \
               '*/tests/*' \
               '*/CMakeFiles/*' \
+              '*/yaml-cpp-src/*' \
               --output-file coverage.info \
               --quiet || true
-          fi
-          
-          # If still no coverage, try capturing from specific source directories
-          if [ ! -f coverage.info ] || [ ! -s coverage.info ] || [ $(wc -l < coverage.info) -lt 5 ]; then
-            echo "Trying alternative capture method from source directories..."
             
-            # Find directories with source .gcda files
-            SOURCE_GCDA_DIRS=$(echo "$GCDA_FILES" | xargs -n1 dirname | sort -u | grep -v "_deps" | grep -v "googletest")
-            
-            for dir in $SOURCE_GCDA_DIRS; do
-              if [ -d "$dir" ]; then
-                echo "Capturing from: $dir"
-                lcov --capture --directory "$dir" \
-                  --base-directory ${{ github.workspace }} \
-                  --output-file coverage_part.info \
-                  --ignore-errors gcov,source,empty \
-                  --quiet || true
-                
-                if [ -f coverage_part.info ] && [ -s coverage_part.info ]; then
-                  if [ -f coverage.info ] && [ -s coverage.info ]; then
-                    lcov --add-tracefile coverage.info --add-tracefile coverage_part.info \
-                      --output-file coverage.info --quiet || true
-                    rm -f coverage_part.info
-                  else
-                    mv coverage_part.info coverage.info
-                  fi
-                fi
-              fi
-            done
-          fi
-          
-          # Remove system includes and dependencies if file exists and has content
-          if [ -f coverage.info ] && [ -s coverage.info ]; then
-            lcov --remove coverage.info '/usr/*' --output-file coverage.info
-            lcov --remove coverage.info '*/tests/*' --output-file coverage.info
-            lcov --remove coverage.info '*/_deps/*' --output-file coverage.info
-            lcov --remove coverage.info '*/googletest/*' --output-file coverage.info
-            lcov --remove coverage.info '*/yaml-cpp-src/*' --output-file coverage.info
-            lcov --remove coverage.info '*/CMakeFiles/*' --output-file coverage.info
             # Generate summary
+            echo "Coverage summary:"
             lcov --list coverage.info || true
           else
-            echo "WARNING: No coverage data found. This may mean tests didn't generate coverage files."
+            echo "WARNING: No coverage data found after all attempts."
             echo "Creating minimal coverage file structure..."
             # Create a minimal valid LCOV file with zero coverage
             echo "TN:" > coverage.info

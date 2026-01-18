@@ -250,7 +250,7 @@ jobs:
           lcov --capture --directory . \
             --base-directory "$WORKSPACE_ROOT" \
             --output-file coverage.info \
-            --ignore-errors gcov,gcov \
+            --ignore-errors gcov,gcov,mismatch \
             --quiet || true
           
           # If no coverage data, check what files exist
@@ -264,7 +264,7 @@ jobs:
             # Try capturing from root directory without base directory
             lcov --capture --directory . \
               --output-file coverage.info \
-              --ignore-errors gcov,gcov,source,empty \
+              --ignore-errors gcov,gcov,source,empty,mismatch \
               --quiet || true
           fi
           

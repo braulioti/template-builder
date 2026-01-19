@@ -29,6 +29,7 @@ This release marks the initial C++ port of the Template Builder project, convert
 - Set up MSI installer generation for Windows using WiX Toolset.
 - Created PowerShell script (build-msi.ps1) for generating MSI installer on Windows.
 - Created release workflow for building artifacts across all platforms (Windows MSI, Linux tar.gz, macOS tar.gz and PKG).
+- Converted TPromptBuilder class from Pascal to C++ (PromptBuilder).
 
 ### Deprecated
 

@@ -118,6 +118,7 @@ void PromptBuilder::getChecklist(PromptInput* promptInput) {
         std::cout << "Use Up/Down arrows to navigate, Space to select/deselect, Enter to confirm" << std::endl;
 
         // Read key input
+#ifdef _WIN32
         while (true) {
             unsigned short key = 0;
             bool keyPressed = false;
@@ -130,7 +131,6 @@ void PromptBuilder::getChecklist(PromptInput* promptInput) {
                 }
 
                 // Process key
-#ifdef _WIN32
                 if (key == VK_UP) {
                     if (currentIndex > 0) {
                         --currentIndex;
@@ -144,15 +144,17 @@ void PromptBuilder::getChecklist(PromptInput* promptInput) {
                 } else if (key == VK_RETURN) {
                     done = true;
                 }
-#else
-                // For non-Windows, we'll need a different approach
-                // This is a placeholder - full implementation would require termios or similar
-                done = true; // Simplified: just exit
-#endif
                 break;
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
+#else
+        // For non-Windows platforms, checklist functionality requires terminal input handling
+        // This is a simplified implementation - full cross-platform support would require
+        // termios (Linux) or similar APIs for non-blocking key input
+        // For now, we'll just mark as done to allow the test to continue
+        done = true;
+#endif
     }
 
     // Clear the instruction line

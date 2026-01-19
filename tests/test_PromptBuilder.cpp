@@ -291,7 +291,6 @@ TEST_F(PromptBuilderTest, ValidateInputStringPromptType) {
     prompt->setResult("Result: {{testVar}}");
     
     auto testVar = std::make_unique<Variable>("testVar", VariableType::vtString);
-    std::vector<Variable*> testVars = {testVar.get()};
     
     auto input = std::make_unique<PromptInput>(PromptType::ptInputString);
     input->setInput("Enter your name: ");
@@ -324,7 +323,6 @@ TEST_F(PromptBuilderTest, ValidateChecklistPromptType) {
     prompt->setResult("Selected: {{testVar}}");
     
     auto testVar = std::make_unique<Variable>("testVar", VariableType::vtString);
-    std::vector<Variable*> testVars = {testVar.get()};
     
     auto input = std::make_unique<PromptInput>(PromptType::ptChecklist);
     input->setInput("Select options: ");
@@ -380,7 +378,6 @@ TEST_F(PromptBuilderTest, ValidateArrayListPromptType) {
     prompt->setResult("Items: {{testVar}}");
     
     auto testVar = std::make_unique<Variable>("testVar", VariableType::vtString);
-    std::vector<Variable*> testVars = {testVar.get()};
     
     auto input = std::make_unique<PromptInput>(PromptType::ptArrayList);
     input->setInput("Enter items (empty line to finish): ");

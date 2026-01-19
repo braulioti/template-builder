@@ -29,31 +29,12 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 if(WIN32)
     add_definitions(-D_WIN32_WINNT=0x0601)  # Windows 7+
     if(MSVC)
-        # MSVC compiler options
-        add_compile_options(/W4 /permissive-)
-        add_compile_options($<$<CONFIG:Debug>:/Od /Zi>)
-        add_compile_options($<$<CONFIG:Release>:/O2>)
         # Set runtime library
         set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
-    elseif(MINGW)
-        # MinGW compiler options
-        add_compile_options(-Wall -Wextra -pedantic)
-        add_compile_options($<$<CONFIG:Debug>:-g -O0>)
-        add_compile_options($<$<CONFIG:Release>:-O3>)
     endif()
-elseif(UNIX AND NOT APPLE)
-    # Linux
-    add_compile_options(-Wall -Wextra -pedantic)
-    add_compile_options($<$<CONFIG:Debug>:-g -O0>)
-    add_compile_options($<$<CONFIG:Release>:-O3 -DNDEBUG>)
 elseif(APPLE)
-    # macOS (supports both x64 and ARM64)
-    add_compile_options(-Wall -Wextra -pedantic)
-    add_compile_options($<$<CONFIG:Debug>:-g -O0>)
-    add_compile_options($<$<CONFIG:Release>:-O3 -DNDEBUG>)
-    
     # Handle universal binaries if needed (x64 + ARM64)
-    if(CMAKE_OSX_ARCHITECTURES STREQUAL "")
+    if(CMAKE_OSX_ARCHITECTURES STREQUAL "") 
         # Default to native architecture
         set(CMAKE_OSX_ARCHITECTURES ${CMAKE_SYSTEM_PROCESSOR})
     endif()
@@ -69,7 +50,8 @@ if(NOT yaml-cpp_FOUND)
     FetchContent_Declare(
         yaml-cpp
         GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
-        GIT_TAG yaml-cpp-0.8.0
+        GIT_TAG master
+        GIT_SHALLOW TRUE
     )
     
     set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "Disable yaml-cpp tests")
@@ -77,18 +59,29 @@ if(NOT yaml-cpp_FOUND)
     set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "Disable yaml-cpp contrib")
     
     FetchContent_MakeAvailable(yaml-cpp)
-    set(yaml-cpp_VERSION "0.8.0")
+    set(yaml-cpp_VERSION "master (latest)")
+else()
+    set(yaml-cpp_VERSION ${yaml-cpp_VERSION})
 endif()
 
 # Source files
 # Note: Additional source files will be added as the code is converted from Pascal
 set(SOURCES
-    src/main.cpp
+    src/template-builder.cpp
+    src/types/VariableType.cpp
+    src/types/PromptType.cpp
+    src/types/FileType.cpp
+    src/builders/PromptBuilder.cpp
 )
 
 # Headers
 # Note: Header files will be added as the code is converted from Pascal
 set(HEADERS
+    src/template-builder.hpp
+    src/types/VariableType.hpp
+    src/types/PromptType.hpp
+    src/types/FileType.hpp
+    src/builders/PromptBuilder.hpp
 )
 
 # Create executable
@@ -100,12 +93,25 @@ target_include_directories(${PROJECT_NAME}
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
+# Platform-specific compiler options (applied to target)
+# Note: Generator expressions only work with multi-config generators (like Visual Studio)
+# For single-config generators (Makefiles, Ninja), CMake handles Debug/Release flags automatically
+if(MSVC)
+    target_compile_options(${PROJECT_NAME} PRIVATE /W4 /permissive-)
+    target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:/Od>)
+    target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:/Zi>)
+    target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:/O2>)
+else()
+    # For single-config generators, CMake automatically uses CMAKE_CXX_FLAGS_<CONFIG>
+    # Just add the common flags here
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic)
+endif()
+
 # Link libraries
-# yaml-cpp will be linked when ParseYAML is implemented
-# target_link_libraries(${PROJECT_NAME}
-#     PRIVATE
-#         yaml-cpp
-# )
+target_link_libraries(${PROJECT_NAME}
+    PRIVATE
+        yaml-cpp
+)
 
 # C++17 filesystem library (required on some compilers)
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.0")

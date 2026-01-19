@@ -26,9 +26,6 @@ files:
     content: "This is TemplateBuilder"
   - path: "output/new folder/file2.txt"
     content: |
-      Esta é a primeira linha
-      Esta é a segunda linha
-      Esta é a terceira linha
-      Esta é a quarta linha
-      Esta é a quinta linha
+      This is a first line
+      This is a second line
   - path: "output/new folder/file3.txt"

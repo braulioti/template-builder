@@ -13,7 +13,9 @@ uses
   unVariableType in 'types\unVariableType.pas',
   unPromptType in 'types\unPromptType.pas',
   unPromptBuilder in 'builders\unPromptBuilder.pas',
-  unFolderBuilder in 'builders\unFolderBuilder.pas';
+  unFolderBuilder in 'builders\unFolderBuilder.pas',
+  unRemoteFileType in 'types\unRemoteFileType.pas',
+  unRemoteFileBuilder in 'builders\unRemoteFileBuilder.pas';
 
 var
   YAMLParser: TParserYAML;

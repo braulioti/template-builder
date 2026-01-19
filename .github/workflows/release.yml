@@ -1,0 +1,286 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+
+      - name: Build
+        run: |
+          cmake --build build --config Release
+
+      - name: Build MSI
+        run: |
+          # Install WiX Toolset
+          Write-Host "Installing WiX Toolset..."
+          choco install wixtoolset -y --no-progress
+          
+          # Wait a bit for installation to complete
+          Start-Sleep -Seconds 5
+          
+          # Refresh environment variables
+          $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+          
+          # Setup directories
+          $workspace = "${{ github.workspace }}"
+          $installerDir = "$workspace\installer\bin"
+          $buildDir = "$workspace\build-temp"
+          
+          Write-Host "Creating directories..."
+          New-Item -ItemType Directory -Force -Path $installerDir | Out-Null
+          New-Item -ItemType Directory -Force -Path $buildDir | Out-Null
+          
+          # Copy executable to installer directory (for WiX SourceDir variable)
+          $exeSource = "build\bin\Release\TemplateBuilder.exe"
+          $exeDest = "$installerDir\TemplateBuilder.exe"
+          
+          Write-Host "Copying executable from $exeSource to $exeDest"
+          Copy-Item $exeSource -Destination $exeDest -Force
+          
+          if (-not (Test-Path $exeDest)) {
+            Write-Error "Executable not found after copy"
+            exit 1
+          }
+          
+          # Find WiX Toolset installation
+          Write-Host "Looking for WiX Toolset..."
+          $wixPaths = @(
+            "$env:ProgramFiles(x86)\WiX Toolset v3.11\bin",
+            "$env:ProgramFiles\WiX Toolset v3.11\bin",
+            "${env:ChocolateyInstall}\bin"  # Sometimes WiX is in Chocolatey bin
+          )
+          
+          # Also try finding in PATH
+          $candlePath = Get-Command candle.exe -ErrorAction SilentlyContinue
+          $lightPath = Get-Command light.exe -ErrorAction SilentlyContinue
+          
+          $wixDir = $null
+          $candle = $null
+          $light = $null
+          
+          if ($candlePath -and $lightPath) {
+            $candle = $candlePath.Source
+            $light = $lightPath.Source
+            $wixDir = Split-Path $candle -Parent
+            Write-Host "Found WiX in PATH at: $wixDir"
+          } else {
+            foreach ($path in $wixPaths) {
+              $candidateCandle = "$path\candle.exe"
+              $candidateLight = "$path\light.exe"
+              if ((Test-Path $candidateCandle) -and (Test-Path $candidateLight)) {
+                $wixDir = $path
+                $candle = $candidateCandle
+                $light = $candidateLight
+                Write-Host "Found WiX at: $wixDir"
+                break
+              }
+            }
+          }
+          
+          if ($wixDir -and $candle -and $light) {
+            # Build MSI using WiX
+            Write-Host "Building MSI with WiX..."
+            Write-Host "Candle: $candle"
+            Write-Host "Light: $light"
+            
+            # Compile WXS file with Candle (output to build-temp directory to avoid permission issues)
+            $wixobjPath = "$buildDir\TemplateBuilder.wixobj"
+            Write-Host "Running candle on: $workspace\installer\TemplateBuilder.wxs"
+            Write-Host "Output directory: $buildDir"
+            Write-Host "SourceDir variable: $installerDir"
+            
+            & $candle "$workspace\installer\TemplateBuilder.wxs" "-dSourceDir=$installerDir" "-out" "$buildDir\"
+            $candleExitCode = $LASTEXITCODE
+            
+            if ($candleExitCode -ne 0) {
+              Write-Error "Candle failed with exit code $candleExitCode"
+              Write-Host "Candle output may contain error details above"
+              exit 1
+            }
+            
+            if (-not (Test-Path $wixobjPath)) {
+              Write-Error "WixObj file not created at: $wixobjPath"
+              exit 1
+            }
+            
+            # Link WIXOBJ file with Light
+            $msiPath = "$workspace\TemplateBuilder.msi"
+            Write-Host "Running light to create MSI at: $msiPath"
+            
+            & $light "$wixobjPath" "-out" "$msiPath"
+            $lightExitCode = $LASTEXITCODE
+            
+            if ($lightExitCode -ne 0) {
+              Write-Error "Light failed with exit code $lightExitCode"
+              Write-Host "Light output may contain error details above"
+              exit 1
+            }
+            
+            # Verify MSI was created
+            if (Test-Path $msiPath) {
+              $msiInfo = Get-Item $msiPath
+              Write-Host "MSI created successfully!"
+              Write-Host "Path: $msiPath"
+              Write-Host "Size: $($msiInfo.Length) bytes"
+              
+              # Also copy to installer/bin for consistency
+              Copy-Item $msiPath -Destination "$installerDir\TemplateBuilder.msi" -Force
+            } else {
+              Write-Error "MSI file not found after build at: $msiPath"
+              exit 1
+            }
+          } else {
+            Write-Error "WiX Toolset not found. Searched in:"
+            $wixPaths | ForEach-Object { Write-Host "  - $_" }
+            Write-Host "Also checked PATH"
+            Write-Warning "Creating zip as fallback..."
+            Compress-Archive -Path "$installerDir\TemplateBuilder.exe" -DestinationPath "$workspace\TemplateBuilder-windows.zip" -Force
+          }
+
+      - name: List files before upload
+        run: |
+          Write-Host "Files in root directory:"
+          Get-ChildItem -Path "${{ github.workspace }}" -Filter "*.msi" | ForEach-Object { Write-Host $_.FullName }
+          Get-ChildItem -Path "${{ github.workspace }}" -Filter "*.zip" | ForEach-Object { Write-Host $_.FullName }
+          Write-Host "Files in installer/bin:"
+          Get-ChildItem -Path "installer\bin" -Recurse | ForEach-Object { Write-Host $_.FullName }
+          Write-Host "Files in build/bin/Release:"
+          Get-ChildItem -Path "build\bin\Release" | ForEach-Object { Write-Host $_.FullName }
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: |
+            TemplateBuilder.msi
+            TemplateBuilder.exe
+            TemplateBuilder-windows.zip
+            build/bin/Release/TemplateBuilder.exe
+          if-no-files-found: error
+          retention-days: 1
+
+  linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential
+
+      - name: Build
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+          cmake --build build
+
+      - name: Package (.tar.gz)
+        run: |
+          cd build
+          tar -czvf ../template-builder-linux.tar.gz bin/TemplateBuilder
+          cd ..
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: |
+            template-builder-linux.tar.gz
+            build/bin/TemplateBuilder
+          if-no-files-found: warn
+
+  macos:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+          cmake --build build
+
+      - name: Package (.tar.gz)
+        run: |
+          cd build
+          tar -czvf ../template-builder-macos.tar.gz bin/TemplateBuilder
+          cd ..
+
+      - name: Build PKG
+        continue-on-error: true
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          pkgbuild \
+            --root build/bin \
+            --identifier com.templatebuilder.app \
+            --version "$VERSION" \
+            --install-location /usr/local/bin \
+            template-builder.pkg
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: |
+            template-builder-macos.tar.gz
+            template-builder.pkg
+            build/bin/TemplateBuilder
+          if-no-files-found: warn
+
+  release:
+    needs: [windows, linux, macos]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release
+
+      - name: List downloaded files
+        run: |
+          echo "Files in release directory:"
+          find release -type f | sort
+
+      - name: List all downloaded files
+        run: |
+          echo "=== All files in release directory ==="
+          find release -type f | sort
+          echo ""
+          echo "=== Windows files ==="
+          find release/windows -type f 2>/dev/null || echo "No windows directory"
+          echo ""
+          echo "=== Linux files ==="
+          find release/linux -type f 2>/dev/null || echo "No linux directory"
+          echo ""
+          echo "=== macOS files ==="
+          find release/macos -type f 2>/dev/null || echo "No macos directory"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b
+        with:
+          files: |
+            release/windows/TemplateBuilder.msi
+            release/windows/TemplateBuilder.exe
+            release/windows/TemplateBuilder-windows.zip
+            release/linux/template-builder-linux.tar.gz
+            release/linux/TemplateBuilder
+            release/macos/template-builder-macos.tar.gz
+            release/macos/template-builder.pkg
+            release/macos/TemplateBuilder
+          generate_release_notes: true
+          fail_on_unmatched_files: false

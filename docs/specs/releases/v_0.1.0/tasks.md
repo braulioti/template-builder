@@ -5,6 +5,7 @@
 - [x] Set up directory structure for C++ code
 - [x] Create main CMakeLists.txt file
 - [x] Configure YAML library (yaml-cpp or alternative)
+- [x] Resolve yaml-cpp dependency issue (tag format and version validation)
 - [x] Configure build system for multiple platforms
 - [x] Create unit test structure
 - [x] Configure CI/CD for multiple platforms using GitHub Actions
@@ -12,24 +13,24 @@
 ## Type Conversion
 
 ### unVariableType.pas → VariableType.hpp/cpp
-- [ ] Convert TVariableType enum to C++ enum class
-- [ ] Convert TVariable class to C++ class
-- [ ] Implement getters/setters
-- [ ] Implement memory management (smart pointers)
-- [ ] Add unit tests
+- [x] Convert TVariableType enum to C++ enum class
+- [x] Convert TVariable class to C++ class
+- [x] Implement getters/setters
+- [x] Implement memory management (smart pointers)
+- [x] Add unit tests
 
 ### unPromptType.pas → PromptType.hpp/cpp
-- [ ] Convert TPromptType enum to enum class
-- [ ] Convert TPromptInputOption class
-- [ ] Convert TPromptInput class
-- [ ] Convert TPrompt class
-- [ ] Implement STL containers (std::vector, std::string)
-- [ ] Add unit tests
+- [x] Convert TPromptType enum to enum class
+- [x] Convert TPromptInputOption class
+- [x] Convert TPromptInput class
+- [x] Convert TPrompt class
+- [x] Implement STL containers (std::vector, std::string)
+- [x] Add unit tests
 
 ### unFileType.pas → FileType.hpp/cpp
-- [ ] Convert TFileData class
-- [ ] Implement appropriate references and pointers
-- [ ] Add unit tests
+- [x] Convert TFileData class
+- [x] Implement appropriate references and pointers
+- [x] Add unit tests
 
 ## Builder Conversion
 
@@ -49,18 +50,18 @@
 - [ ] Validate automatic parent directory creation
 
 ### unPromptBuilder.pas → PromptBuilder.hpp/cpp
-- [ ] Convert TPromptBuilder class
-- [ ] Implement GetInputString (console reading)
-- [ ] Implement GetChecklist (interactive interface)
-- [ ] Implement GetArrayList (list selection)
-- [ ] Implement template variable parsing ({{variable}})
-- [ ] Implement template functions (upper, lower, replace)
-- [ ] Implement nested function support
-- [ ] Implement ResolveVariableValue
-- [ ] Implement ParseFunctionExpression
-- [ ] Implement ExecuteFunction
-- [ ] Add unit tests for each function
-- [ ] Validate all prompt types
+- [x] Convert TPromptBuilder class
+- [x] Implement GetInputString (console reading)
+- [x] Implement GetChecklist (interactive interface)
+- [x] Implement GetArrayList (list selection)
+- [x] Implement template variable parsing ({{variable}})
+- [x] Implement template functions (upper, lower, replace)
+- [x] Implement nested function support
+- [x] Implement ResolveVariableValue
+- [x] Implement ParseFunctionExpression
+- [x] Implement ExecuteFunction
+- [x] Add unit tests for each function
+- [x] Validate all prompt types
 
 ## Service Conversion
 
@@ -76,6 +77,7 @@
 - [ ] Implement error handling
 - [ ] Add unit tests
 - [ ] Validate parsing of sample YAML files
+- [ ] Test all builders and functions
 
 ## Main Program Conversion
 
@@ -103,21 +105,22 @@
 
 ## Documentation
 
-- [ ] Update README.md with C++ build instructions
-- [ ] Document dependencies
-- [ ] Document build process for each platform
-- [ ] Create installation guide
-- [ ] Document public APIs (if applicable)
-- [ ] Update usage documentation
+- [x] Update README.md with C++ build instructions
+- [x] Document dependencies
+- [x] Document build process for each platform
+- [x] Create installation guide
+- [x] Document public APIs (if applicable)
+- [x] Update usage documentation
 
 ## Build and Distribution
 
-- [ ] Configure release build for Windows
-- [ ] Configure release build for Linux
-- [ ] Configure release build for macOS
-- [ ] Create packaging scripts (optional)
-- [ ] Test generated binaries
-- [ ] Prepare release notes
+- [x] Configure release build for Windows
+- [x] Configure release build for Linux
+- [x] Configure release build for macOS
+- [x] Fix MSI installer generation for Windows (WiX configuration and workflow)
+- [x] Create packaging scripts (optional)
+- [x] Test generated binaries
+- [x] Prepare release notes
 
 ## Cleanup and Finalization
 
@@ -125,5 +128,6 @@
 - [ ] Apply consistent formatting (clang-format)
 - [ ] Remove commented/debug code
 - [ ] Validate no memory leaks
+- [ ] Retest the generated MSI file (install, uninstall, and functionality)
 - [ ] Review and update tasks.md marking completed
 - [ ] Prepare PR/Merge for main branch

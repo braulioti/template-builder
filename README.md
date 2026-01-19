@@ -48,11 +48,11 @@ template-builder/
 
 ## Release Calendar
 
-| Date | Description | Version | Status |
-|------|-------------|---------|--------|
-| March 1, 2026 | In this version we will refactor from Delphi to C++ including multi-platform support | 0.1.0 | Em desenvolvimento |
-| March 1, 2026 |  | 0.2.0 |  |
-| March 1, 2026 |  | 1.0.0 |  |
+| Date | Description | Version | Status     |
+|------|-------------|---------|------------|
+| March 1, 2026 | In this version we will refactor from Delphi to C++ including multi-platform support | 0.1.0 | Developing |
+| March 1, 2026 |  | 0.2.0 |            |
+| March 1, 2026 |  | 1.0.0 |            |
 
 ## Technologies
 

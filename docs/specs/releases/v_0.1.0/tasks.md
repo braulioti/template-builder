@@ -50,7 +50,7 @@
 - [ ] Validate automatic parent directory creation
 
 ### unPromptBuilder.pas → PromptBuilder.hpp/cpp
-- [ ] Convert TPromptBuilder class
+- [x] Convert TPromptBuilder class
 - [ ] Implement GetInputString (console reading)
 - [ ] Implement GetChecklist (interactive interface)
 - [ ] Implement GetArrayList (list selection)

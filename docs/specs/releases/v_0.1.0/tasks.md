@@ -51,17 +51,17 @@
 
 ### unPromptBuilder.pas → PromptBuilder.hpp/cpp
 - [x] Convert TPromptBuilder class
-- [ ] Implement GetInputString (console reading)
-- [ ] Implement GetChecklist (interactive interface)
-- [ ] Implement GetArrayList (list selection)
-- [ ] Implement template variable parsing ({{variable}})
-- [ ] Implement template functions (upper, lower, replace)
-- [ ] Implement nested function support
-- [ ] Implement ResolveVariableValue
-- [ ] Implement ParseFunctionExpression
-- [ ] Implement ExecuteFunction
-- [ ] Add unit tests for each function
-- [ ] Validate all prompt types
+- [x] Implement GetInputString (console reading)
+- [x] Implement GetChecklist (interactive interface)
+- [x] Implement GetArrayList (list selection)
+- [x] Implement template variable parsing ({{variable}})
+- [x] Implement template functions (upper, lower, replace)
+- [x] Implement nested function support
+- [x] Implement ResolveVariableValue
+- [x] Implement ParseFunctionExpression
+- [x] Implement ExecuteFunction
+- [x] Add unit tests for each function
+- [x] Validate all prompt types
 
 ## Service Conversion
 
@@ -77,6 +77,7 @@
 - [ ] Implement error handling
 - [ ] Add unit tests
 - [ ] Validate parsing of sample YAML files
+- [ ] Test all builders and functions
 
 ## Main Program Conversion
 

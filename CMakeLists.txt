@@ -34,7 +34,7 @@ if(WIN32)
     endif()
 elseif(APPLE)
     # Handle universal binaries if needed (x64 + ARM64)
-    if(CMAKE_OSX_ARCHITECTURES STREQUAL "") 
+    if(CMAKE_OSX_ARCHITECTURES STREQUAL "")
         # Default to native architecture
         set(CMAKE_OSX_ARCHITECTURES ${CMAKE_SYSTEM_PROCESSOR})
     endif()
@@ -71,14 +71,17 @@ set(SOURCES
     src/types/VariableType.cpp
     src/types/PromptType.cpp
     src/types/FileType.cpp
+    src/builders/PromptBuilder.cpp
 )
 
 # Headers
 # Note: Header files will be added as the code is converted from Pascal
 set(HEADERS
+    src/template-builder.hpp
     src/types/VariableType.hpp
     src/types/PromptType.hpp
     src/types/FileType.hpp
+    src/builders/PromptBuilder.hpp
 )
 
 # Create executable

@@ -11,7 +11,7 @@ protected:
         // Create a temporary test YAML file
         testYamlFile = "test_template.yaml";
         std::ofstream file(testYamlFile);
-        file << "version: \"1.0\"\n";
+        file << "version: \"0.2\"\n";
         file << "name: \"Test Template\"\n";
         file.close();
     }

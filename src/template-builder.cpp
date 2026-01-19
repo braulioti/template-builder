@@ -45,7 +45,7 @@ int processYamlFile(const std::string& yamlFilePath) {
 int main(int argc, char* argv[]) {
     std::cout << std::endl;
     std::cout << "***************************************************" << std::endl;
-    std::cout << "* TEMPLATE BUILDER - VERSION 0.1.0                *" << std::endl;
+    std::cout << "* TEMPLATE BUILDER - VERSION 0.2.0                *" << std::endl;
     std::cout << "* Generate project templates using YAML files     *" << std::endl;
     std::cout << "***************************************************" << std::endl;
     std::cout << std::endl;

@@ -1,4 +1,4 @@
-﻿# Template Builder - Version: 0.1.0
+﻿# Template Builder - Version: 0.2.0
 
 [![X: @_brau_io](https://img.shields.io/badge/contact-@_brau_io-blue.svg?style=flat)](https://x.com/_brau_io)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/f69823e9d31f443d89212528e308c716)](https://app.codacy.com/gh/braulioti/template-builder/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
@@ -48,11 +48,11 @@ template-builder/
 
 ## Release Calendar
 
-| Date | Description | Version | Status |
-|------|-------------|---------|--------|
-| March 1, 2026 | In this version we will refactor from Delphi to C++ including multi-platform support | 0.1.0 | Em desenvolvimento |
-| March 1, 2026 |  | 0.2.0 |  |
-| March 1, 2026 |  | 1.0.0 |  |
+| DATE          | DESCRIPTION                                                                                                                                                                                                                                                                                                                                                    | VERSION | STATUS     |   
+|---------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|------------|
+| March 1, 2026 | In this version we will refactor from Delphi to C++ including multi-platform support                                                                                                                                                                                                                                                                           | 0.1.0   | Developing |
+| March 1, 2026 | This release focuses on enhancing the Template Builder CLI with repository support, improved command-line interface, and better installation management. The main goals are to enable users to download samples from a repository, list available templates, and improve the overall user experience with better help documentation and installation handling. | 0.2.0   | Started    |
+| March 1, 2026 |                                                                                                                                                                                                                                                                                                                                                                | 1.0.0   |            |
 
 ## Technologies
 

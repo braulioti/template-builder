@@ -1,5 +1,16 @@
 # Changelog
 
+## [Version 0.2.0] - XXXX-XX-XX
+
+This release focuses on enhancing the Template Builder CLI with repository support, improved command-line interface, and better installation management. The main goals are to enable users to download samples from a repository, list available templates, and improve the overall user experience with better help documentation and installation handling.
+
+### Feature
+
+### Deprecated
+
+### Fix
+
+### Documentation
 
 ## [Version 0.1.0] - XXXX-XX-XX
 

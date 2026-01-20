@@ -42,12 +42,12 @@
 - [ ] Validate nested directory creation
 
 ### unFileBuilder.pas → FileBuilder.hpp/cpp
-- [ ] Convert TFileBuilder class
-- [ ] Implement file creation
-- [ ] Implement UTF-8 encoding
-- [ ] Integrate with PromptBuilder
-- [ ] Add unit tests
-- [ ] Validate automatic parent directory creation
+- [x] Convert TFileBuilder class
+- [x] Implement file creation
+- [x] Implement UTF-8 encoding
+- [x] Integrate with PromptBuilder
+- [x] Add unit tests
+- [x] Validate automatic parent directory creation
 
 ### unPromptBuilder.pas → PromptBuilder.hpp/cpp
 - [x] Convert TPromptBuilder class

@@ -72,6 +72,7 @@ set(SOURCES
     src/types/PromptType.cpp
     src/types/FileType.cpp
     src/builders/PromptBuilder.cpp
+    src/builders/FileBuilder.cpp
 )
 
 # Headers
@@ -82,6 +83,7 @@ set(HEADERS
     src/types/PromptType.hpp
     src/types/FileType.hpp
     src/builders/PromptBuilder.hpp
+    src/builders/FileBuilder.hpp
 )
 
 # Create executable

@@ -118,6 +118,133 @@ For GitHub Actions, the provided workflows in `.github/workflows/` already handl
 
 ---
 
+### CMake Error: Generator mismatch or incompatible build directory
+
+**Symptoms:**
+- Error: "Cannot generate into [directory]. It was created with incompatible generator"
+- Error: "Error: generator : Visual Studio 18 2026. Does not match the generator used previously"
+- Build step for curl failed with generator errors
+
+**Solution:**
+
+This error occurs when CMake tries to use a different generator than the one used to create the build directory.
+
+1. **Clean the build directory completely:**
+   ```powershell
+   # Windows PowerShell
+   Remove-Item -Recurse -Force cmake-build-debug -ErrorAction SilentlyContinue
+   ```
+
+   Or manually delete the `cmake-build-debug` folder.
+
+2. **In CLion, configure the correct toolchain:**
+   - Go to **File → Settings → Build, Execution, Deployment → Toolchains**
+   - If using Visual Studio, ensure a Visual Studio toolchain is configured:
+     - Click **+** to add a new toolchain
+     - Select **Visual Studio**
+     - Set path to: `C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools` (or your Visual Studio installation path)
+     - Select **x64** as architecture
+   - If using MinGW, ensure MinGW toolchain is properly configured
+
+3. **Reload CMake project:**
+   - Go to **File → Reload CMake Project** or press **Ctrl+Shift+O**
+
+4. **If the problem persists, manually configure CMake:**
+   ```powershell
+   # Remove build directory
+   Remove-Item -Recurse -Force cmake-build-debug -ErrorAction SilentlyContinue
+   
+   # Reconfigure with explicit generator (if needed)
+   cmake -B cmake-build-debug -S .
+   ```
+
+**Note:** If you have both Visual Studio and MinGW installed, make sure CLion is using the correct toolchain for your project. Visual Studio is recommended for Windows builds.
+
+---
+
+### Build step for curl failed (FetchContent errors)
+
+**Symptoms:**
+- Error: "Build step for curl failed: 2"
+- Error: "Failed to remove directory: curl-src"
+- CMake errors when trying to download/build curl
+
+**Solution:**
+
+1. **Stop any running CMake or build processes:**
+   ```powershell
+   # Windows PowerShell
+   Get-Process | Where-Object {$_.Path -like "*cmake*" -or $_.Path -like "*mingw*" -or $_.Path -like "*curl*"} | Stop-Process -Force -ErrorAction SilentlyContinue
+   ```
+
+2. **Clean curl-related directories:**
+   ```powershell
+   Remove-Item -Recurse -Force cmake-build-debug\_deps\curl-* -ErrorAction SilentlyContinue
+   ```
+
+3. **Clean the entire build directory and reconfigure:**
+   ```powershell
+   Remove-Item -Recurse -Force cmake-build-debug -ErrorAction SilentlyContinue
+   cmake -B cmake-build-debug -S .
+   ```
+
+4. **If using CLion, reload the CMake project after cleaning**
+
+**Note:** Ensure you have a stable internet connection when CMake downloads dependencies via FetchContent.
+
+---
+
+### CMake Error: Could not find CURL or HTTPS downloads failing
+
+**Symptoms:**
+- Error: "Could not find a package configuration file provided by CURL"
+- Error: "WARNING: libcurl was compiled without SSL/TLS support. HTTPS downloads will fail."
+- HTTPS downloads fail with "Unsupported protocol" error
+
+**Solution:**
+
+If you're using vcpkg to manage dependencies, follow these steps to install curl with SSL support:
+
+1. **Verify vcpkg is installed and working:**
+   ```powershell
+   # Open a new terminal and test:
+   vcpkg version
+   ```
+   
+   If vcpkg is not found, make sure it's in your PATH or navigate to the vcpkg directory.
+
+2. **Remove old curl installation (without SSL):**
+   ```powershell
+   vcpkg remove curl
+   ```
+   
+   If curl doesn't exist, vcpkg will inform you — this is not a problem.
+
+3. **Install curl with HTTPS support (SSL enabled):**
+   
+   **Option 1 - Using OpenSSL (recommended):**
+   ```powershell
+   vcpkg install curl
+   ```
+   
+   This will automatically install curl with OpenSSL support, enabling HTTPS downloads.
+
+4. **Configure CMake with vcpkg toolchain:**
+   ```powershell
+   cmake -B cmake-build-debug -S . -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+   ```
+   
+   Replace `C:/vcpkg` with your actual vcpkg installation path.
+
+5. **Rebuild the project:**
+   ```powershell
+   cmake --build cmake-build-debug
+   ```
+
+**Note:** If you're not using vcpkg, you can install libcurl system-wide. On Windows, you can download pre-built binaries or build from source with SSL support.
+
+---
+
 ## Common Issues
 
 ### Project compiles but executable is not found

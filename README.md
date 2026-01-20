@@ -74,41 +74,51 @@ template-builder/
 
 ### Building the Project
 
-1. **Clone the repository**:
+1. **Install vcpkg (optional, for dependency management)**:
+   ```bash
+   cd C:\
+   git clone https://github.com/microsoft/vcpkg.git
+   cd vcpkg
+   bootstrap-vcpkg.bat
+   ```
+   
+   **Note**: vcpkg is optional. The project uses CMake FetchContent to automatically download dependencies (yaml-cpp, libcurl) if they are not found on the system.
+
+2. **Clone the repository**:
    ```bash
    git clone https://github.com/braulioti/template-builder.git
    cd template-builder
    ```
 
-2. **Configure CMake**:
+3. **Configure CMake**:
    ```bash
-   cmake -B build -S .
+   cmake -B cmake-build-debug -S .
    ```
    
    For Debug build:
    ```bash
-   cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug
+   cmake -B cmake-build-debug -S . -DCMAKE_BUILD_TYPE=Debug
    ```
    
    To build with tests:
    ```bash
-   cmake -B build -S . -DBUILD_TESTS=ON
+   cmake -B cmake-build-debug -S . -DBUILD_TESTS=ON
    ```
 
-3. **Build the project**:
+4. **Build the project**:
    ```bash
-   cmake --build build
+   cmake --build cmake-build-debug
    ```
    
    On Windows with MSVC (specify config):
    ```bash
-   cmake --build build --config Release
+   cmake --build cmake-build-debug --config Release
    ```
 
-4. **Executable location**:
-   - **Linux/macOS**: `build/bin/TemplateBuilder`
-   - **Windows (Release)**: `build/bin/Release/TemplateBuilder.exe`
-   - **Windows (Debug)**: `build/bin/Debug/TemplateBuilder.exe`
+5. **Executable location**:
+   - **Linux/macOS**: `cmake-build-debug/bin/TemplateBuilder`
+   - **Windows (Release)**: `cmake-build-debug/bin/Release/TemplateBuilder.exe`
+   - **Windows (Debug)**: `cmake-build-debug/bin/Debug/TemplateBuilder.exe`
 
 ### Running the Application
 
@@ -116,12 +126,12 @@ Execute the application with a YAML template file:
 
 **Linux/macOS**:
 ```bash
-./build/bin/TemplateBuilder samples/sample.yaml
+./cmake-build-debug/bin/TemplateBuilder samples/sample.yaml
 ```
 
 **Windows**:
 ```bash
-build\bin\Release\TemplateBuilder.exe samples\sample.yaml
+cmake-build-debug\bin\TemplateBuilder.exe samples\sample.yaml
 ```
 
 The application will:
@@ -139,19 +149,45 @@ The project uses Google Test framework for unit testing. This section explains h
 
 ### Running Tests
 
+#### Enabling Tests in CLion
+
+1. **Open CMake Settings**:
+   - Go to **File → Settings → Build, Execution, Deployment → CMake**
+   - Select your configuration (e.g., "Debug")
+   - In **CMake options**, add:
+     ```
+     -DBUILD_TESTS=ON
+     ```
+   - Click **Apply** and then **OK**
+
+2. **Reload CMake Project**:
+   - Go to **File → Reload CMake Project** (or press `Ctrl+Shift+O`)
+   - CLion will reconfigure CMake with tests enabled
+
+3. **Build the project**:
+   - The test executables will be built automatically when you build the project
+   - You can also build specific tests from the **Build** menu
+
+4. **Run tests**:
+   - Right-click on any test file in the project tree and select **Run**
+   - Or use **Run → Run 'All Tests'** to run all tests
+   - Tests will appear in the **Run** tool window
+
+#### Enabling Tests via Command Line
+
 1. **Configure CMake with tests enabled**:
    ```bash
-   cmake -B build -S . -DBUILD_TESTS=ON
+   cmake -B cmake-build-debug -S . -DBUILD_TESTS=ON
    ```
 
 2. **Build the project**:
    ```bash
-   cmake --build build
+   cmake --build cmake-build-debug
    ```
 
 3. **Run all tests using CTest**:
    ```bash
-   cd build
+   cd cmake-build-debug
    ctest --output-on-failure
    ```
 

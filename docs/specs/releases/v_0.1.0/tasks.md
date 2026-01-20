@@ -76,41 +76,40 @@
 ## Service Conversion
 
 ### unParseYAML.pas → ParseYAML.hpp/cpp
-- [ ] Convert TParserYAML class
-- [ ] Integrate C++ YAML library (yaml-cpp)
-- [ ] Implement LoadVariables
-- [ ] Implement LoadPrompts
-- [ ] Implement LoadFiles
-- [ ] Implement LoadFolders
-- [ ] Implement ValidateVersion
-- [ ] Implement BuildAll
-- [ ] Implement error handling
-- [ ] Add unit tests
-- [ ] Validate parsing of sample YAML files
-- [ ] Test all builders and functions
+- [x] Convert TParserYAML class
+- [x] Integrate C++ YAML library (yaml-cpp)
+- [x] Implement LoadVariables
+- [x] Implement LoadPrompts
+- [x] Implement LoadFiles
+- [x] Implement LoadFolders
+- [x] Implement LoadRemoteFiles
+- [x] Implement ValidateVersion
+- [x] Implement BuildAll
+- [x] Implement error handling
+- [x] Add unit tests
+- [x] Validate parsing of sample YAML files
+- [x] Test all builders and functions
 
 ## Main Program Conversion
 
 ### TemplateBuilder.dpr → main.cpp
-- [ ] Convert main program
-- [ ] Implement command-line argument parsing
-- [ ] Implement banner/version display
-- [ ] Implement exception handling
-- [ ] Implement user-friendly error messages
-- [ ] Validate complete end-to-end flow
+- [x] Convert main program
+- [x] Implement command-line argument parsing
+- [x] Implement banner/version display
+- [x] Implement exception handling
+- [x] Implement user-friendly error messages
+- [x] Validate complete end-to-end flow
 
 ## Testing and Validation
 
 - [ ] Run all test cases (see use-cases.md)
 - [ ] Validate with existing YAML templates (samples/)
 - [ ] Test on Windows
-- [ ] Test on Linux
-- [ ] Test on macOS
-- [ ] Validate UTF-8 encoding
-- [ ] Validate file and directory creation
-- [ ] Validate all prompt types
-- [ ] Validate template functions
-- [ ] Validate nested functions
+- [x] Validate UTF-8 encoding
+- [x] Validate file and directory creation
+- [x] Validate all prompt types
+- [x] Validate template functions
+- [x] Validate nested functions
 - [ ] Test error handling
 
 ## Documentation

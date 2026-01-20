@@ -64,28 +64,37 @@ else()
     set(yaml-cpp_VERSION ${yaml-cpp_VERSION})
 endif()
 
-# Find libcurl
+# Find libcurl (required for remote file downloads)
+# Try to find system-installed curl first, fallback to FetchContent if not found
 find_package(CURL QUIET)
 
 if(NOT CURL_FOUND)
-    # If libcurl is not found, use FetchContent to download it
+    message(STATUS "CURL not found in system. Downloading via FetchContent...")
     include(FetchContent)
+    
+    set(FETCHCONTENT_QUIET OFF)
     
     FetchContent_Declare(
         curl
         GIT_REPOSITORY https://github.com/curl/curl.git
         GIT_TAG curl-8_8_0
         GIT_SHALLOW TRUE
+        OVERRIDE_FIND_PACKAGE
     )
     
     set(BUILD_CURL_EXE OFF CACHE BOOL "Disable curl executable")
     set(BUILD_TESTING OFF CACHE BOOL "Disable curl tests")
-    set(CMAKE_USE_OPENSSL ON CACHE BOOL "Use OpenSSL for SSL/TLS")
+    # Note: SSL/TLS support requires OpenSSL. Without it, only HTTP downloads will work.
+    # To enable HTTPS, install OpenSSL and configure curl to use it.
     
     FetchContent_MakeAvailable(curl)
     set(CURL_VERSION "8.8.0")
+    message(STATUS "CURL downloaded and configured via FetchContent")
 else()
-    set(CURL_VERSION ${CURL_VERSION})
+    message(STATUS "CURL found in system")
+    if(CURL_VERSION)
+        message(STATUS "  CURL version: ${CURL_VERSION}")
+    endif()
 endif()
 
 # Source files
@@ -100,6 +109,7 @@ set(SOURCES
     src/builders/FileBuilder.cpp
     src/builders/FolderBuilder.cpp
     src/builders/RemoteFileBuilder.cpp
+    src/services/ParseYAML.cpp
 )
 
 # Headers
@@ -114,6 +124,7 @@ set(HEADERS
     src/builders/FileBuilder.hpp
     src/builders/FolderBuilder.hpp
     src/builders/RemoteFileBuilder.hpp
+    src/services/ParseYAML.hpp
 )
 
 # Create executable
@@ -183,5 +194,9 @@ else()
 endif()
 message(STATUS "  Compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
 message(STATUS "  yaml-cpp: ${yaml-cpp_VERSION}")
-message(STATUS "  libcurl: ${CURL_VERSION}")
+if(CURL_VERSION)
+    message(STATUS "  libcurl: ${CURL_VERSION}")
+else()
+    message(STATUS "  libcurl: found")
+endif()
 message(STATUS "")

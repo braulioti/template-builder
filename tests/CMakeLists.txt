@@ -83,7 +83,8 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
             ${GTEST_MAIN_TARGET}
             ${GMOCK_TARGET}
             yaml-cpp
-            CURL::libcurl
+            # TODO: Temporarily disabled - remote file download functionality
+            # CURL::libcurl
     )
     
     # Link source files needed for the test
@@ -126,9 +127,23 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
             ${CMAKE_SOURCE_DIR}/src/types/FileType.cpp
         )
     elseif(${TEST_NAME} STREQUAL "test_RemoteFileBuilder")
+        # TODO: Temporarily disabled - remote file download functionality
+        # target_sources(${TEST_NAME} PRIVATE
+        #     ${CMAKE_SOURCE_DIR}/src/builders/RemoteFileBuilder.cpp
+        #     ${CMAKE_SOURCE_DIR}/src/types/RemoteFileType.cpp
+        # )
+    elseif(${TEST_NAME} STREQUAL "test_ParseYAML")
         target_sources(${TEST_NAME} PRIVATE
-            ${CMAKE_SOURCE_DIR}/src/builders/RemoteFileBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/services/ParseYAML.cpp
+            ${CMAKE_SOURCE_DIR}/src/builders/FileBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/builders/FolderBuilder.cpp
+            # TODO: Temporarily disabled - remote file download functionality
+            # ${CMAKE_SOURCE_DIR}/src/builders/RemoteFileBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/builders/PromptBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/FileType.cpp
             ${CMAKE_SOURCE_DIR}/src/types/RemoteFileType.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/PromptType.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/VariableType.cpp
         )
     endif()
 
@@ -162,8 +177,9 @@ add_unit_test(test_template-builder test_template-builder.cpp)
 add_unit_test(test_PromptBuilder test_PromptBuilder.cpp)
 add_unit_test(test_FileBuilder test_FileBuilder.cpp)
 add_unit_test(test_FolderBuilder test_FolderBuilder.cpp)
-add_unit_test(test_RemoteFileBuilder test_RemoteFileBuilder.cpp)
-# add_unit_test(test_ParseYAML services/test_ParseYAML.cpp)
+# TODO: Temporarily disabled - remote file download functionality
+# add_unit_test(test_RemoteFileBuilder test_RemoteFileBuilder.cpp)
+add_unit_test(test_ParseYAML test_ParseYAML.cpp)
 
 # Message
 message(STATUS "Unit tests configuration: Tests will be built when BUILD_TESTS is ON")

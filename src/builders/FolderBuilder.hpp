@@ -17,7 +17,7 @@ private:
     // Helper methods to reduce complexity
     void validateFolder(const FileData* folder) const;
     std::filesystem::path prepareFolderPath(const FileData* folder) const;
-    std::filesystem::path determineDirectoryPath(const std::filesystem::path& fullPath, const std::string& originalPath) const;
+    std::filesystem::path determineDirectoryPath(const std::filesystem::path& fullPath) const;
     void createDirectory(const std::filesystem::path& directory) const;
 };
 

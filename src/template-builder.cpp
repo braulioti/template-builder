@@ -4,6 +4,14 @@
 #include <filesystem>
 #include <yaml-cpp/yaml.h>
 #include "template-builder.hpp"
+#include "services/ParseYAML.hpp"
+
+#ifdef _WIN32
+#include <windows.h>
+#include <io.h>
+#include <fcntl.h>
+#endif
+#include <curl/curl.h>
 
 void showUsage(const char* programName) {
     std::cout << "Usage: " << programName << " <arquivo.yaml>" << std::endl;
@@ -19,36 +27,53 @@ bool fileExists(const std::string& filePath) {
 
 int processYamlFile(const std::string& yamlFilePath) {
     try {
-        // Load YAML file
-        YAML::Node config = YAML::LoadFile(yamlFilePath);
-
-        // Basic validation - file was loaded successfully
-        if (!config.IsDefined()) {
-            std::cerr << "Error: Failed to load YAML file." << std::endl;
-            return 1;
-        }
+        // Create parser and load YAML file
+        TemplateBuilder::ParserYAML parser(yamlFilePath);
+        
+        // Build all files, folders, and remote files
+        // buildAll handles exceptions internally and continues processing
+        parser.buildAll();
 
         std::cout << std::endl;
-        std::cout << "Template Builder execution completed successfully." << std::endl;
+        std::cout << "Template successfully generated." << std::endl;
+        std::cout << "Thanks for using Template Builder!  :)" << std::endl;
         std::cout << std::endl;
         return 0;
 
+    } catch (const TemplateBuilder::UnsupportedTemplateVersion& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 1;
     } catch (const YAML::Exception& e) {
         std::cerr << "Error parsing YAML: " << e.what() << std::endl;
         return 1;
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
         return 1;
+    } catch (...) {
+        std::cerr << "Unknown error occurred" << std::endl;
+        return 1;
     }
 }
 
 int main(int argc, char* argv[]) {
+#ifdef _WIN32
+    // Set console to UTF-8 mode for proper handling of special characters
+    SetConsoleOutputCP(65001);  // UTF-8 code page
+    SetConsoleCP(65001);        // UTF-8 code page for input
+    // Also set stdin/stdout to binary mode to preserve UTF-8 bytes
+    _setmode(_fileno(stdin), _O_BINARY);
+    _setmode(_fileno(stdout), _O_BINARY);
+    _setmode(_fileno(stderr), _O_BINARY);
+#endif
+
     std::cout << std::endl;
     std::cout << "***************************************************" << std::endl;
     std::cout << "* TEMPLATE BUILDER - VERSION 0.1.0                *" << std::endl;
     std::cout << "* Generate project templates using YAML files     *" << std::endl;
     std::cout << "***************************************************" << std::endl;
     std::cout << std::endl;
+    auto* info = curl_version_info(CURLVERSION_NOW);
+    std::cout << "SSL: " << (info->ssl_version ? info->ssl_version : "NONE") << std::endl;
 
     // Check if YAML file path was provided
     if (!validateArguments(argc)) {

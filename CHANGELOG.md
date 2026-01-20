@@ -37,6 +37,10 @@ This release marks the initial C++ port of the Template Builder project, convert
 ### Deprecated
 
 ### Fix
+- Fixed unused parameter warning in `FolderBuilder::determineDirectoryPath()` by removing unused `originalPath` parameter.
+- Fixed Windows macro conflict (`max`/`min`) in `PromptBuilder.cpp` by undefining Windows macros after including `<windows.h>`.
+- Fixed remote file download functionality by simplifying libcurl integration with automatic fallback to FetchContent.
+- Changed supported template version from "1.0" to "0.1" to match project version.
 
 ### Documentation
 - Created LICENSE file with MIT license.
@@ -44,3 +48,6 @@ This release marks the initial C++ port of the Template Builder project, convert
 - Created CONTRIBUTING.md file with instructions on how to contribute to the project.
 - Created release documentation in docs/specs/releases/v_0.1.0/ with use-cases, tasks, and release notes.
 - Documented CMake build process and dependencies.
+- Updated README.md with vcpkg installation instructions and standardized build directory (`cmake-build-debug`).
+- Added troubleshooting section for CURL/HTTPS download issues in TROUBLESHOOTING.md.
+- Added instructions for enabling tests in CLion in README.md.

@@ -6,10 +6,14 @@
 #include <cctype>
 #include <thread>
 #include <chrono>
+#include <limits>
 
 #ifdef _WIN32
 #include <windows.h>
 #include <conio.h>
+// Undefine Windows macros that conflict with C++ standard library
+#undef max
+#undef min
 #else
 #include <termios.h>
 #include <unistd.h>
@@ -67,10 +71,32 @@ void PromptBuilder::getInputString(PromptInput* promptInput) {
         throw std::runtime_error("Variable is nullptr in PromptInput.");
     }
 
-    std::cout << promptInput->getInput();
-    std::string userInput;
-    std::getline(std::cin, userInput);
-    promptInput->getVariable()->setValue(userInput);
+    try {
+        // Output the prompt text and flush to ensure it's displayed immediately (including trailing spaces)
+        // Using std::flush ensures the entire prompt text (including trailing spaces) is displayed before reading input
+        // Note: std::cout is line-buffered by default, so we need flush to ensure immediate display
+        const std::string& inputText = promptInput->getInput();
+        std::cout.write(inputText.c_str(), inputText.size());
+        std::cout.flush();
+        
+        // Check if std::cin is in a good state before reading
+        if (!std::cin.good()) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+        
+        std::string userInput;
+        if (!std::getline(std::cin, userInput)) {
+            // If getline fails, use empty string
+            userInput = "";
+        }
+        
+        // Store the value - std::getline already consumes the newline, so no extra newline is added
+        promptInput->getVariable()->setValue(userInput);
+    } catch (const std::exception& e) {
+        // Re-throw with more context
+        throw std::runtime_error("Error reading input: " + std::string(e.what()));
+    }
 }
 
 void PromptBuilder::getChecklist(PromptInput* promptInput) {
@@ -416,79 +442,91 @@ std::string PromptBuilder::parseFunctionExpression(const std::vector<Variable*>&
 }
 
 std::string PromptBuilder::getContent(const std::string& content, const std::vector<Variable*>& variables) {
-    if (variables.empty()) {
-        return content;
-    }
+    try {
+        // If content is empty, return empty string (will be replaced with space in FileBuilder if needed)
+        if (content.empty()) {
+            return content;
+        }
+        
+        // If variables are empty, return content as-is
+        if (variables.empty()) {
+            return content;
+        }
 
-    std::string result = content;
+        std::string result = content;
 
     // First, process special pattern {{"prefix" | variableName}}
     // Pattern: {{"..." | varName}} or {{'...' | varName}}
-    std::regex prefixPattern("\\{\\{\"([^\"]+)\"\\s*\\|\\s*(\\w+)\\}\\}");
-    std::sregex_iterator iter(result.begin(), result.end(), prefixPattern);
-    std::sregex_iterator end;
+    // Only process if result is not empty
+    if (!result.empty()) {
+        std::regex prefixPattern("\\{\\{\"([^\"]+)\"\\s*\\|\\s*(\\w+)\\}\\}");
+        std::sregex_iterator iter(result.begin(), result.end(), prefixPattern);
+        std::sregex_iterator end;
 
-    // Collect all matches first (we need to process from end to start to maintain positions)
-    std::vector<std::pair<size_t, size_t>> matches; // (position, length)
-    std::vector<std::pair<std::string, std::string>> replacements; // (prefix, varName)
-    
-    for (; iter != end; ++iter) {
-        std::smatch match = *iter;
-        matches.push_back({match.position(), match.length()});
-        replacements.push_back({match[1].str(), match[2].str()});
-    }
-
-    // Process matches from end to start
-    for (int i = static_cast<int>(matches.size()) - 1; i >= 0; --i) {
-        size_t pos = matches[i].first;
-        size_t len = matches[i].second;
-        std::string prefix = replacements[i].first;
-        std::string varName = replacements[i].second;
-
-        // Find the variable value
-        std::string variableValue = resolveVariableValue(variables, varName);
-
-        // Process the value: split by lines and add prefix to each
-        std::vector<std::string> lines;
-        std::istringstream iss(variableValue);
-        std::string line;
-        while (std::getline(iss, line)) {
-            // Remove \r if present
-            if (!line.empty() && line.back() == '\r') {
-                line.pop_back();
-            }
-            // Trim whitespace
-            line.erase(0, line.find_first_not_of(" \t\n\r"));
-            line.erase(line.find_last_not_of(" \t\n\r") + 1);
-            if (!line.empty()) {
-                lines.push_back(line);
-            }
+        // Collect all matches first (we need to process from end to start to maintain positions)
+        std::vector<std::pair<size_t, size_t>> matches; // (position, length)
+        std::vector<std::pair<std::string, std::string>> replacements; // (prefix, varName)
+        
+        for (; iter != end; ++iter) {
+            std::smatch match = *iter;
+            matches.push_back({match.position(), match.length()});
+            replacements.push_back({match[1].str(), match[2].str()});
         }
 
-        std::string processedValue;
-        for (size_t j = 0; j < lines.size(); ++j) {
-            if (j > 0) {
-                processedValue += "\r\n";
-            }
-            processedValue += prefix + lines[j];
-        }
+        // Process matches from end to start
+        for (int i = static_cast<int>(matches.size()) - 1; i >= 0; --i) {
+            size_t pos = matches[i].first;
+            size_t len = matches[i].second;
+            std::string prefix = replacements[i].first;
+            std::string varName = replacements[i].second;
 
-        // Replace the matched pattern with processed value
-        result.replace(pos, len, processedValue);
+            // Find the variable value
+            std::string variableValue = resolveVariableValue(variables, varName);
+
+            // Process the value: split by lines and add prefix to each
+            std::vector<std::string> lines;
+            std::istringstream iss(variableValue);
+            std::string line;
+            while (std::getline(iss, line)) {
+                // Remove \r if present
+                if (!line.empty() && line.back() == '\r') {
+                    line.pop_back();
+                }
+                // Trim whitespace
+                line.erase(0, line.find_first_not_of(" \t\n\r"));
+                line.erase(line.find_last_not_of(" \t\n\r") + 1);
+                if (!line.empty()) {
+                    lines.push_back(line);
+                }
+            }
+
+            std::string processedValue;
+            for (size_t j = 0; j < lines.size(); ++j) {
+                if (j > 0) {
+                    processedValue += "\r\n";
+                }
+                processedValue += prefix + lines[j];
+            }
+
+            // Replace the matched pattern with processed value
+            result.replace(pos, len, processedValue);
+        }
     }
 
     // Second, process function expressions {{upper(variable)}}, {{lower(variable)}}, {{replace(" ", "_", variable)}}, etc.
     // Pattern: {{functionName(arg1, arg2, ...)}}
     // Process recursively - ParseFunctionExpression handles nested functions internally
-    const int maxIterations = 100; // Safety limit
-    int iteration = 0;
+    // Only process if result is not empty
+    if (!result.empty()) {
+        const int maxIterations = 100; // Safety limit
+        int iteration = 0;
 
-    while (iteration < maxIterations) {
-        bool processed = false;
-        size_t i = 0;
+        while (iteration < maxIterations) {
+            bool processed = false;
+            size_t i = 0;
 
-        // Find function expressions manually to properly handle nested functions
-        while (i < result.length() - 2) {
+            // Find function expressions manually to properly handle nested functions
+            while (i < result.length() - 2) {
             // Look for {{ that starts a function expression
             if (result[i] == '{' && result[i + 1] == '{') {
                 size_t startPos = i;
@@ -554,19 +592,32 @@ std::string PromptBuilder::getContent(const std::string& content, const std::vec
             ++i;
         }
 
-        if (!processed) {
-            break; // No more functions to process
+            if (!processed) {
+                break; // No more functions to process
+            }
+            ++iteration;
         }
-        ++iteration;
     }
 
     // Finally, replace normal placeholders {{variableName}} with variable values
-    for (Variable* variable : variables) {
+    // Only process if result is not empty
+    if (!result.empty()) {
+        for (Variable* variable : variables) {
         if (variable) {
             std::string variableName = variable->getName();
             std::string variableValue;
             if (variable->hasValue()) {
                 variableValue = variable->getValue();
+                // Trim leading and trailing whitespace/newlines to prevent unwanted line breaks
+                // This preserves the original line structure when multiple variables are on the same line
+                if (!variableValue.empty()) {
+                    // Remove leading whitespace/newlines
+                    variableValue.erase(0, variableValue.find_first_not_of(" \t\n\r"));
+                    // Remove trailing whitespace/newlines
+                    if (!variableValue.empty()) {
+                        variableValue.erase(variableValue.find_last_not_of(" \t\n\r") + 1);
+                    }
+                }
             }
 
             std::string placeholder = "{{" + variableName + "}}";
@@ -576,9 +627,14 @@ std::string PromptBuilder::getContent(const std::string& content, const std::vec
                 pos += variableValue.length();
             }
         }
+        }
     }
 
     return result;
+    } catch (const std::exception& e) {
+        // Re-throw with more context
+        throw std::runtime_error("Error processing content template: " + std::string(e.what()));
+    }
 }
 
 std::string PromptBuilder::build(Prompt* prompt, const std::vector<Variable*>& variables) {
@@ -586,22 +642,33 @@ std::string PromptBuilder::build(Prompt* prompt, const std::vector<Variable*>& v
         return "";
     }
 
-    // Iterate over all inputs
-    const auto& inputs = prompt->getInputs();
-    for (const auto& promptInput : inputs) {
-        if (promptInput) {
-            PromptType type = promptInput->getType();
-            if (type == PromptType::ptInputString) {
-                getInputString(promptInput.get());
-            } else if (type == PromptType::ptChecklist) {
-                getChecklist(promptInput.get());
-            } else if (type == PromptType::ptArrayList) {
-                getArrayList(promptInput.get());
+    try {
+        // Iterate over all inputs
+        const auto& inputs = prompt->getInputs();
+        for (const auto& promptInput : inputs) {
+            if (promptInput) {
+                try {
+                    PromptType type = promptInput->getType();
+                    if (type == PromptType::ptInputString) {
+                        getInputString(promptInput.get());
+                    } else if (type == PromptType::ptChecklist) {
+                        getChecklist(promptInput.get());
+                    } else if (type == PromptType::ptArrayList) {
+                        getArrayList(promptInput.get());
+                    }
+                } catch (const std::exception& e) {
+                    // Re-throw with more context
+                    throw std::runtime_error("Error processing prompt input: " + std::string(e.what()));
+                }
             }
         }
-    }
 
-    return getContent(prompt->getResult(), variables);
+        // Process the result template with variable substitution
+        return getContent(prompt->getResult(), variables);
+    } catch (const std::exception& e) {
+        // Re-throw with more context
+        throw std::runtime_error("Error building prompt: " + std::string(e.what()));
+    }
 }
 
 } // namespace TemplateBuilder

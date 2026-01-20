@@ -17,6 +17,8 @@
 
 # C++
 cmake-build-debug
+cmake-build-debug-mingw
+cmake-build-debug-visual-studio
 build/
 out/
 dist/
@@ -58,5 +60,6 @@ __recovery/
 *.~*
 
 # Installation files
+build-temp
 *.msi
 *.wixpdb

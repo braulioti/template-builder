@@ -31,6 +31,8 @@ This release marks the initial C++ port of the Template Builder project, convert
 - Created release workflow for building artifacts across all platforms (Windows MSI, Linux tar.gz, macOS tar.gz and PKG).
 - Converted TPromptBuilder class from Pascal to C++ (PromptBuilder).
 - Converted TFileBuilder class from Pascal to C++ (FileBuilder).
+- Converted TFolderBuilder class from Pascal to C++ (FolderBuilder).
+- Converted TRemoteFileBuilder class from Pascal to C++ (RemoteFileBuilder).
 
 ### Deprecated
 

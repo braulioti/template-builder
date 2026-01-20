@@ -11,6 +11,14 @@ FileBuilder::FileBuilder()
 }
 
 void FileBuilder::build(const FileData* file) {
+    validateFile(file);
+    std::filesystem::path filePath = prepareFilePath(file);
+    ensureDirectoryExists(filePath);
+    std::string fileContent = getFileContent(file);
+    writeFile(filePath, fileContent);
+}
+
+void FileBuilder::validateFile(const FileData* file) const {
     if (!file) {
         return;
     }
@@ -18,38 +26,41 @@ void FileBuilder::build(const FileData* file) {
     if (file->getPath().empty()) {
         throw std::runtime_error("File path cannot be empty.");
     }
+}
 
-    // Get current working directory and combine with file path
+std::filesystem::path FileBuilder::prepareFilePath(const FileData* file) const {
     std::filesystem::path currentDir = std::filesystem::current_path();
-    std::filesystem::path filePath = currentDir / file->getPath();
-    
-    // Get directory path and create it if it doesn't exist
+    return currentDir / file->getPath();
+}
+
+void FileBuilder::ensureDirectoryExists(const std::filesystem::path& filePath) const {
     std::filesystem::path directory = filePath.parent_path();
     if (!directory.empty() && !std::filesystem::exists(directory)) {
         std::filesystem::create_directories(directory);
     }
+}
 
-    // Get file content
-    std::string fileContent;
+std::vector<Variable*> FileBuilder::getVariableList(const FileData* file) const {
+    const std::vector<Variable*>* variables = file->getVariables();
+    if (variables) {
+        return *variables;
+    }
+    return std::vector<Variable*>();
+}
+
+std::string FileBuilder::getFileContent(const FileData* file) const {
+    std::vector<Variable*> varList = getVariableList(file);
     
     if (!file->hasPrompt()) {
         // Use static content with variable substitution
-        const std::vector<Variable*>* variables = file->getVariables();
-        std::vector<Variable*> varList;
-        if (variables) {
-            varList = *variables;
-        }
-        fileContent = m_promptBuilder->getContent(file->getContent(), varList);
+        return m_promptBuilder->getContent(file->getContent(), varList);
     } else {
         // Use prompt to get content
-        const std::vector<Variable*>* variables = file->getVariables();
-        std::vector<Variable*> varList;
-        if (variables) {
-            varList = *variables;
-        }
-        fileContent = m_promptBuilder->build(file->getPrompt(), varList);
+        return m_promptBuilder->build(file->getPrompt(), varList);
     }
+}
 
+void FileBuilder::writeFile(const std::filesystem::path& filePath, const std::string& content) const {
     // Write file with UTF-8 encoding
     // Using binary mode ensures UTF-8 bytes are written exactly as stored in std::string
     // std::string in C++17 stores UTF-8 encoded text as a sequence of bytes
@@ -64,7 +75,7 @@ void FileBuilder::build(const FileData* file) {
 
     // Write UTF-8 encoded content directly
     // Binary mode ensures no encoding conversion occurs
-    outFile << fileContent;
+    outFile << content;
     
     if (!outFile.good()) {
         outFile.close();

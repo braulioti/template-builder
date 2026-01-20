@@ -35,11 +35,11 @@
 ## Builder Conversion
 
 ### unFolderBuilder.pas → FolderBuilder.hpp/cpp
-- [ ] Convert TFolderBuilder class
-- [ ] Implement directory creation (C++17 filesystem)
-- [ ] Implement error handling
-- [ ] Add unit tests
-- [ ] Validate nested directory creation
+- [x] Convert TFolderBuilder class
+- [x] Implement directory creation (C++17 filesystem)
+- [x] Implement error handling
+- [x] Add unit tests
+- [x] Validate nested directory creation
 
 ### unFileBuilder.pas → FileBuilder.hpp/cpp
 - [x] Convert TFileBuilder class
@@ -48,6 +48,16 @@
 - [x] Integrate with PromptBuilder
 - [x] Add unit tests
 - [x] Validate automatic parent directory creation
+
+### unRemoteFileBuilder.pas → RemoteFileBuilder.hpp/cpp
+- [x] Convert TRemoteFileBuilder class
+- [x] Convert TRemoteFile type to RemoteFileData
+- [x] Integrate HTTP client library (libcurl)
+- [x] Implement file download functionality
+- [x] Implement automatic directory creation
+- [x] Implement error handling for HTTP errors
+- [x] Add unit tests
+- [x] Validate download with various HTTP status codes
 
 ### unPromptBuilder.pas → PromptBuilder.hpp/cpp
 - [x] Convert TPromptBuilder class

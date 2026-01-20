@@ -64,6 +64,30 @@ else()
     set(yaml-cpp_VERSION ${yaml-cpp_VERSION})
 endif()
 
+# Find libcurl
+find_package(CURL QUIET)
+
+if(NOT CURL_FOUND)
+    # If libcurl is not found, use FetchContent to download it
+    include(FetchContent)
+    
+    FetchContent_Declare(
+        curl
+        GIT_REPOSITORY https://github.com/curl/curl.git
+        GIT_TAG curl-8_8_0
+        GIT_SHALLOW TRUE
+    )
+    
+    set(BUILD_CURL_EXE OFF CACHE BOOL "Disable curl executable")
+    set(BUILD_TESTING OFF CACHE BOOL "Disable curl tests")
+    set(CMAKE_USE_OPENSSL ON CACHE BOOL "Use OpenSSL for SSL/TLS")
+    
+    FetchContent_MakeAvailable(curl)
+    set(CURL_VERSION "8.8.0")
+else()
+    set(CURL_VERSION ${CURL_VERSION})
+endif()
+
 # Source files
 # Note: Additional source files will be added as the code is converted from Pascal
 set(SOURCES
@@ -71,8 +95,11 @@ set(SOURCES
     src/types/VariableType.cpp
     src/types/PromptType.cpp
     src/types/FileType.cpp
+    src/types/RemoteFileType.cpp
     src/builders/PromptBuilder.cpp
     src/builders/FileBuilder.cpp
+    src/builders/FolderBuilder.cpp
+    src/builders/RemoteFileBuilder.cpp
 )
 
 # Headers
@@ -82,8 +109,11 @@ set(HEADERS
     src/types/VariableType.hpp
     src/types/PromptType.hpp
     src/types/FileType.hpp
+    src/types/RemoteFileType.hpp
     src/builders/PromptBuilder.hpp
     src/builders/FileBuilder.hpp
+    src/builders/FolderBuilder.hpp
+    src/builders/RemoteFileBuilder.hpp
 )
 
 # Create executable
@@ -113,6 +143,7 @@ endif()
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
         yaml-cpp
+        CURL::libcurl
 )
 
 # C++17 filesystem library (required on some compilers)
@@ -152,4 +183,5 @@ else()
 endif()
 message(STATUS "  Compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
 message(STATUS "  yaml-cpp: ${yaml-cpp_VERSION}")
+message(STATUS "  libcurl: ${CURL_VERSION}")
 message(STATUS "")

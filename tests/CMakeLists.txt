@@ -83,6 +83,7 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
             ${GTEST_MAIN_TARGET}
             ${GMOCK_TARGET}
             yaml-cpp
+            CURL::libcurl
     )
     
     # Link source files needed for the test
@@ -119,6 +120,16 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
             ${CMAKE_SOURCE_DIR}/src/types/PromptType.cpp
             ${CMAKE_SOURCE_DIR}/src/types/VariableType.cpp
         )
+    elseif(${TEST_NAME} STREQUAL "test_FolderBuilder")
+        target_sources(${TEST_NAME} PRIVATE
+            ${CMAKE_SOURCE_DIR}/src/builders/FolderBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/FileType.cpp
+        )
+    elseif(${TEST_NAME} STREQUAL "test_RemoteFileBuilder")
+        target_sources(${TEST_NAME} PRIVATE
+            ${CMAKE_SOURCE_DIR}/src/builders/RemoteFileBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/RemoteFileType.cpp
+        )
     endif()
 
     # Include directories
@@ -150,7 +161,8 @@ add_unit_test(test_FileType test_FileType.cpp)
 add_unit_test(test_template-builder test_template-builder.cpp)
 add_unit_test(test_PromptBuilder test_PromptBuilder.cpp)
 add_unit_test(test_FileBuilder test_FileBuilder.cpp)
-# add_unit_test(test_FolderBuilder builders/test_FolderBuilder.cpp)
+add_unit_test(test_FolderBuilder test_FolderBuilder.cpp)
+add_unit_test(test_RemoteFileBuilder test_RemoteFileBuilder.cpp)
 # add_unit_test(test_ParseYAML services/test_ParseYAML.cpp)
 
 # Message

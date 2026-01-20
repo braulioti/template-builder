@@ -11,6 +11,11 @@ FileBuilder::FileBuilder()
 }
 
 void FileBuilder::build(const FileData* file) {
+    // Null file should be a no-op (used by tests and to keep callers safe).
+    if (!file) {
+        return;
+    }
+
     try {
         validateFile(file);
         std::filesystem::path filePath = prepareFilePath(file);
@@ -62,19 +67,13 @@ std::string FileBuilder::getFileContent(const FileData* file) const {
         std::string content;
         if (!file->hasPrompt()) {
             // Use static content with variable substitution
-            // If content is empty and no prompt, file will be created with a space
             content = m_promptBuilder->getContent(file->getContent(), varList);
         } else {
             // Use prompt to get content
             content = m_promptBuilder->build(file->getPrompt(), varList);
         }
-        
-        // If content is empty, return a space to ensure file is created with at least one character
-        // This prevents issues with empty file creation
-        if (content.empty()) {
-            return " ";
-        }
-        
+
+        // Empty content is valid: the file should be created empty.
         return content;
     } catch (const std::exception& e) {
         // Re-throw with more context

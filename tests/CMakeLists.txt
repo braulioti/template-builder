@@ -83,9 +83,18 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
             ${GTEST_MAIN_TARGET}
             ${GMOCK_TARGET}
             yaml-cpp
-            # TODO: Temporarily disabled - remote file download functionality
-            # CURL::libcurl
+            CURL::libcurl
     )
+
+    # If GoogleTest is built/linked as a shared library (DLL on Windows),
+    # the test executable must be compiled with this macro so the registry
+    # lives in the DLL and tests are discovered by gtest_main.
+    if(WIN32)
+        get_target_property(_gtest_type ${GTEST_TARGET} TYPE)
+        if(_gtest_type STREQUAL "SHARED_LIBRARY")
+            target_compile_definitions(${TEST_NAME} PRIVATE GTEST_LINKED_AS_SHARED_LIBRARY=1)
+        endif()
+    endif()
     
     # Link source files needed for the test
     if(${TEST_NAME} STREQUAL "test_VariableType")
@@ -105,7 +114,16 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
         )
     elseif(${TEST_NAME} STREQUAL "test_template-builder")
         target_sources(${TEST_NAME} PRIVATE
-            ${CMAKE_SOURCE_DIR}/src/template-builder.cpp
+            ${CMAKE_SOURCE_DIR}/src/template-builder-lib.cpp
+            ${CMAKE_SOURCE_DIR}/src/services/ParseYAML.cpp
+            ${CMAKE_SOURCE_DIR}/src/builders/FileBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/builders/FolderBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/builders/RemoteFileBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/builders/PromptBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/FileType.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/RemoteFileType.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/PromptType.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/VariableType.cpp
         )
     elseif(${TEST_NAME} STREQUAL "test_PromptBuilder")
         target_sources(${TEST_NAME} PRIVATE
@@ -127,18 +145,16 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
             ${CMAKE_SOURCE_DIR}/src/types/FileType.cpp
         )
     elseif(${TEST_NAME} STREQUAL "test_RemoteFileBuilder")
-        # TODO: Temporarily disabled - remote file download functionality
-        # target_sources(${TEST_NAME} PRIVATE
-        #     ${CMAKE_SOURCE_DIR}/src/builders/RemoteFileBuilder.cpp
-        #     ${CMAKE_SOURCE_DIR}/src/types/RemoteFileType.cpp
-        # )
+        target_sources(${TEST_NAME} PRIVATE
+            ${CMAKE_SOURCE_DIR}/src/builders/RemoteFileBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/RemoteFileType.cpp
+        )
     elseif(${TEST_NAME} STREQUAL "test_ParseYAML")
         target_sources(${TEST_NAME} PRIVATE
             ${CMAKE_SOURCE_DIR}/src/services/ParseYAML.cpp
             ${CMAKE_SOURCE_DIR}/src/builders/FileBuilder.cpp
             ${CMAKE_SOURCE_DIR}/src/builders/FolderBuilder.cpp
-            # TODO: Temporarily disabled - remote file download functionality
-            # ${CMAKE_SOURCE_DIR}/src/builders/RemoteFileBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/builders/RemoteFileBuilder.cpp
             ${CMAKE_SOURCE_DIR}/src/builders/PromptBuilder.cpp
             ${CMAKE_SOURCE_DIR}/src/types/FileType.cpp
             ${CMAKE_SOURCE_DIR}/src/types/RemoteFileType.cpp
@@ -177,8 +193,7 @@ add_unit_test(test_template-builder test_template-builder.cpp)
 add_unit_test(test_PromptBuilder test_PromptBuilder.cpp)
 add_unit_test(test_FileBuilder test_FileBuilder.cpp)
 add_unit_test(test_FolderBuilder test_FolderBuilder.cpp)
-# TODO: Temporarily disabled - remote file download functionality
-# add_unit_test(test_RemoteFileBuilder test_RemoteFileBuilder.cpp)
+add_unit_test(test_RemoteFileBuilder test_RemoteFileBuilder.cpp)
 add_unit_test(test_ParseYAML test_ParseYAML.cpp)
 
 # Message

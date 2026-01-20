@@ -8,8 +8,9 @@
 namespace TemplateBuilder {
 
 namespace {
-    constexpr const char* SUPPORTED_VERSIONS[] = {"0.1"};
-    constexpr size_t SUPPORTED_VERSIONS_COUNT = 1;
+    // Keep older templates working while supporting the current spec.
+    constexpr const char* SUPPORTED_VERSIONS[] = {"0.1", "1.0"};
+    constexpr size_t SUPPORTED_VERSIONS_COUNT = sizeof(SUPPORTED_VERSIONS) / sizeof(SUPPORTED_VERSIONS[0]);
 }
 
 ParserYAML::ParserYAML(const std::string& fileName) {

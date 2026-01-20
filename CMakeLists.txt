@@ -101,6 +101,7 @@ endif()
 # Note: Additional source files will be added as the code is converted from Pascal
 set(SOURCES
     src/template-builder.cpp
+    src/template-builder-lib.cpp
     src/types/VariableType.cpp
     src/types/PromptType.cpp
     src/types/FileType.cpp
@@ -166,6 +167,8 @@ endif()
 
 # Unit Tests
 if(BUILD_TESTS)
+    # Enable CTest at the top-level so `ctest` works from the build root.
+    enable_testing()
     add_subdirectory(tests)
 endif()
 

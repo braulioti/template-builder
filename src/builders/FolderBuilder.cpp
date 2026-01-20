@@ -4,6 +4,11 @@
 namespace TemplateBuilder {
 
 void FolderBuilder::build(const FileData* folder) {
+    // Null folder should be a no-op (used by tests and to keep callers safe).
+    if (!folder) {
+        return;
+    }
+
     validateFolder(folder);
     std::filesystem::path fullPath = prepareFolderPath(folder);
     std::filesystem::path directory = determineDirectoryPath(fullPath);

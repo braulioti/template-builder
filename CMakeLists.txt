@@ -34,7 +34,7 @@ if(WIN32)
     endif()
 elseif(APPLE)
     # Handle universal binaries if needed (x64 + ARM64)
-    if(CMAKE_OSX_ARCHITECTURES STREQUAL "") 
+    if(CMAKE_OSX_ARCHITECTURES STREQUAL "")
         # Default to native architecture
         set(CMAKE_OSX_ARCHITECTURES ${CMAKE_SYSTEM_PROCESSOR})
     endif()
@@ -64,13 +64,53 @@ else()
     set(yaml-cpp_VERSION ${yaml-cpp_VERSION})
 endif()
 
+# Find libcurl (required for remote file downloads)
+# Try to find system-installed curl first, fallback to FetchContent if not found
+find_package(CURL QUIET)
+
+if(NOT CURL_FOUND)
+    message(STATUS "CURL not found in system. Downloading via FetchContent...")
+    include(FetchContent)
+    
+    set(FETCHCONTENT_QUIET OFF)
+    
+    FetchContent_Declare(
+        curl
+        GIT_REPOSITORY https://github.com/curl/curl.git
+        GIT_TAG curl-8_8_0
+        GIT_SHALLOW TRUE
+        OVERRIDE_FIND_PACKAGE
+    )
+    
+    set(BUILD_CURL_EXE OFF CACHE BOOL "Disable curl executable")
+    set(BUILD_TESTING OFF CACHE BOOL "Disable curl tests")
+    # Note: SSL/TLS support requires OpenSSL. Without it, only HTTP downloads will work.
+    # To enable HTTPS, install OpenSSL and configure curl to use it.
+    
+    FetchContent_MakeAvailable(curl)
+    set(CURL_VERSION "8.8.0")
+    message(STATUS "CURL downloaded and configured via FetchContent")
+else()
+    message(STATUS "CURL found in system")
+    if(CURL_VERSION)
+        message(STATUS "  CURL version: ${CURL_VERSION}")
+    endif()
+endif()
+
 # Source files
 # Note: Additional source files will be added as the code is converted from Pascal
 set(SOURCES
     src/template-builder.cpp
+    src/template-builder-lib.cpp
     src/types/VariableType.cpp
     src/types/PromptType.cpp
     src/types/FileType.cpp
+    src/types/RemoteFileType.cpp
+    src/builders/PromptBuilder.cpp
+    src/builders/FileBuilder.cpp
+    src/builders/FolderBuilder.cpp
+    src/builders/RemoteFileBuilder.cpp
+    src/services/ParseYAML.cpp
 )
 
 # Headers
@@ -80,6 +120,12 @@ set(HEADERS
     src/types/VariableType.hpp
     src/types/PromptType.hpp
     src/types/FileType.hpp
+    src/types/RemoteFileType.hpp
+    src/builders/PromptBuilder.hpp
+    src/builders/FileBuilder.hpp
+    src/builders/FolderBuilder.hpp
+    src/builders/RemoteFileBuilder.hpp
+    src/services/ParseYAML.hpp
 )
 
 # Create executable
@@ -109,6 +155,7 @@ endif()
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
         yaml-cpp
+        CURL::libcurl
 )
 
 # C++17 filesystem library (required on some compilers)
@@ -120,6 +167,8 @@ endif()
 
 # Unit Tests
 if(BUILD_TESTS)
+    # Enable CTest at the top-level so `ctest` works from the build root.
+    enable_testing()
     add_subdirectory(tests)
 endif()
 
@@ -148,4 +197,9 @@ else()
 endif()
 message(STATUS "  Compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
 message(STATUS "  yaml-cpp: ${yaml-cpp_VERSION}")
+if(CURL_VERSION)
+    message(STATUS "  libcurl: ${CURL_VERSION}")
+else()
+    message(STATUS "  libcurl: found")
+endif()
 message(STATUS "")

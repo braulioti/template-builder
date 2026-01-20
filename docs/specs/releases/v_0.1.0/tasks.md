@@ -35,71 +35,81 @@
 ## Builder Conversion
 
 ### unFolderBuilder.pas → FolderBuilder.hpp/cpp
-- [ ] Convert TFolderBuilder class
-- [ ] Implement directory creation (C++17 filesystem)
-- [ ] Implement error handling
-- [ ] Add unit tests
-- [ ] Validate nested directory creation
+- [x] Convert TFolderBuilder class
+- [x] Implement directory creation (C++17 filesystem)
+- [x] Implement error handling
+- [x] Add unit tests
+- [x] Validate nested directory creation
 
 ### unFileBuilder.pas → FileBuilder.hpp/cpp
-- [ ] Convert TFileBuilder class
-- [ ] Implement file creation
-- [ ] Implement UTF-8 encoding
-- [ ] Integrate with PromptBuilder
-- [ ] Add unit tests
-- [ ] Validate automatic parent directory creation
+- [x] Convert TFileBuilder class
+- [x] Implement file creation
+- [x] Implement UTF-8 encoding
+- [x] Integrate with PromptBuilder
+- [x] Add unit tests
+- [x] Validate automatic parent directory creation
+
+### unRemoteFileBuilder.pas → RemoteFileBuilder.hpp/cpp
+- [x] Convert TRemoteFileBuilder class
+- [x] Convert TRemoteFile type to RemoteFileData
+- [x] Integrate HTTP client library (libcurl)
+- [x] Implement file download functionality
+- [x] Implement automatic directory creation
+- [x] Implement error handling for HTTP errors
+- [x] Add unit tests
+- [x] Validate download with various HTTP status codes
 
 ### unPromptBuilder.pas → PromptBuilder.hpp/cpp
-- [ ] Convert TPromptBuilder class
-- [ ] Implement GetInputString (console reading)
-- [ ] Implement GetChecklist (interactive interface)
-- [ ] Implement GetArrayList (list selection)
-- [ ] Implement template variable parsing ({{variable}})
-- [ ] Implement template functions (upper, lower, replace)
-- [ ] Implement nested function support
-- [ ] Implement ResolveVariableValue
-- [ ] Implement ParseFunctionExpression
-- [ ] Implement ExecuteFunction
-- [ ] Add unit tests for each function
-- [ ] Validate all prompt types
+- [x] Convert TPromptBuilder class
+- [x] Implement GetInputString (console reading)
+- [x] Implement GetChecklist (interactive interface)
+- [x] Implement GetArrayList (list selection)
+- [x] Implement template variable parsing ({{variable}})
+- [x] Implement template functions (upper, lower, replace)
+- [x] Implement nested function support
+- [x] Implement ResolveVariableValue
+- [x] Implement ParseFunctionExpression
+- [x] Implement ExecuteFunction
+- [x] Add unit tests for each function
+- [x] Validate all prompt types
 
 ## Service Conversion
 
 ### unParseYAML.pas → ParseYAML.hpp/cpp
-- [ ] Convert TParserYAML class
-- [ ] Integrate C++ YAML library (yaml-cpp)
-- [ ] Implement LoadVariables
-- [ ] Implement LoadPrompts
-- [ ] Implement LoadFiles
-- [ ] Implement LoadFolders
-- [ ] Implement ValidateVersion
-- [ ] Implement BuildAll
-- [ ] Implement error handling
-- [ ] Add unit tests
-- [ ] Validate parsing of sample YAML files
+- [x] Convert TParserYAML class
+- [x] Integrate C++ YAML library (yaml-cpp)
+- [x] Implement LoadVariables
+- [x] Implement LoadPrompts
+- [x] Implement LoadFiles
+- [x] Implement LoadFolders
+- [x] Implement LoadRemoteFiles
+- [x] Implement ValidateVersion
+- [x] Implement BuildAll
+- [x] Implement error handling
+- [x] Add unit tests
+- [x] Validate parsing of sample YAML files
+- [x] Test all builders and functions
 
 ## Main Program Conversion
 
 ### TemplateBuilder.dpr → main.cpp
-- [ ] Convert main program
-- [ ] Implement command-line argument parsing
-- [ ] Implement banner/version display
-- [ ] Implement exception handling
-- [ ] Implement user-friendly error messages
-- [ ] Validate complete end-to-end flow
+- [x] Convert main program
+- [x] Implement command-line argument parsing
+- [x] Implement banner/version display
+- [x] Implement exception handling
+- [x] Implement user-friendly error messages
+- [x] Validate complete end-to-end flow
 
 ## Testing and Validation
 
 - [ ] Run all test cases (see use-cases.md)
 - [ ] Validate with existing YAML templates (samples/)
 - [ ] Test on Windows
-- [ ] Test on Linux
-- [ ] Test on macOS
-- [ ] Validate UTF-8 encoding
-- [ ] Validate file and directory creation
-- [ ] Validate all prompt types
-- [ ] Validate template functions
-- [ ] Validate nested functions
+- [x] Validate UTF-8 encoding
+- [x] Validate file and directory creation
+- [x] Validate all prompt types
+- [x] Validate template functions
+- [x] Validate nested functions
 - [ ] Test error handling
 
 ## Documentation

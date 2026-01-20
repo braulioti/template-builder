@@ -29,10 +29,18 @@ This release marks the initial C++ port of the Template Builder project, convert
 - Set up MSI installer generation for Windows using WiX Toolset.
 - Created PowerShell script (build-msi.ps1) for generating MSI installer on Windows.
 - Created release workflow for building artifacts across all platforms (Windows MSI, Linux tar.gz, macOS tar.gz and PKG).
+- Converted TPromptBuilder class from Pascal to C++ (PromptBuilder).
+- Converted TFileBuilder class from Pascal to C++ (FileBuilder).
+- Converted TFolderBuilder class from Pascal to C++ (FolderBuilder).
+- Converted TRemoteFileBuilder class from Pascal to C++ (RemoteFileBuilder).
 
 ### Deprecated
 
 ### Fix
+- Fixed unused parameter warning in `FolderBuilder::determineDirectoryPath()` by removing unused `originalPath` parameter.
+- Fixed Windows macro conflict (`max`/`min`) in `PromptBuilder.cpp` by undefining Windows macros after including `<windows.h>`.
+- Fixed remote file download functionality by simplifying libcurl integration with automatic fallback to FetchContent.
+- Changed supported template version from "1.0" to "0.1" to match project version.
 
 ### Documentation
 - Created LICENSE file with MIT license.
@@ -40,3 +48,6 @@ This release marks the initial C++ port of the Template Builder project, convert
 - Created CONTRIBUTING.md file with instructions on how to contribute to the project.
 - Created release documentation in docs/specs/releases/v_0.1.0/ with use-cases, tasks, and release notes.
 - Documented CMake build process and dependencies.
+- Updated README.md with vcpkg installation instructions and standardized build directory (`cmake-build-debug`).
+- Added troubleshooting section for CURL/HTTPS download issues in TROUBLESHOOTING.md.
+- Added instructions for enabling tests in CLion in README.md.

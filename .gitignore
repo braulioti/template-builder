@@ -7,16 +7,17 @@
 !old_src/
 !old_src/dll/
 !old_src/dll/sqlite3.dll
-!libs/
-!libs/*.dll
 
 # Ignore all .exe files except in lib
 *.exe
 !libs/
+!libs/*.dll
 !libs/*.exe
 
 # C++
 cmake-build-debug
+cmake-build-debug-mingw
+cmake-build-debug-visual-studio
 build/
 out/
 dist/
@@ -58,5 +59,6 @@ __recovery/
 *.~*
 
 # Installation files
+build-temp
 *.msi
 *.wixpdb

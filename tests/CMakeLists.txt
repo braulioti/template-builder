@@ -27,11 +27,11 @@ if(NOT GTest_FOUND)
         GIT_TAG v1.14.0
         GIT_SHALLOW TRUE
     )
-    
+
     FetchContent_MakeAvailable(googletest)
-    
+
     # Verify that GTest targets are available
-    # Google Test provides both the old-style targets (gtest, gtest_main) 
+    # Google Test provides both the old-style targets (gtest, gtest_main)
     # and the new-style imported targets (GTest::gtest, GTest::gtest_main)
     if(TARGET GTest::gtest AND TARGET GTest::gtest_main)
         message(STATUS "Google Test downloaded and configured successfully")
@@ -69,22 +69,33 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
     else()
         message(FATAL_ERROR "Google Test targets not found for ${TEST_NAME}. Please check GTest configuration.")
     endif()
-    
+
     # Apply coverage flags if they are set in CMAKE_CXX_FLAGS
     # This ensures coverage data is generated when tests run
     if(CMAKE_CXX_FLAGS MATCHES "coverage|--coverage|-fprofile-arcs|-ftest-coverage")
         target_compile_options(${TEST_NAME} PRIVATE --coverage -fprofile-arcs -ftest-coverage)
         target_link_options(${TEST_NAME} PRIVATE --coverage)
     endif()
-    
+
     target_link_libraries(${TEST_NAME}
         PRIVATE
             ${GTEST_TARGET}
             ${GTEST_MAIN_TARGET}
             ${GMOCK_TARGET}
             yaml-cpp
+            CURL::libcurl
     )
-    
+
+    # If GoogleTest is built/linked as a shared library (DLL on Windows),
+    # the test executable must be compiled with this macro so the registry
+    # lives in the DLL and tests are discovered by gtest_main.
+    if(WIN32)
+        get_target_property(_gtest_type ${GTEST_TARGET} TYPE)
+        if(_gtest_type STREQUAL "SHARED_LIBRARY")
+            target_compile_definitions(${TEST_NAME} PRIVATE GTEST_LINKED_AS_SHARED_LIBRARY=1)
+        endif()
+    endif()
+
     # Link source files needed for the test
     if(${TEST_NAME} STREQUAL "test_VariableType")
         target_sources(${TEST_NAME} PRIVATE
@@ -103,10 +114,55 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
         )
     elseif(${TEST_NAME} STREQUAL "test_template-builder")
         target_sources(${TEST_NAME} PRIVATE
-            ${CMAKE_SOURCE_DIR}/src/template-builder.cpp
+            ${CMAKE_SOURCE_DIR}/src/template-builder-lib.cpp
+            ${CMAKE_SOURCE_DIR}/src/services/ParseYAML.cpp
+            ${CMAKE_SOURCE_DIR}/src/builders/FileBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/builders/FolderBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/builders/RemoteFileBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/builders/PromptBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/FileType.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/RemoteFileType.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/PromptType.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/VariableType.cpp
+        )
+    elseif(${TEST_NAME} STREQUAL "test_PromptBuilder")
+        target_sources(${TEST_NAME} PRIVATE
+            ${CMAKE_SOURCE_DIR}/src/builders/PromptBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/PromptType.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/VariableType.cpp
+        )
+    elseif(${TEST_NAME} STREQUAL "test_FileBuilder")
+        target_sources(${TEST_NAME} PRIVATE
+            ${CMAKE_SOURCE_DIR}/src/builders/FileBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/builders/PromptBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/FileType.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/PromptType.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/VariableType.cpp
+        )
+    elseif(${TEST_NAME} STREQUAL "test_FolderBuilder")
+        target_sources(${TEST_NAME} PRIVATE
+            ${CMAKE_SOURCE_DIR}/src/builders/FolderBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/FileType.cpp
+        )
+    elseif(${TEST_NAME} STREQUAL "test_RemoteFileBuilder")
+        target_sources(${TEST_NAME} PRIVATE
+            ${CMAKE_SOURCE_DIR}/src/builders/RemoteFileBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/RemoteFileType.cpp
+        )
+    elseif(${TEST_NAME} STREQUAL "test_ParseYAML")
+        target_sources(${TEST_NAME} PRIVATE
+            ${CMAKE_SOURCE_DIR}/src/services/ParseYAML.cpp
+            ${CMAKE_SOURCE_DIR}/src/builders/FileBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/builders/FolderBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/builders/RemoteFileBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/builders/PromptBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/FileType.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/RemoteFileType.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/PromptType.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/VariableType.cpp
         )
     endif()
-    
+
     # Include directories
     target_include_directories(${TEST_NAME}
         PRIVATE
@@ -134,10 +190,11 @@ add_unit_test(test_VariableType test_VariableType.cpp)
 add_unit_test(test_PromptType test_PromptType.cpp)
 add_unit_test(test_FileType test_FileType.cpp)
 add_unit_test(test_template-builder test_template-builder.cpp)
-# add_unit_test(test_FileBuilder builders/test_FileBuilder.cpp)
-# add_unit_test(test_FolderBuilder builders/test_FolderBuilder.cpp)
-# add_unit_test(test_PromptBuilder builders/test_PromptBuilder.cpp)
-# add_unit_test(test_ParseYAML services/test_ParseYAML.cpp)
+add_unit_test(test_PromptBuilder test_PromptBuilder.cpp)
+add_unit_test(test_FileBuilder test_FileBuilder.cpp)
+add_unit_test(test_FolderBuilder test_FolderBuilder.cpp)
+add_unit_test(test_RemoteFileBuilder test_RemoteFileBuilder.cpp)
+add_unit_test(test_ParseYAML test_ParseYAML.cpp)
 
 # Message
 message(STATUS "Unit tests configuration: Tests will be built when BUILD_TESTS is ON")

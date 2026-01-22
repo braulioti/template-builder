@@ -30,12 +30,7 @@
             <Component Id="ApplicationFiles" Guid="A1B2C3D4-E5F6-4A3B-8C9D-0E1F2A3B4C5D">
                 <File Id="TemplateBuilderExe" Source="$(var.SourceDir)\TemplateBuilder.exe" KeyPath="yes" />
             </Component>
-            <!-- MinGW/GCC runtime DLLs (copied by build-msi.ps1 if the executable depends on them) -->
-            <Component Id="MinGWDlls" Guid="A2B3C4D5-E6F7-4A8B-9C0D-1E2F3A4B5C6D">
-                <File Id="LibGccDll" Source="$(var.SourceDir)\libgcc_s_seh-1.dll" />
-                <File Id="LibStdCppDll" Source="$(var.SourceDir)\libstdc++-6.dll" />
-                <File Id="LibWinPthreadDll" Source="$(var.SourceDir)\libwinpthread-1.dll" />
-            </Component>
+            <!-- MinGW/GCC runtime DLLs will be added by build-msi.ps1 if they exist -->
         </ComponentGroup>
         
         <ComponentGroup Id="EnvironmentComponents" Directory="INSTALLFOLDER">

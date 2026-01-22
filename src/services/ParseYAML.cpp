@@ -64,9 +64,11 @@ void ParserYAML::validateVersion(const std::string& version) const {
     
     if (!found) {
         std::string supportedVersionsStr;
+        bool first = true;
         for (size_t i = 0; i < SUPPORTED_VERSIONS_COUNT; ++i) {
-            if (i > 0) supportedVersionsStr += ", ";
+            if (!first) supportedVersionsStr += ", ";
             supportedVersionsStr += SUPPORTED_VERSIONS[i];
+            first = false;
         }
         throw UnsupportedTemplateVersion(
             "Template version not supported: " + version + ". Supported versions: " + supportedVersionsStr

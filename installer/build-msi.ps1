@@ -71,6 +71,16 @@ if (-not (Test-Path $exeDest)) {
     exit 1
 }
 
+# Copy Terms of Use file to installer directory (needed for WiX)
+$termsSource = Join-Path $ScriptDir "TERMS_OF_USE.rtf"
+$termsDest = Join-Path $installerDir "TERMS_OF_USE.rtf"
+if (Test-Path $termsSource) {
+    Write-Host "Copying Terms of Use file to $termsDest..."
+    Copy-Item $termsSource -Destination $termsDest -Force
+} else {
+    Write-Warning "Terms of Use file not found: $termsSource"
+}
+
 # Check for dependencies and copy required DLLs
 Write-Host "Checking for required DLLs and dependencies..."
 

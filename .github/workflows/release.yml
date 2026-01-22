@@ -53,6 +53,87 @@ jobs:
             exit 1
           }
           
+          # Copy Terms of Use file
+          $termsSource = "$workspace\installer\TERMS_OF_USE.rtf"
+          $termsDest = "$installerDir\TERMS_OF_USE.rtf"
+          if (Test-Path $termsSource) {
+            Write-Host "Copying Terms of Use file..."
+            Copy-Item $termsSource -Destination $termsDest -Force
+          } else {
+            Write-Warning "Terms of Use file not found: $termsSource"
+          }
+          
+          # Copy required DLLs
+          Write-Host "Copying required DLLs..."
+          $buildBinDir = "build\bin\Release"
+          $requiredDlls = @{
+            "libcurl.dll" = @(
+              "build\bin\Release\libcurl.dll",
+              "build\_deps\curl-build\lib\Release\libcurl.dll",
+              "build\_deps\curl-build\bin\Release\libcurl.dll",
+              "build\_deps\curl-build\lib\libcurl.dll"
+            )
+            "VCRUNTIME140.dll" = @(
+              "build\bin\Release\VCRUNTIME140.dll",
+              "$env:ProgramFiles\Microsoft Visual Studio\2022\Enterprise\VC\Redist\MSVC\*\x64\Microsoft.VC143.CRT\VCRUNTIME140.dll",
+              "$env:ProgramFiles\Microsoft Visual Studio\2022\Professional\VC\Redist\MSVC\*\x64\Microsoft.VC143.CRT\VCRUNTIME140.dll",
+              "$env:ProgramFiles\Microsoft Visual Studio\2022\Community\VC\Redist\MSVC\*\x64\Microsoft.VC143.CRT\VCRUNTIME140.dll"
+            )
+            "VCRUNTIME140_1.dll" = @(
+              "build\bin\Release\VCRUNTIME140_1.dll",
+              "$env:ProgramFiles\Microsoft Visual Studio\2022\Enterprise\VC\Redist\MSVC\*\x64\Microsoft.VC143.CRT\VCRUNTIME140_1.dll",
+              "$env:ProgramFiles\Microsoft Visual Studio\2022\Professional\VC\Redist\MSVC\*\x64\Microsoft.VC143.CRT\VCRUNTIME140_1.dll",
+              "$env:ProgramFiles\Microsoft Visual Studio\2022\Community\VC\Redist\MSVC\*\x64\Microsoft.VC143.CRT\VCRUNTIME140_1.dll"
+            )
+            "MSVCP140.dll" = @(
+              "build\bin\Release\MSVCP140.dll",
+              "$env:ProgramFiles\Microsoft Visual Studio\2022\Enterprise\VC\Redist\MSVC\*\x64\Microsoft.VC143.CRT\MSVCP140.dll",
+              "$env:ProgramFiles\Microsoft Visual Studio\2022\Professional\VC\Redist\MSVC\*\x64\Microsoft.VC143.CRT\MSVCP140.dll",
+              "$env:ProgramFiles\Microsoft Visual Studio\2022\Community\VC\Redist\MSVC\*\x64\Microsoft.VC143.CRT\MSVCP140.dll"
+            )
+          }
+          
+          foreach ($dllName in $requiredDlls.Keys) {
+            $dllDest = Join-Path $installerDir $dllName
+            $found = $false
+            
+            foreach ($dllPath in $requiredDlls[$dllName]) {
+              # Handle wildcard paths
+              if ($dllPath -like "*\*") {
+                $foundFiles = Get-ChildItem -Path $dllPath -ErrorAction SilentlyContinue | Select-Object -First 1
+                if ($foundFiles) {
+                  Write-Host "  Copying $dllName from $($foundFiles.FullName)..."
+                  Copy-Item $foundFiles.FullName -Destination $dllDest -Force
+                  $found = $true
+                  break
+                }
+              } elseif (Test-Path $dllPath) {
+                Write-Host "  Copying $dllName from $dllPath..."
+                Copy-Item $dllPath -Destination $dllDest -Force
+                $found = $true
+                break
+              }
+            }
+            
+            if (-not $found) {
+              Write-Warning "  DLL not found: $dllName (searched in multiple locations)"
+            }
+          }
+          
+          # Verify all required DLLs are present
+          $missingDlls = @()
+          foreach ($dllName in $requiredDlls.Keys) {
+            if (-not (Test-Path (Join-Path $installerDir $dllName))) {
+              $missingDlls += $dllName
+            }
+          }
+          
+          if ($missingDlls.Count -gt 0) {
+            Write-Error "Missing required DLLs: $($missingDlls -join ', ')"
+            Write-Host "These DLLs are required for the application to run on a clean machine."
+            exit 1
+          }
+          
           # Find WiX Toolset installation
           Write-Host "Looking for WiX Toolset..."
           $wixPaths = @(
@@ -96,12 +177,20 @@ jobs:
             
             # Compile WXS file with Candle (output to build-temp directory to avoid permission issues)
             $wixobjPath = "$buildDir\TemplateBuilder.wixobj"
-            Write-Host "Running candle on: $workspace\installer\TemplateBuilder.wxs"
+            $wxsFile = "$workspace\installer\TemplateBuilder.wxs"
+            Write-Host "Running candle on: $wxsFile"
             Write-Host "Output directory: $buildDir"
             Write-Host "SourceDir variable: $installerDir"
             
-            & $candle "$workspace\installer\TemplateBuilder.wxs" "-dSourceDir=$installerDir" "-out" "$buildDir\"
-            $candleExitCode = $LASTEXITCODE
+            # Change to installer directory so RTF file path is resolved correctly
+            # The WixVariable path is relative to the .wxs file location
+            Push-Location "$workspace\installer"
+            try {
+              & $candle "TemplateBuilder.wxs" "-dSourceDir=$installerDir" "-out" "$buildDir\"
+              $candleExitCode = $LASTEXITCODE
+            } finally {
+              Pop-Location
+            }
             
             if ($candleExitCode -ne 0) {
               Write-Error "Candle failed with exit code $candleExitCode"

@@ -5,6 +5,17 @@
         
         <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
         <MediaTemplate EmbedCab="yes" />
+        
+        <!-- Include Terms of Use License Agreement -->
+        <!-- The RTF file must be in the same directory as the .wxs file or in SourceDir -->
+        <WixVariable Id="WixUILicenseRtf" Value="TERMS_OF_USE.rtf" />
+        
+        <!-- Custom success message -->
+        <Property Id="WIXUI_EXITDIALOGOPTIONALTEXT" Value="Template Builder has been successfully installed on your computer.&#xD;&#xA;&#xD;&#xA;You can now use TemplateBuilder from the command line to generate project templates from YAML files.&#xD;&#xA;&#xD;&#xA;For more information, visit: http://brau.io" />
+        
+        <!-- Use standard UI with license agreement -->
+        <UIRef Id="WixUI_InstallDir" />
+        <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
 
         <Directory Id="TARGETDIR" Name="SourceDir">
             <Directory Id="ProgramFiles64Folder">
@@ -29,6 +40,13 @@
         <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
             <Component Id="ApplicationFiles" Guid="A1B2C3D4-E5F6-4A3B-8C9D-0E1F2A3B4C5D" Win64="yes">
                 <File Id="TemplateBuilderExe" Source="$(var.SourceDir)\TemplateBuilder.exe" KeyPath="yes" />
+            </Component>
+            <!-- Runtime DLLs (libcurl and MSVC runtime) -->
+            <Component Id="RuntimeDlls" Guid="B2C3D4E5-F6A7-5B9C-0D1E-2F3A4B5C6D7E" Win64="yes">
+                <File Id="LibCurlDll" Source="$(var.SourceDir)\libcurl.dll" />
+                <File Id="VCRuntime140Dll" Source="$(var.SourceDir)\VCRUNTIME140.dll" />
+                <File Id="VCRuntime140_1Dll" Source="$(var.SourceDir)\VCRUNTIME140_1.dll" />
+                <File Id="MSVCP140Dll" Source="$(var.SourceDir)\MSVCP140.dll" />
             </Component>
             <!-- MinGW/GCC runtime DLLs will be added by build-msi.ps1 if they exist -->
         </ComponentGroup>

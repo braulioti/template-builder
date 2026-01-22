@@ -27,14 +27,14 @@
 
     <Fragment>
         <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-            <Component Id="ApplicationFiles" Guid="A1B2C3D4-E5F6-4A3B-8C9D-0E1F2A3B4C5D">
+            <Component Id="ApplicationFiles" Guid="A1B2C3D4-E5F6-4A3B-8C9D-0E1F2A3B4C5D" Win64="yes">
                 <File Id="TemplateBuilderExe" Source="$(var.SourceDir)\TemplateBuilder.exe" KeyPath="yes" />
             </Component>
             <!-- MinGW/GCC runtime DLLs will be added by build-msi.ps1 if they exist -->
         </ComponentGroup>
         
         <ComponentGroup Id="EnvironmentComponents" Directory="INSTALLFOLDER">
-            <Component Id="EnvironmentPath" Guid="F9E8D7C6-B5A4-3C2D-1E0F-9A8B7C6D5E4F">
+            <Component Id="EnvironmentPath" Guid="F9E8D7C6-B5A4-3C2D-1E0F-9A8B7C6D5E4F" Win64="yes">
                 <CreateFolder />
                 <Environment Id="PathEnvironment" 
                     Name="PATH" 

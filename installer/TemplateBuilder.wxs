@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
     <Product Id="*" Name="Template Builder" Language="1033" Version="0.1.0" Manufacturer="Template Builder" UpgradeCode="B2D5C2F3-8E4A-4F1D-9C3B-7A6E5D4C3B2A">
-        <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+        <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" Platform="x64" />
         
         <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
         <MediaTemplate EmbedCab="yes" />

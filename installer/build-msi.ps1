@@ -540,7 +540,8 @@ if ($useWixV6) {
         New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
     }
     
-    & $light "$wixobjPath" "-out" "$OutputPath"
+    # Include WixUIExtension for UI dialogs (license, finish, etc.)
+    & $light "$wixobjPath" "-ext" "WixUIExtension" "-out" "$OutputPath"
     
     if ($LASTEXITCODE -ne 0) {
         Write-Error "Light failed with exit code $LASTEXITCODE"

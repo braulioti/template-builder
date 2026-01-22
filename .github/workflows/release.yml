@@ -207,7 +207,9 @@ jobs:
             $msiPath = "$workspace\TemplateBuilder.msi"
             Write-Host "Running light to create MSI at: $msiPath"
             
-            & $light "$wixobjPath" "-out" "$msiPath"
+            # Include WixUIExtension for UI dialogs (license, finish, etc.)
+            # The -ext flag tells light to load the WixUIExtension.dll which provides WixUI_InstallDir
+            & $light "$wixobjPath" "-ext" "WixUIExtension" "-out" "$msiPath"
             $lightExitCode = $LASTEXITCODE
             
             if ($lightExitCode -ne 0) {

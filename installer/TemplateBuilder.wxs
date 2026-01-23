@@ -1,39 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
-    <Package Name="Template Builder" Language="1033" Version="0.1.0" Manufacturer="Template Builder" UpgradeCode="B2D5C2F3-8E4A-4F1D-9C3B-7A6E5D4C3B2A">
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Product Id="*" Name="Template Builder" Language="1033" Version="0.1.0" Manufacturer="Template Builder" UpgradeCode="B2D5C2F3-8E4A-4F1D-9C3B-7A6E5D4C3B2A">
+        <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" Platform="x64" />
+        
         <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
         <MediaTemplate EmbedCab="yes" />
+        
+        <!-- Include Terms of Use License Agreement -->
+        <!-- The RTF file path is resolved relative to the .wxs file location when candle/light runs -->
+        <WixVariable Id="WixUILicenseRtf" Value="TERMS_OF_USE.rtf" />
+        
+        <!-- Custom success message -->
+        <Property Id="WIXUI_EXITDIALOGOPTIONALTEXT" Value="Template Builder has been successfully installed on your computer.&#xD;&#xA;&#xD;&#xA;You can now use TemplateBuilder from the command line to generate project templates from YAML files.&#xD;&#xA;&#xD;&#xA;For more information, visit: http://brau.io" />
+        
+        <!-- Use standard UI with license agreement -->
+        <UIRef Id="WixUI_InstallDir" />
+        <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
 
-        <StandardDirectory Id="ProgramFiles64Folder">
-            <Directory Id="INSTALLFOLDER" Name="TemplateBuilder" />
-        </StandardDirectory>
+        <Directory Id="TARGETDIR" Name="SourceDir">
+            <Directory Id="ProgramFiles64Folder">
+                <Directory Id="INSTALLFOLDER" Name="TemplateBuilder" />
+            </Directory>
+        </Directory>
 
-        <StandardDirectory Id="ProgramMenuFolder">
-            <Directory Id="ApplicationProgramsFolder" Name="TemplateBuilder" />
-        </StandardDirectory>
+        <DirectoryRef Id="TARGETDIR">
+            <Directory Id="ProgramMenuFolder">
+                <Directory Id="ApplicationProgramsFolder" Name="TemplateBuilder" />
+            </Directory>
+        </DirectoryRef>
 
         <Feature Id="ProductFeature" Title="TemplateBuilder" Level="1">
             <ComponentGroupRef Id="ProductComponents" />
             <ComponentGroupRef Id="EnvironmentComponents" />
             <ComponentGroupRef Id="ShortcutComponents" />
         </Feature>
-    </Package>
+    </Product>
 
     <Fragment>
         <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-            <Component Id="ApplicationFiles" Guid="A1B2C3D4-E5F6-4A3B-8C9D-0E1F2A3B4C5D">
+            <Component Id="ApplicationFiles" Guid="A1B2C3D4-E5F6-4A3B-8C9D-0E1F2A3B4C5D" Win64="yes">
                 <File Id="TemplateBuilderExe" Source="$(var.SourceDir)\TemplateBuilder.exe" KeyPath="yes" />
             </Component>
-            <!-- MinGW/GCC runtime DLLs (copied by build-msi.ps1 if the executable depends on them) -->
-            <Component Id="MinGWDlls" Guid="A2B3C4D5-E6F7-4A8B-9C0D-1E2F3A4B5C6D">
-                <File Id="LibGccDll" Source="$(var.SourceDir)\libgcc_s_seh-1.dll" />
-                <File Id="LibStdCppDll" Source="$(var.SourceDir)\libstdc++-6.dll" />
-                <File Id="LibWinPthreadDll" Source="$(var.SourceDir)\libwinpthread-1.dll" />
+            <!-- Runtime DLLs (libcurl and MSVC runtime) -->
+            <Component Id="RuntimeDlls" Guid="B2C3D4E5-F6A7-5B9C-0D1E-2F3A4B5C6D7E" Win64="yes">
+                <File Id="LibCurlDll" Source="$(var.SourceDir)\libcurl.dll" />
+                <File Id="VCRuntime140Dll" Source="$(var.SourceDir)\VCRUNTIME140.dll" />
+                <File Id="VCRuntime140_1Dll" Source="$(var.SourceDir)\VCRUNTIME140_1.dll" />
+                <File Id="MSVCP140Dll" Source="$(var.SourceDir)\MSVCP140.dll" />
             </Component>
+            <!-- MinGW/GCC runtime DLLs will be added by build-msi.ps1 if they exist -->
         </ComponentGroup>
         
         <ComponentGroup Id="EnvironmentComponents" Directory="INSTALLFOLDER">
-            <Component Id="EnvironmentPath" Guid="F9E8D7C6-B5A4-3C2D-1E0F-9A8B7C6D5E4F">
+            <Component Id="EnvironmentPath" Guid="F9E8D7C6-B5A4-3C2D-1E0F-9A8B7C6D5E4F" Win64="yes">
                 <CreateFolder />
                 <Environment Id="PathEnvironment" 
                     Name="PATH" 

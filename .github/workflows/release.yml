@@ -53,12 +53,15 @@ jobs:
             exit 1
           }
           
-          # Copy Terms of Use file
+          # Copy Terms of Use file to installer directory (where .wxs file is located)
+          # The WixVariable looks for the RTF file relative to the .wxs file location
           $termsSource = "$workspace\installer\TERMS_OF_USE.rtf"
-          $termsDest = "$installerDir\TERMS_OF_USE.rtf"
+          $termsDestInstaller = "$workspace\installer\TERMS_OF_USE.rtf"
+          $termsDestBin = "$installerDir\TERMS_OF_USE.rtf"
           if (Test-Path $termsSource) {
-            Write-Host "Copying Terms of Use file..."
-            Copy-Item $termsSource -Destination $termsDest -Force
+            Write-Host "Terms of Use file already in installer directory"
+            # Also copy to bin directory for reference
+            Copy-Item $termsSource -Destination $termsDestBin -Force
           } else {
             Write-Warning "Terms of Use file not found: $termsSource"
           }
@@ -184,6 +187,15 @@ jobs:
             
             # Change to installer directory so RTF file path is resolved correctly
             # The WixVariable path is relative to the .wxs file location
+            # Verify TERMS_OF_USE.rtf exists before compiling
+            $termsRtfPath = "$workspace\installer\TERMS_OF_USE.rtf"
+            if (-not (Test-Path $termsRtfPath)) {
+              Write-Error "Terms of Use file not found at: $termsRtfPath"
+              Write-Host "This file is required for the license agreement dialog."
+              exit 1
+            }
+            Write-Host "Terms of Use file found at: $termsRtfPath"
+            
             Push-Location "$workspace\installer"
             try {
               & $candle "TemplateBuilder.wxs" "-dSourceDir=$installerDir" "-out" "$buildDir\"
@@ -209,8 +221,15 @@ jobs:
             
             # Include WixUIExtension for UI dialogs (license, finish, etc.)
             # The -ext flag tells light to load the WixUIExtension.dll which provides WixUI_InstallDir
-            & $light "$wixobjPath" "-ext" "WixUIExtension" "-out" "$msiPath"
-            $lightExitCode = $LASTEXITCODE
+            # Execute light from installer directory so RTF file path is resolved correctly
+            # Use absolute paths for wixobj and output since we're changing directory
+            Push-Location "$workspace\installer"
+            try {
+              & $light "$buildDir\TemplateBuilder.wixobj" "-ext" "WixUIExtension" "-out" "$msiPath"
+              $lightExitCode = $LASTEXITCODE
+            } finally {
+              Pop-Location
+            }
             
             if ($lightExitCode -ne 0) {
               Write-Error "Light failed with exit code $lightExitCode"

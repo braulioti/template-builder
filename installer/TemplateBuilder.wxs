@@ -7,7 +7,7 @@
         <MediaTemplate EmbedCab="yes" />
         
         <!-- Include Terms of Use License Agreement -->
-        <!-- The RTF file must be in the same directory as the .wxs file or in SourceDir -->
+        <!-- The RTF file path is resolved relative to the .wxs file location when candle/light runs -->
         <WixVariable Id="WixUILicenseRtf" Value="TERMS_OF_USE.rtf" />
         
         <!-- Custom success message -->

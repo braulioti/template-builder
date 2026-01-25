@@ -84,12 +84,19 @@ if(NOT CURL_FOUND)
     
     set(BUILD_CURL_EXE OFF CACHE BOOL "Disable curl executable")
     set(BUILD_TESTING OFF CACHE BOOL "Disable curl tests")
-    # Note: SSL/TLS support requires OpenSSL. Without it, only HTTP downloads will work.
-    # To enable HTTPS, install OpenSSL and configure curl to use it.
+    # Use Schannel (Windows native SSL) on Windows for HTTPS without OpenSSL or extra DLLs.
+    # On clean machines, Schannel uses system crypto (crypt32, secur32) — no install needed.
+    if(WIN32)
+        set(CURL_USE_SCHANNEL ON CACHE BOOL "Use Windows Schannel for SSL/TLS")
+        set(CURL_USE_OPENSSL OFF CACHE BOOL "Disable OpenSSL (using Schannel instead)")
+    endif()
     
     FetchContent_MakeAvailable(curl)
     set(CURL_VERSION "8.8.0")
     message(STATUS "CURL downloaded and configured via FetchContent")
+    if(WIN32)
+        message(STATUS "  SSL/TLS: Schannel (Windows native)")
+    endif()
 else()
     message(STATUS "CURL found in system")
     if(CURL_VERSION)

@@ -1,6 +1,7 @@
 import { Component, ViewEncapsulation } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from '../header/header.component';
+import { SocialNetwork } from '../../models/social-network.interface';
 
 @Component({
   selector: 'app-main',
@@ -11,4 +12,7 @@ import { HeaderComponent } from '../header/header.component';
   encapsulation: ViewEncapsulation.None
 })
 export class MainComponent {
+  socialNetworks: SocialNetwork[] = [
+    { name: 'Github', faClass: 'fab fa-github', url: 'https://github.com/braulioti/template-builder' }
+  ];
 }

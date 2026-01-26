@@ -33,6 +33,7 @@ This release marks the initial C++ port of the Template Builder project, convert
 - Converted TFileBuilder class from Pascal to C++ (FileBuilder).
 - Converted TFolderBuilder class from Pascal to C++ (FolderBuilder).
 - Converted TRemoteFileBuilder class from Pascal to C++ (RemoteFileBuilder).
+- Created basic frontend application in `frontend/` (Angular 21, Jest for tests, SCSS for styles).
 
 ### Deprecated
 

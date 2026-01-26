@@ -1,12 +1,12 @@
 /**
  * Environment Configuration - Production
- * 
+ *
  * This file is used for production builds.
  */
 
 export const environment = {
   production: true,
-  appTitle: 'Editorial',
+  appTitle: 'Template Builder',
   appVersion: '0.1.0',
   apiUrl: '',
   apiTimeout: 30000,

@@ -1,10 +1,13 @@
 <header id="header">
-  <a routerLink="/" class="logo"><strong>{{ title }}</strong> {{ subtitle }}</a>
+  <a routerLink="/" class="logo"><strong>{{ title }}</strong></a>
   <ul class="icons">
-    <li><a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i><span class="label">Twitter</span></a></li>
-    <li><a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i><span class="label">Facebook</span></a></li>
-    <li><a href="#" aria-label="Snapchat"><i class="fab fa-snapchat-ghost"></i><span class="label">Snapchat</span></a></li>
-    <li><a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i><span class="label">Instagram</span></a></li>
-    <li><a href="#" aria-label="Medium"><i class="fab fa-medium-m"></i><span class="label">Medium</span></a></li>
+    @for (social of socialNetworks; track social.name) {
+      <li>
+        <a [href]="social.url" [attr.aria-label]="social.name">
+          <i [class]="social.faClass"></i>
+          <span class="label">{{ social.name }}</span>
+        </a>
+      </li>
+    }
   </ul>
 </header>

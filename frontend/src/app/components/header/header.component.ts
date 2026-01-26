@@ -1,5 +1,7 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+import { Component, Input, ViewEncapsulation } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { environment } from '../../core/config/environment';
+import { SocialNetwork } from '../../models/social-network.interface';
 
 @Component({
   selector: 'app-header',
@@ -10,6 +12,7 @@ import { RouterModule } from '@angular/router';
   encapsulation: ViewEncapsulation.None
 })
 export class HeaderComponent {
-  title = 'Editorial';
-  subtitle = 'by HTML5 UP';
+  title = environment.appTitle;
+
+  @Input() socialNetworks: SocialNetwork[] = [];
 }

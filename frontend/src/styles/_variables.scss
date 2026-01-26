@@ -1,0 +1,77 @@
+@use 'sass:map';
+
+///
+/// Editorial Theme Variables
+/// Based on HTML5 UP Editorial template
+///
+
+// Misc.
+$misc: (
+  z-index-base: 10000
+) !default;
+
+// Duration.
+$duration: (
+  nav: 0.5s,
+  transition: 0.2s
+) !default;
+
+// Size.
+$size: (
+  border-radius: 0.375em,
+  element-height: 2.75em,
+  element-margin: 2em,
+  sidebar-width: 26em,
+  sidebar-width-alt: 24em,
+  gutter: 3em
+) !default;
+
+// Font.
+$font: (
+  family: ('Open Sans', sans-serif),
+  family-heading: ('Roboto Slab', serif),
+  family-fixed: ('Courier New', monospace),
+  weight: 400,
+  weight-bold: 600,
+  weight-heading: 700,
+  weight-heading-alt: 400,
+  kerning-heading: 0.075em
+) !default;
+
+// Palette.
+$palette: (
+  bg: #ffffff,
+  bg-alt: #f5f6f7,
+  fg: #7f888f,
+  fg-bold: #3d4449,
+  fg-light: #9fa3a6,
+  border: rgba(210, 215, 217, 0.75),
+  border-bg: rgba(230, 235, 237, 0.75),
+  accent: #3baed4
+) !default;
+
+// Helper functions
+@function _size($key) {
+  @return map.get($size, $key);
+}
+
+@function _palette($key) {
+  @return map.get($palette, $key);
+}
+
+@function _font($key) {
+  @return map.get($font, $key);
+}
+
+@function _duration($key) {
+  @return map.get($duration, $key);
+}
+
+@function _misc($key) {
+  @return map.get($misc, $key);
+}
+
+// Helper function for multiplication
+@function _multiply($value, $multiplier) {
+  @return $value * $multiplier;
+}

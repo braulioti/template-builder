@@ -1,0 +1,31 @@
+// Direct palette values
+// These are the actual values from the palette map
+// Using direct variables instead of functions to avoid compilation issues
+
+$palette-bg: #ffffff !default;
+$palette-bg-alt: #f5f6f7 !default;
+$palette-fg: #7f888f !default;
+$palette-fg-bold: #3d4449 !default;
+$palette-fg-light: #9fa3a6 !default;
+$palette-border: rgba(210, 215, 217, 0.75) !default;
+$palette-border-bg: rgba(230, 235, 237, 0.75) !default;
+$palette-accent: #3baed4 !default;
+
+$font-family: 'Open Sans', sans-serif !default;
+$font-family-heading: 'Roboto Slab', serif !default;
+$font-family-fixed: 'Courier New', monospace !default;
+$font-weight: 400 !default;
+$font-weight-bold: 600 !default;
+$font-weight-heading: 700 !default;
+
+$size-border-radius: 0.375em !default;
+$size-element-height: 2.75em !default;
+$size-element-margin: 2em !default;
+$size-sidebar-width: 26em !default;
+$size-sidebar-width-alt: 24em !default;
+$size-gutter: 3em !default;
+
+$duration-transition: 0.2s !default;
+$duration-nav: 0.5s !default;
+
+$misc-z-index-base: 10000 !default;

@@ -1,0 +1,67 @@
+@use 'sass:color';
+@use '../../../styles/palette-values' as *;
+
+#main {
+  flex-grow: 1;
+  flex-shrink: 1;
+  width: 100%;
+
+  > .inner {
+    padding: 0 6em;
+    margin: 0 auto;
+    max-width: 110em;
+
+    // Header não está dentro de section
+    app-header {
+      display: block;
+    }
+
+    // Estilos para sections renderizadas pelo router-outlet
+    // Aplicar diretamente nas sections do conteúdo
+    section {
+      padding: 6em 0;
+      border-top: solid 2px color.change(rgb(210, 215, 217), $alpha: 75%) !important; // $palette-border
+
+      // Primeira section (banner) não tem border-top
+      &:first-of-type {
+        border-top: 0 !important;
+        padding-top: 0;
+      }
+
+      // Banner tem padding especial
+      &#banner {
+        padding-top: 6em;
+      }
+    }
+  }
+
+  @media (width <= 1280px) {
+    > .inner {
+      padding: 0 5em;
+
+      section {
+        padding: 5em 0;
+      }
+    }
+  }
+
+  @media (width <= 980px) {
+    > .inner {
+      padding: 0 4em;
+
+      section {
+        padding: 4em 0;
+      }
+    }
+  }
+
+  @media (width <= 736px) {
+    > .inner {
+      padding: 0 2em;
+
+      section {
+        padding: 3em 0;
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "extends": [
+    "stylelint-config-standard-scss",
+    "stylelint-config-prettier"
+  ],
+  "rules": {
+    "media-feature-range-notation": "context",
+    "alpha-value-notation": "percentage",
+    "function-disallowed-list": null,
+    "scss/at-import-partial-extension": null,
+    "function-no-unknown": [
+      true,
+      {
+        "ignoreFunctions": [
+          "color.change",
+          "rgb",
+          "rgba",
+          "hsl",
+          "hsla"
+        ]
+      }
+    ]
+  }
+}

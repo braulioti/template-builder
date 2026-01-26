@@ -40,8 +40,26 @@ export default tseslint.config(
     ],
     rules: {},
   },
+  {
+    files: ['**/*.js'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'commonjs',
+    },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+      'no-undef': 'off',
+    },
+  },
   prettierConfig,
   {
-    ignores: ['dist/**', 'node_modules/**', '*.config.js'],
+    ignores: [
+      'dist/**',
+      'node_modules/**',
+      '*.config.js',
+      'jest.config.js',
+      'setup-jest.ts',
+      '**/*.config.js',
+    ],
   }
 );

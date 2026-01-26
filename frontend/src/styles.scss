@@ -1,17 +1,353 @@
-/* Global styles */
-:root {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color: #213547;
-  background-color: #ffffff;
-}
+@use 'sass:color';
+@use 'sass:meta';
+@use 'styles/palette-values' as *;
+
+/* Global styles - Editorial Theme */
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,600,400italic,600italic|Roboto+Slab:400,700');
 
 * {
   box-sizing: border-box;
 }
 
+html {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  min-height: 100vh;
+  padding: 0;
+  background: #ffffff !important; // $palette-bg
+  color: #7f888f !important; // $palette-fg
+  font-family: 'Open Sans', sans-serif !important; // $font-family
+  font-size: 13pt !important;
+  font-weight: 400 !important; // $font-weight
+  line-height: 1.65 !important;
+  -webkit-text-size-adjust: none;
+  -ms-overflow-style: scrollbar;
+}
+
+// Typography
+a {
+  transition: color $duration-transition ease-in-out,
+              border-bottom-color $duration-transition ease-in-out;
+  border-bottom: dotted 1px;
+  color: $palette-accent;
+  text-decoration: none;
+
+  &:hover {
+    border-bottom-color: $palette-accent;
+    color: $palette-accent !important;
+
+    strong {
+      color: inherit;
+    }
+  }
+}
+
+strong, b {
+  color: $palette-fg-bold;
+  font-weight: $font-weight-bold;
+}
+
+em, i {
+  font-style: italic;
+}
+
+p {
+  margin: 0 0 $size-element-margin 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: $palette-fg-bold;
+  font-family: $font-family-heading;
+  font-weight: $font-weight-heading;
+  line-height: 1.5;
+  margin: 0 0 calc($size-element-margin * 0.5) 0;
+
+  a {
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 0;
+  }
+}
+
+h1 {
+  font-size: 4em;
+  margin: 0 0 calc($size-element-margin * 0.25) 0;
+  line-height: 1.3;
+}
+
+h2 {
+  font-size: 1.75em;
+}
+
+h3 {
+  font-size: 1.25em;
+}
+
+h4 {
+  font-size: 1.1em;
+}
+
+h5 {
+  font-size: 0.9em;
+}
+
+h6 {
+  font-size: 0.7em;
+}
+
+blockquote {
+  border-left: solid 3px $palette-border;
+  font-style: italic;
+  margin: 0 0 $size-element-margin 0;
+  padding: calc($size-element-margin / 4) 0 calc($size-element-margin / 4) $size-element-margin;
+}
+
+code {
+  background: $palette-border-bg;
+  border-radius: $size-border-radius;
+  border: solid 1px $palette-border;
+  font-family: $font-family-fixed;
+  font-size: 0.9em;
+  margin: 0 0.25em;
+  padding: 0.25em 0.65em;
+}
+
+pre {
+  font-family: $font-family-fixed;
+  font-size: 0.9em;
+  margin: 0 0 $size-element-margin 0;
+
+  code {
+    display: block;
+    line-height: 1.75;
+    padding: 1em 1.5em;
+    overflow-x: auto;
+  }
+}
+
+hr {
+  border: 0;
+  border-bottom: solid 1px $palette-border;
+  margin: $size-element-margin 0;
+
+  &.major {
+    margin: calc($size-element-margin * 1.5) 0;
+  }
+}
+
+// Lists
+ul, ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+ul.alt {
+  list-style: none;
+  padding-left: 0;
+
+  li {
+    border-top: solid 1px $palette-border;
+    padding: 0.5em 0;
+
+    &:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+  }
+}
+
+// Buttons
+input[type="submit"],
+input[type="reset"],
+input[type="button"],
+button,
+.button {
+  appearance: none;
+  transition: background-color $duration-transition ease-in-out,
+              color $duration-transition ease-in-out;
+  background-color: transparent;
+  border-radius: $size-border-radius;
+  border: 0;
+  box-shadow: inset 0 0 0 2px $palette-accent;
+  color: $palette-accent !important;
+  cursor: pointer;
+  display: inline-block;
+  font-family: $font-family-heading;
+  font-size: 0.8em;
+  font-weight: $font-weight-heading;
+  height: 3.5em;
+  letter-spacing: 0.075em;
+  line-height: 3.5em;
+  padding: 0 2.25em;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  &:hover {
+    // Use direct color value to ensure type recognition
+    background-color: color.change(#3baed4, $alpha: 0.05);
+  }
+
+  &:active {
+    // Use direct color value to ensure type recognition
+    background-color: color.change(#3baed4, $alpha: 0.15);
+  }
+
+  &.primary {
+    background-color: $palette-accent;
+    box-shadow: none;
+    color: $palette-bg !important;
+
+    &:hover {
+      // Use direct color value to ensure type recognition
+      background-color: color.scale(#3baed4, $lightness: 3%);
+    }
+
+    &:active {
+      // Use direct color value to ensure type recognition
+      background-color: color.scale(#3baed4, $lightness: -3%);
+    }
+  }
+
+  &.small {
+    font-size: 0.6em;
+  }
+
+  &.large {
+    font-size: 1em;
+    height: 3.65em;
+    line-height: 3.65em;
+  }
+
+  &.big {
+    font-size: 1.25em;
+    height: 3.75em;
+    line-height: 3.75em;
+    padding: 0 2.5em;
+  }
+
+  &.fit {
+    width: 100%;
+  }
+
+  &.disabled,
+  &:disabled {
+    pointer-events: none;
+    opacity: 0.25;
+  }
+}
+
+// Actions
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1em;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  &.stacked {
+    flex-direction: column;
+
+    li {
+      width: 100%;
+    }
+  }
+
+  &.small {
+    gap: 0.5em;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 1280px) {
+  body {
+    font-size: 11pt;
+  }
+
+  h1 {
+    font-size: 3.5em;
+  }
+}
+
+@media (max-width: 980px) {
+  body {
+    font-size: 10pt;
+  }
+
+  h1 {
+    font-size: 3.25em;
+  }
+}
+
+@media (max-width: 736px) {
+  body {
+    font-size: 10pt;
+  }
+
+  h1 {
+    font-size: 2em;
+    line-height: 1.4;
+  }
+
+  h2 {
+    font-size: 1.5em;
+  }
+}
+
+@media (max-width: 360px) {
+  body {
+    font-size: 9pt;
+  }
+}
+
+// Images
+.image {
+  border: 0;
+  display: inline-block;
+  position: relative;
+
+  img {
+    display: block;
+    width: 100%;
+  }
+
+  &.left {
+    float: left;
+    margin: 0 $size-element-margin $size-element-margin 0;
+    top: 0.25em;
+  }
+
+  &.right {
+    float: right;
+    margin: 0 0 $size-element-margin $size-element-margin;
+    top: 0.25em;
+  }
+
+  &.fit {
+    display: block;
+    margin: 0 0 $size-element-margin 0;
+    width: 100%;
+
+    img {
+      width: 100%;
+    }
+  }
+
+  &.object {
+    display: block;
+    margin: 0 0 $size-element-margin 0;
+    width: 100%;
+
+    img {
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      width: 100%;
+    }
+  }
 }

@@ -14,6 +14,8 @@
     "test:coverage": "jest --coverage",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "lint:style": "stylelint \"src/**/*.{css,scss}\"",
+    "lint:style:fix": "stylelint \"src/**/*.{css,scss}\" --fix",
     "format": "prettier --write \"src/**/*.{ts,html,scss,json}\"",
     "format:check": "prettier --check \"src/**/*.{ts,html,scss,json}\""
   },
@@ -39,6 +41,7 @@
     "@angular/compiler-cli": "^21.1.0",
     "@eslint/js": "^9.39.2",
     "@types/jest": "^29.5.0",
+    "@types/node": "^25.0.10",
     "@typescript-eslint/eslint-plugin": "^8.53.1",
     "@typescript-eslint/parser": "^8.53.1",
     "angular-eslint": "^21.1.0",
@@ -49,6 +52,9 @@
     "jest-preset-angular": "^16.0.0",
     "prettier": "^3.8.1",
     "sass": "^1.69.0",
+    "stylelint": "^17.0.0",
+    "stylelint-config-prettier": "^9.0.5",
+    "stylelint-config-standard-scss": "^17.0.0",
     "typescript": "~5.9.0",
     "typescript-eslint": "^8.53.1"
   }

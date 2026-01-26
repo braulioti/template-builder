@@ -1,0 +1,330 @@
+@use '../../../styles/palette-values' as *;
+
+// Banner
+#banner {
+  padding: 6em 0 0 0; // Padding top apenas, o bottom vem do main.component
+  display: flex;
+
+  h1 {
+    margin-top: -0.125em;
+  }
+
+  .content {
+    flex-grow: 1;
+    flex-shrink: 1;
+    width: 50%;
+  }
+
+  .image {
+    flex-grow: 0;
+    flex-shrink: 0;
+    display: block;
+    margin: 0 0 $size-element-margin calc($size-element-margin * 2);
+    width: 50%;
+
+    img {
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      width: 100%;
+    }
+  }
+
+  @media (orientation: portrait) {
+    flex-direction: column-reverse;
+
+    h1 br {
+      display: none;
+    }
+
+    .content {
+      flex-grow: 0;
+      flex-shrink: 0;
+      width: 100%;
+    }
+
+    .image {
+      flex-grow: 0;
+      flex-shrink: 0;
+      margin: 0 0 calc($size-element-margin * 2) 0;
+      height: 25em;
+      max-height: 50vh;
+      min-height: 18em;
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .image {
+      max-height: 35vh;
+    }
+  }
+}
+
+// Features
+.features {
+  $gutter: $size-gutter;
+  $gutter-negative: -3em;
+
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 0 $size-element-margin $gutter-negative;
+  width: calc(100% + #{$gutter});
+
+  article {
+    align-items: center;
+    display: flex;
+    margin: 0 0 $gutter $gutter;
+    position: relative;
+    width: calc(50% - #{$gutter});
+
+    &:nth-child(2n - 1) {
+      margin-right: calc($gutter * 0.5);
+    }
+
+    &:nth-child(2n) {
+      margin-left: calc($gutter * 0.5);
+    }
+
+    &:nth-last-child(1),
+    &:nth-last-child(2) {
+      margin-bottom: 0;
+    }
+
+    .icon {
+      flex-grow: 0;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 10em;
+      margin: 0 $size-element-margin 0 0;
+      text-align: center;
+      width: 10em;
+      position: relative;
+
+      i {
+        color: $palette-accent;
+        font-size: 2.75rem;
+        position: relative;
+        z-index: 1;
+      }
+
+      &::after {
+        transform: rotate(45deg);
+        border-radius: 0.25rem;
+        border: solid 2px $palette-border;
+        content: '';
+        display: block;
+        height: 7em;
+        left: 50%;
+        margin: -3.5em 0 0 -3.5em;
+        position: absolute;
+        top: 50%;
+        width: 7em;
+      }
+    }
+
+    .content {
+      flex-grow: 1;
+      flex-shrink: 1;
+      width: 100%;
+
+      > :last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  @media (max-width: 980px) {
+    margin: 0 0 $size-element-margin 0;
+    width: 100%;
+
+    article {
+      margin: 0 0 $gutter 0;
+      width: 100%;
+
+      &:nth-child(2n - 1) {
+        margin-right: 0;
+      }
+
+      &:nth-child(2n) {
+        margin-left: 0;
+      }
+
+      &:nth-last-child(1),
+      &:nth-last-child(2) {
+        margin-bottom: $gutter;
+      }
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .icon {
+        height: 8em;
+        width: 8em;
+
+        i {
+          font-size: 2.25rem;
+        }
+
+        &::after {
+          height: 6em;
+          margin: -3em 0 0 -3em;
+          width: 6em;
+        }
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    article {
+      flex-direction: column;
+      align-items: flex-start;
+
+      .icon {
+        height: 6em;
+        margin: 0 0 calc($size-element-margin * 0.75) 0;
+        width: 6em;
+
+        i {
+          font-size: 1.5rem;
+        }
+
+        &::after {
+          height: 4em;
+          margin: -2em 0 0 -2em;
+          width: 4em;
+        }
+      }
+    }
+  }
+}
+
+// Posts
+.posts {
+  $gutter: 6em; // $size-gutter * 2 = 3em * 2
+  $gutter-negative: -6em;
+
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 0 $size-element-margin $gutter-negative;
+  width: calc(100% + #{$gutter});
+
+  article {
+    flex-grow: 0;
+    flex-shrink: 1;
+    margin: 0 0 $gutter $gutter;
+    position: relative;
+    width: calc(33.333% - #{$gutter});
+
+    &::before {
+      background: $palette-border;
+      content: '';
+      display: block;
+      height: calc(100% + #{$gutter});
+      left: calc($gutter * -0.5);
+      position: absolute;
+      top: 0;
+      width: 1px;
+    }
+
+    &::after {
+      background: $palette-border;
+      bottom: calc($gutter * -0.5);
+      content: '';
+      display: block;
+      height: 1px;
+      position: absolute;
+      right: 0;
+      width: calc(100% + #{$gutter});
+    }
+
+    > :last-child {
+      margin-bottom: 0;
+    }
+
+    .image {
+      display: block;
+      margin: 0 0 $size-element-margin 0;
+
+      img {
+        display: block;
+        width: 100%;
+      }
+    }
+  }
+
+  @media (max-width: 1280px) {
+    article {
+      width: calc(50% - #{$gutter});
+
+      &:nth-last-child(3) {
+        margin-bottom: $gutter;
+      }
+    }
+  }
+
+  @media (max-width: 736px) {
+    $gutter: 4.5em; // $size-gutter * 1.5 = 3em * 1.5
+    $gutter-negative: -4.5em;
+
+    margin: 0 0 $size-element-margin $gutter-negative;
+    width: calc(100% + #{$gutter});
+
+    article {
+      margin: 0 0 $gutter $gutter;
+      width: calc(50% - #{$gutter});
+
+      &::before {
+        height: calc(100% + #{$gutter});
+        left: calc($gutter * -0.5);
+      }
+
+      &::after {
+        bottom: calc($gutter * -0.5);
+        width: calc(100% + #{$gutter});
+      }
+
+      &:nth-last-child(3) {
+        margin-bottom: $gutter;
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    $gutter: 4.5em; // $size-gutter * 1.5 = 3em * 1.5
+
+    margin: 0 0 $size-element-margin 0;
+    width: 100%;
+
+    article {
+      margin: 0 0 $gutter 0;
+      width: 100%;
+
+      &::before {
+        display: none;
+      }
+
+      &::after {
+        width: 100%;
+      }
+
+      &:last-child {
+        margin-bottom: 0;
+
+        &::after {
+          display: none;
+        }
+      }
+    }
+  }
+}
+
+// Section header
+section {
+  header.major {
+    margin-bottom: $size-element-margin;
+  }
+}

@@ -1,0 +1,5 @@
+node_modules/
+dist/
+out-tsc/
+*.min.css
+*.min.scss

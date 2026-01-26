@@ -4,6 +4,8 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/f69823e9d31f443d89212528e308c716)](https://app.codacy.com/gh/braulioti/template-builder/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?logo=github-actions&logoColor=white)](./.github)
 [![C++](https://img.shields.io/badge/C++-00599C?style=flat-square&logo=C%2B%2B&logoColor=white)](https://visualstudio.microsoft.com/vs/features/cplusplus/)
+[![Angular 21](https://img.shields.io/badge/Angular-21-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.dev/)
+[![Jest](https://img.shields.io/badge/Jest-323330?style=for-the-badge&logo=Jest&logoColor=white)](https://jestjs.io/)
 [![Licence](https://img.shields.io/github/license/Ileriayo/markdown-badges?style=for-the-badge)](./LICENSE)
 
 Template Builder is a CLI tool that allows users to create custom project templates from YAML configuration files. The tool generates ready-made project structures by creating folders, generating files, and collecting user input through interactive CLI prompts defined in YAML files.
@@ -61,6 +63,8 @@ template-builder/
 - Google Test (v1.14.0)
 - YAML Library: yaml-cpp
 - WIX Toolset V6.0
+- Angular 21
+- Jest + jest-preset-angular
 
 ## Build and Run
 

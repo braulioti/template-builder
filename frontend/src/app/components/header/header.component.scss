@@ -1,0 +1,83 @@
+@use '../../../styles/palette-values' as *;
+
+#header {
+  display: flex;
+  border-bottom: solid 5px #3baed4 !important; // $palette-accent
+  padding: 6em 0 1em 0;
+  position: relative;
+
+  > * {
+    flex: 1;
+    margin-bottom: 0;
+  }
+
+  .logo {
+    border-bottom: 0;
+    color: inherit;
+    font-family: $font-family-heading;
+    font-size: 1.125em;
+  }
+
+  .icons {
+    text-align: right;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5em;
+
+    li {
+      list-style: none;
+    }
+
+    a {
+      border-bottom: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.25em;
+      height: 2.25em;
+      text-align: center;
+      border-radius: 100%;
+      background: $palette-bg-alt;
+      color: $palette-fg;
+      transition: background-color _duration(transition) ease-in-out,
+                  color _duration(transition) ease-in-out;
+
+      i {
+        font-size: 1em;
+      }
+
+      &:hover {
+        background: $palette-accent;
+        color: $palette-bg !important;
+      }
+
+      .label {
+        display: none;
+      }
+    }
+  }
+
+  @media (max-width: 1280px) {
+    padding-top: 5em;
+  }
+
+  @media (max-width: 736px) {
+    padding-top: 6.5em;
+
+    .logo {
+      font-size: 1.25em;
+      margin: 0;
+    }
+
+    .icons {
+      height: 5em;
+      line-height: 5em;
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+  }
+}

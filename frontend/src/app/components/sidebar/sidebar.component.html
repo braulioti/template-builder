@@ -1,0 +1,36 @@
+<div id="sidebar" [class.inactive]="!isActive">
+  <button class="toggle" (click)="toggleSidebar()" [attr.aria-label]="isActive ? 'Hide sidebar' : 'Show sidebar'"></button>
+  <div class="inner">
+
+    <!-- Menu -->
+    <nav id="menu">
+      <header class="major">
+        <h2>Menu</h2>
+      </header>
+      <ul>
+        <li><a routerLink="/">Homepage</a></li>
+        <li><a routerLink="/generic">Generic</a></li>
+        <li><a routerLink="/elements">Elements</a></li>
+      </ul>
+    </nav>
+
+    <!-- Section -->
+    <section>
+      <header class="major">
+        <h2>Get in touch</h2>
+      </header>
+      <p>Sed varius enim lorem ullamcorper dolore aliquam aenean ornare velit lacus, ac varius enim lorem ullamcorper dolore.</p>
+      <ul class="contact">
+        <li class="icon solid fa-envelope"><i class="fas fa-envelope"></i><a href="#">information@untitled.tld</a></li>
+        <li class="icon solid fa-phone"><i class="fas fa-phone"></i>(000) 000-0000</li>
+        <li class="icon solid fa-home"><i class="fas fa-home"></i>1234 Somewhere Road #8254<br />
+        Nashville, TN 00000-0000</li>
+      </ul>
+    </section>
+
+    <!-- Footer -->
+    <footer id="footer">
+      <p class="copyright">&copy; Untitled. All rights reserved. Design: <a href="https://html5up.net">HTML5 UP</a>.</p>
+    </footer>
+  </div>
+</div>

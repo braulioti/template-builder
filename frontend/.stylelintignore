@@ -3,3 +3,5 @@ dist/
 out-tsc/
 *.min.css
 *.min.scss
+*.config.js
+jest.config.js

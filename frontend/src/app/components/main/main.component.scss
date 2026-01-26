@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use '../../../styles/palette-values' as *;
 
 #main {
@@ -19,7 +20,7 @@
     // Aplicar diretamente nas sections do conteúdo
     section {
       padding: 6em 0;
-      border-top: solid 2px rgba(210, 215, 217, 75%) !important; // $palette-border
+      border-top: solid 2px color.change(rgb(210, 215, 217), $alpha: 75%) !important; // $palette-border
 
       // Primeira section (banner) não tem border-top
       &:first-of-type {

@@ -1,4 +1,5 @@
-<div id="wrapper">
-  <app-main></app-main>
-  <app-sidebar></app-sidebar>
+<div id="wrapper" [class.sidebar-inactive]="!isSidebarActive">
+  <app-main #main></app-main>
+  <app-sidebar #sidebar [menus]="menus"></app-sidebar>
+  <button class="sidebar-toggle" (click)="sidebar.toggleSidebar()" [attr.aria-label]="isSidebarActive ? 'Hide sidebar' : 'Show sidebar'"></button>
 </div>

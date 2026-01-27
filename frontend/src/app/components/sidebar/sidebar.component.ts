@@ -1,17 +1,24 @@
-import { Component, OnInit, HostListener, ViewEncapsulation } from '@angular/core';
+import { Component, Input, OnInit, HostListener, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { MenuComponent } from '../menu/menu.component';
+import { Menu } from '../../models/menu.interface';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, MenuComponent],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss',
   encapsulation: ViewEncapsulation.None
 })
 export class SidebarComponent implements OnInit {
+  @Input() menus: Menu[] = [];
+  
   isActive = true; // Sidebar visível por padrão
+
+  toggleSidebar(): void {
+    this.isActive = !this.isActive;
+  }
 
   ngOnInit(): void {
     // Em telas menores, o sidebar começa inativo (como no template original)
@@ -24,15 +31,8 @@ export class SidebarComponent implements OnInit {
   }
 
   private checkScreenSize(): void {
-    // Em telas <= 980px, o sidebar começa inativo
-    if (window.innerWidth <= 980) {
-      this.isActive = false;
-    } else {
-      this.isActive = true;
-    }
-  }
-
-  toggleSidebar(): void {
-    this.isActive = !this.isActive;
+    // O sidebar sempre começa ativo, independente do tamanho da tela
+    // O usuário pode alternar usando o toggle button
+    this.isActive = true;
   }
 }

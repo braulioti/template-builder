@@ -1,18 +1,8 @@
 <div id="sidebar" [class.inactive]="!isActive">
-  <button class="toggle" (click)="toggleSidebar()" [attr.aria-label]="isActive ? 'Hide sidebar' : 'Show sidebar'"></button>
   <div class="inner">
 
     <!-- Menu -->
-    <nav id="menu">
-      <header class="major">
-        <h2>Menu</h2>
-      </header>
-      <ul>
-        <li><a routerLink="/">Homepage</a></li>
-        <li><a routerLink="/generic">Generic</a></li>
-        <li><a routerLink="/elements">Elements</a></li>
-      </ul>
-    </nav>
+    <app-menu [menus]="menus"></app-menu>
 
     <!-- Section -->
     <section>

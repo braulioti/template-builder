@@ -13,16 +13,16 @@ import { Menu } from '../../models/menu.interface';
 })
 export class MenuComponent {
   @Input() menus: Menu[] = [];
-  
-  openSubmenus: { [key: string]: boolean } = {};
+
+  private readonly openSubmenus = new Map<string, boolean>();
 
   toggleSubmenu(route: string, event: Event): void {
     event.preventDefault();
-    this.openSubmenus[route] = !this.openSubmenus[route];
+    this.openSubmenus.set(route, !this.openSubmenus.get(route));
   }
 
   isSubmenuOpen(route: string): boolean {
-    return this.openSubmenus[route] || false;
+    return this.openSubmenus.get(route) ?? false;
   }
 
   hasChildren(menu: Menu): boolean {

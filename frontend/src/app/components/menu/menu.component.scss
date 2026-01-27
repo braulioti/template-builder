@@ -1,0 +1,106 @@
+@use 'sass:color';
+@use '../../../styles/palette-values' as *;
+
+#menu {
+  border-bottom: solid 2px color.change(rgb(210, 215, 217), $alpha: 75%) !important;
+  margin: 0 0 3.5em 0 !important;
+  padding: 0 0 3.5em 0 !important;
+
+  header.major {
+    border-bottom: solid 5px $palette-accent !important;
+    padding-bottom: calc($size-element-margin * 0.75);
+    margin-bottom: calc($size-element-margin * 0.75);
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      border-bottom: solid 1px $palette-border;
+      margin-bottom: 0;
+
+      &:last-child {
+        border-bottom: 0;
+      }
+
+      a {
+        display: block;
+        border-bottom: 0;
+        color: $palette-fg; // Cor cinza padrão para itens não selecionados
+        text-decoration: none;
+        padding: 0.5em 0;
+        transition: color $duration-transition ease-in-out;
+        text-transform: uppercase;
+        position: relative;
+
+        &:hover:not(.active) {
+          color: $palette-accent;
+        }
+
+        &.active {
+          color: $palette-accent !important; // Cor primária para item selecionado
+        }
+
+        i {
+          position: absolute;
+          right: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          transition: transform $duration-transition ease-in-out;
+          font-size: 0.8em;
+
+          &.rotated {
+            transform: translateY(-50%) rotate(180deg);
+          }
+        }
+      }
+
+      &.has-submenu {
+        > a {
+          padding-right: 1.5em;
+
+          &.active {
+            color: $palette-accent;
+          }
+        }
+
+        .submenu {
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height $duration-transition ease-in-out;
+          padding-left: 1em;
+
+          &.open {
+            max-height: 500px;
+          }
+
+          li {
+            border-bottom: solid 1px color.change($palette-border, $alpha: 50%);
+            margin-bottom: 0;
+
+            &:last-child {
+              border-bottom: 0;
+            }
+
+            a {
+              padding: 0.4em 0;
+              font-size: 0.9em;
+              text-transform: none;
+              color: $palette-fg-light; // Cor cinza claro padrão para submenus não selecionados
+
+              &:hover:not(.active) {
+                color: $palette-accent;
+              }
+
+              &.active {
+                color: $palette-accent !important; // Cor primária para submenu selecionado
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

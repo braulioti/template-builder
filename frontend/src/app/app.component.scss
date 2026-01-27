@@ -4,4 +4,129 @@
   display: flex;
   flex-direction: row-reverse;
   min-height: 100vh;
+  position: relative;
+}
+
+.sidebar-toggle {
+  transition: left 0.5s ease;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+  border: 0 !important;
+  display: block;
+  height: 7.5em;
+  left: 30em;
+  line-height: 7.5em;
+  outline: 0 !important;
+  overflow: hidden;
+  position: absolute;
+  text-align: center;
+  text-indent: -15em;
+  white-space: nowrap;
+  top: 0;
+  width: 6em;
+  z-index: calc($misc-z-index-base + 10);
+  cursor: pointer;
+  background: transparent;
+  box-shadow: none !important;
+
+  &:hover {
+    background: transparent !important;
+  }
+
+  &:focus,
+  &:focus-visible,
+  &:active {
+    outline: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  &::before {
+    content: '\f0c9';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    font-size: 2rem;
+    height: inherit;
+    left: 0;
+    line-height: inherit;
+    position: absolute;
+    text-indent: 0;
+    top: 0;
+    width: inherit;
+  }
+
+  @media (max-width: 1280px) {
+    height: 6.25em;
+    left: 30em;
+    line-height: 6.25em;
+    text-indent: 5em;
+    width: 5em;
+
+    &::before {
+      font-size: 1.5rem;
+    }
+  }
+
+  @media (max-width: 980px) {
+    height: 6.25em;
+    left: 30em;
+    line-height: 6.25em;
+    text-indent: 5em;
+    width: 5em;
+    position: fixed;
+
+    &::before {
+      font-size: 1.5rem;
+    }
+  }
+
+  @media (max-width: 736px) {
+    text-indent: 7.25em;
+    width: 7.25em;
+
+    &::before {
+      color: $palette-fg;
+      margin-left: calc(-0.125em / 2);
+      margin-top: calc(-0.5em / 2);
+      font-size: 1.1rem;
+      z-index: 1;
+    }
+
+    &::after {
+      background: rgba(127, 136, 143, 0.25);
+      border-radius: $size-border-radius;
+      content: '';
+      height: 3.5em;
+      left: 1em;
+      position: absolute;
+      top: 1em;
+      width: 5em;
+    }
+  }
+}
+
+// Quando o sidebar está inativo, o botão se move junto (fecha junto com o sidebar)
+#wrapper.sidebar-inactive .sidebar-toggle {
+  left: calc(30em - $size-sidebar-width);
+
+  @media (max-width: 1280px) {
+    left: calc(30em - $size-sidebar-width-alt);
+  }
+
+  @media (max-width: 980px) {
+    left: calc(30em - $size-sidebar-width-alt);
+    text-indent: 6em;
+    width: 6em;
+
+    &::before {
+      font-size: 1.5rem;
+      margin-left: calc(-0.875em / 2);
+    }
+  }
+
+  @media (max-width: 736px) {
+    left: calc(30em - $size-sidebar-width-alt);
+    text-indent: 7.25em;
+    width: 7.25em;
+  }
 }

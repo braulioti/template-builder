@@ -44,6 +44,8 @@
   font-size: 0.9em;
   position: relative;
   width: $size-sidebar-width;
+  min-height: 100vh;
+  height: 100%;
 
   h2 {
     font-size: 1.3888888889em; // 1.25em / 0.9
@@ -81,74 +83,10 @@
     }
   }
 
-  .toggle {
-    transition: left 0.5s ease;
-    -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
-    border: 0;
-    display: block;
-    height: 7.5em;
-    left: $size-sidebar-width;
-    line-height: 7.5em;
-    outline: 0;
-    overflow: hidden;
-    position: fixed; // Mudado para fixed para ficar sempre visível
-    text-align: center;
-    text-indent: -15em;
-    white-space: nowrap;
-    top: 0;
-    width: 6em;
-    z-index: calc($misc-z-index-base + 10); // Z-index maior para ficar acima de tudo
-    cursor: pointer;
-    background: transparent;
-
-    &::before {
-      content: '\f0c9';
-      font-family: 'Font Awesome 5 Free';
-      font-weight: 900;
-      font-size: 2rem;
-      height: inherit;
-      left: 0;
-      line-height: inherit;
-      position: absolute;
-      text-indent: 0;
-      top: 0;
-      width: inherit;
-    }
-
-    // Ocultar em telas grandes
-    @media (min-width: 981px) {
-      display: none;
-    }
-  }
-
   &.inactive {
-    // Em telas grandes, o sidebar sempre fica visível
-    @media (min-width: 981px) {
-      margin-left: 0;
-    }
-    
-    // Em telas menores, esconde o sidebar
-    @media (max-width: 980px) {
-      margin-left: calc($size-sidebar-width-alt * -1);
-    }
+    margin-left: calc($size-sidebar-width * -1);
   }
 
-  #menu {
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-
-      li {
-        margin-bottom: 0.5em;
-
-        a {
-          display: block;
-          padding: 0.5em 0;
-        }
-      }
-    }
-  }
 
   .contact {
     list-style: none;
@@ -215,6 +153,7 @@
     &.inactive {
       box-shadow: none;
       margin-left: calc($size-sidebar-width-alt * -1);
+
     }
 
     > .inner {
@@ -233,63 +172,8 @@
       }
     }
 
-    .toggle {
-      height: 6.25em;
-      left: $size-sidebar-width-alt;
-      line-height: 6.25em;
-      text-indent: 5em;
-      width: 5em;
-      position: fixed; // Fixed para ficar sempre visível
-
-      &::before {
-        font-size: 1.5rem;
-      }
-    }
-
-    &.inactive .toggle {
-      // Quando o sidebar está inativo, o botão fica na posição 0
-      left: 0;
-      text-indent: 6em;
-      width: 6em;
-
-      &::before {
-        font-size: 1.5rem;
-        margin-left: calc(-0.875em / 2);
-      }
-    }
   }
 
   @media (max-width: 736px) {
-    .toggle {
-      text-indent: 7.25em;
-      width: 7.25em;
-
-      &::before {
-        color: $palette-fg;
-        margin-left: calc(-0.125em / 2);
-        margin-top: calc(-0.5em / 2);
-        font-size: 1.1rem;
-        z-index: 1;
-      }
-
-      &::after {
-        // Use direct color value to ensure type recognition
-        $scaled-color: color.scale(#7f888f, $lightness: 35%);
-        background: color.change($scaled-color, $alpha: 0.25);
-        border-radius: $size-border-radius;
-        content: '';
-        height: 3.5em;
-        left: 1em;
-        position: absolute;
-        top: 1em;
-        width: 5em;
-      }
-    }
-
-    &.inactive .toggle {
-      left: 0;
-      text-indent: 7.25em;
-      width: 7.25em;
-    }
   }
 }

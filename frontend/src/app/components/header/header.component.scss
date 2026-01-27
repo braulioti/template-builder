@@ -2,7 +2,7 @@
 
 #header {
   display: flex;
-  border-bottom: solid 5px #3baed4 !important; // $palette-accent
+  border-bottom: solid 5px $palette-accent !important;
   padding: 6em 0 1em 0;
   position: relative;
 

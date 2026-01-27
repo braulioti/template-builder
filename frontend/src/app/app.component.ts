@@ -30,10 +30,10 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   get isSidebarActive(): boolean {
-    return this.sidebar.isActive;
+    return this.sidebar ? this.sidebar.isActive : true;
   }
 
   get menus() {
-    return this.main.menus;
+    return this.main ? this.main.menus : [];
   }
 }

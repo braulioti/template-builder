@@ -14,8 +14,7 @@ import { Menu } from '../../models/menu.interface';
 export class MenuComponent {
   @Input() menus: Menu[] = [];
 
-  /** Estado aberto/fechado por índice do item no menu (cada submenu é independente). */
-  openSubmenus: { [key: number]: boolean } = {};
+  openSubmenus: Record<number, boolean> = {};
 
   toggleSubmenu(index: number, event: Event): void {
     event.preventDefault();

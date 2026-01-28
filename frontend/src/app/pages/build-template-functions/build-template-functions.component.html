@@ -1,0 +1,46 @@
+<!-- Banner -->
+<section id="banner">
+  <div class="content">
+    <header>
+      <h1>Functions</h1>
+    </header>
+    <p>Functions allow you to transform variable values inside placeholders. You use them by writing the function name followed by the argument in parentheses inside double curly braces (e.g. <code>{{ functionPlaceholder }}</code>). The Template Builder evaluates the function and replaces the placeholder with the result. Functions can be used in file content and in prompt results. Functions can also be nested (e.g. <code>{{ nestedExample }}</code>).</p>
+
+    <h2>Available Functions</h2>
+    <div class="table-wrapper">
+      <table class="attributes">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Arguments</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>upper</code></td>
+            <td>1: variable or string</td>
+            <td>Converts the argument to uppercase. Example: <code>{{ upperExample }}</code> converts the value of <code>variableName</code> to all uppercase letters.</td>
+          </tr>
+          <tr>
+            <td><code>lower</code></td>
+            <td>1: variable or string</td>
+            <td>Converts the argument to lowercase. Example: <code>{{ lowerExample }}</code> converts the value of <code>variableName</code> to all lowercase letters.</td>
+          </tr>
+          <tr>
+            <td><code>replace</code></td>
+            <td>3: search, replace, variable or string</td>
+            <td>Replaces all occurrences of the first argument (search) with the second argument (replace) in the third argument (variable or string). Example: <code>{{ replaceExample }}</code> replaces all spaces with underscores in the value of <code>variableName</code>.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Chained Functions</h2>
+    <p>Functions can be chained: the result of one function is passed as the argument to another. The Template Builder evaluates the innermost function first, then the next, and so on. For example, <code>{{ nestedExample }}</code> first replaces spaces with underscores in the variable value, then converts the result to lowercase. Chaining lets you combine transformations (e.g. normalize a name for use as an identifier or filename).</p>
+
+    <h2>Example</h2>
+    <p>The following YAML shows a file using chained functions with variables and string arguments. The variable <code>projectName</code> is transformed with <code>replace(" ", "_", projectName)</code> and <code>lower(...)</code> for package/slug names, and with <code>upper(projectName)</code> for a display label.</p>
+    <pre><code>{{ yamlExample }}</code></pre>
+  </div>
+</section>

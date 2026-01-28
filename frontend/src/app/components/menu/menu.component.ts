@@ -14,15 +14,16 @@ import { Menu } from '../../models/menu.interface';
 export class MenuComponent {
   @Input() menus: Menu[] = [];
 
-  openSubmenus: { [key: string]: boolean } = {};
+  /** Estado aberto/fechado por índice do item no menu (cada submenu é independente). */
+  openSubmenus: { [key: number]: boolean } = {};
 
-  toggleSubmenu(route: string, event: Event): void {
+  toggleSubmenu(index: number, event: Event): void {
     event.preventDefault();
-    this.openSubmenus[route] = !this.openSubmenus[route];
+    this.openSubmenus[index] = !this.openSubmenus[index];
   }
 
-  isSubmenuOpen(route: string): boolean {
-    return this.openSubmenus[route] || false;
+  isSubmenuOpen(index: number): boolean {
+    return this.openSubmenus[index] ?? false;
   }
 
   hasChildren(menu: Menu): boolean {

@@ -19,12 +19,26 @@ export class MainComponent {
 
   menus: Menu[] = [
     {
-      route: '/en',
-      description: 'Home'
+      route: '',
+      description: 'Quick Start',
+      childrens: [
+        { route: '/en', description: 'About Template Builder' },
+        { route: '/en/installation', description: 'Installation' },
+        { route: '/en/using-template', description: 'Using a Template' },
+        { route: '/en/terms-of-use', description: 'Terms of Use' },
+      ],
     },
     {
-      route: '/en/home2',
-      description: 'Home2'
-    }
+      route: '',
+      description: 'Build Template',
+      childrens: [
+        { route: '/en/build-template/introduction', description: 'Introduction' },
+        { route: '/en/build-template/variables', description: 'Variables' },
+        { route: '/en/build-template/remote-files', description: 'Remote Files' },
+        { route: '/en/build-template/files', description: 'Files' },
+        { route: '/en/build-template/prompts', description: 'Prompts' },
+        { route: '/en/build-template/functions', description: 'Functions' },
+      ],
+    },
   ];
 }

@@ -1,0 +1,67 @@
+<!-- Banner -->
+<section id="banner">
+  <div class="content">
+    <header>
+      <h1>Variables</h1>
+    </header>
+    <p>Variables are named placeholders that hold values used when generating files. Their values come from interactive prompts—each prompt input is bound to a variable—or from those defaults when no prompt is used. Once set, variables can be referenced in file content with <code>{{ variableSyntax }}</code>, and inside template functions like <code>{{ upperSyntax }}</code>. In short: variables are the link between what the user types in the CLI and what ends up in the generated files.</p>
+
+    <h2>Attributes</h2>
+    <div class="table-wrapper">
+      <table class="attributes">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Required</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>name</code></td>
+            <td>required</td>
+            <td>Unique identifier for the variable. Used when binding prompt inputs and when referencing the value in file content (e.g. <code>{{ variableSyntax }}</code>).</td>
+          </tr>
+          <tr>
+            <td><code>type</code></td>
+            <td>required</td>
+            <td>Data type of the variable.</td>
+          </tr>
+          <tr>
+            <td><code>value</code></td>
+            <td>optional</td>
+            <td>Default value for the variable. Used when no prompt supplies a value, or as the initial value before prompts run.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Types of variables</h2>
+    <div class="table-wrapper">
+      <table class="attributes">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>string</code></td>
+            <td>Text value. Used for names, labels, and any content that is displayed or written to files.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Using Variables</h2>
+    <p>Variables can be used in the <code>content</code> of a file defined in the <a routerLink="/en/build-template/files">Files</a> section. Put the variable name inside double curly braces (e.g. <code>{{ variableSyntax }}</code>); when generating the project, the Template Builder replaces each occurrence with the variable’s value.</p>
+
+    <h2>Changing Variable Value</h2>
+    <p>The value of a variable can be changed through a prompt. When a prompt input is bound to a variable, the user's response overwrites the variable's default value (if any). This allows templates to be interactive and customizable. For more information on how prompts work, see the <a routerLink="/en/build-template/prompts">Prompts</a> section.</p>
+
+    <h2>Example</h2>
+    <p>Variables can be used in generated files by placing the variable name inside double curly braces, e.g. <code>{{ variableSyntax }}</code>. Below is a minimal template that defines a string variable with value <code>"Hello World"</code> and writes it to <code>output.txt</code>.</p>
+    <pre><code>{{ yamlExample }}</code></pre>
+  </div>
+</section>

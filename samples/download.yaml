@@ -1,5 +1,0 @@
-version: 0.1
-
-remote:
-  - uri: "https://raw.githubusercontent.com/braulioti/template-builder/refs/heads/main/samples/files/compile-mo.php"
-    path: "languages/compile-mo.php"

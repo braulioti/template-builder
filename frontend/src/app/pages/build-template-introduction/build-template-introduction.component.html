@@ -1,0 +1,24 @@
+<!-- Banner -->
+<section id="banner">
+  <div class="content">
+    <header>
+      <h1>Build your first template</h1>
+    </header>
+    <p>The template is defined in a YAML file. In it you declare folders, files, variables, and prompts. Template Builder reads this file and generates the project structure in the current directory.</p>
+    <p>Every template project must specify the <strong>format version</strong> at the top of the YAML. This version must match the Template Builder version without the third number: for example, for Template Builder 0.1.0, use <code>version: 0.1</code> in the file.</p>
+
+    <h2>Example: folder and file</h2>
+    <p>Create a file named <code>hello.yaml</code> with the content below. It defines a folder <code>New Folder</code> and a file <code>Hello.txt</code> inside it with the content <code>Hello World</code>.</p>
+    <pre><code>version: 0.1
+
+folders:
+  - path: "New Folder"
+
+files:
+  - path: "New Folder/Hello.txt"
+    content: "Hello World"</code></pre>
+
+    <p>To generate the folder and file, run the following in a terminal, in the same directory as <code>hello.yaml</code>:</p>
+    <pre><code>TemplateBuilder hello.yaml</code></pre>
+  </div>
+</section>

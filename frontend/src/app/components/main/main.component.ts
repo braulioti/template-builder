@@ -25,6 +25,7 @@ export class MainComponent {
         { route: '/en', description: 'About Template Builder' },
         { route: '/en/installation', description: 'Installation' },
         { route: '/en/using-template', description: 'Using a Template' },
+        { route: '/en/changelog', description: 'Changelog' },
         { route: '/en/terms-of-use', description: 'Terms of Use' },
       ],
     },

@@ -1,54 +1,29 @@
 # Changelog
 
+## [Version 0.1.0] - 2026-02-18
 
-## [Version 0.1.0] - XXXX-XX-XX
-
-This release marks the initial C++ port of the Template Builder project, converting the entire codebase from Delphi/Object Pascal to modern C++17. The primary objective is to enable cross-platform compilation and distribution across Windows, Linux, and macOS while maintaining full compatibility with existing YAML templates. This conversion establishes a solid foundation with a CMake-based build system, integrates yaml-cpp for YAML parsing, implements Google Test framework for comprehensive unit testing, and sets up CI/CD pipelines for continuous integration across all target platforms. The conversion preserves all existing functionality including variable management, interactive prompts, file generation, directory creation, template functions, and UTF-8 encoding support, ensuring seamless migration for existing users.
+This release marks the initial C++ port of the Template Builder project in modern C++17. The primary objective is to enable cross-platform compilation and distribution across Windows, Linux, and macOS while maintaining full compatibility with existing YAML templates. This conversion establishes a solid foundation with a CMake-based build system, integrates yaml-cpp for YAML parsing, implements Google Test framework for comprehensive unit testing, and sets up CI/CD pipelines for continuous integration across all target platforms. The conversion preserves all existing functionality including variable management, interactive prompts, file generation, directory creation, template functions, and UTF-8 encoding support, ensuring seamless migration for existing users.
 
 ### Feature
 - Created cross-platform CMake build system for Windows, Linux, and macOS.
-- Set up directory structure for C++ code conversion from Delphi/Object Pascal.
-- Integrated yaml-cpp library for YAML file parsing using FetchContent.
-- Configured Google Test framework for unit testing with FetchContent.
+- Created structure to import YAML files (variables, prompts, files, folders, remote files).
+- Created release workflow for building artifacts across all platforms (Windows MSI, Linux tar.gz, macOS tar.gz and PKG).
+- Created structure for folder generation.
+- Created dynamic file generation (content and prompt-based).
+- Created structure for remote file download.
+- Created prompt builder for interactive prompts (InputString, Checklist, ArrayList).
+- Created template function `upper` for converting variable values to uppercase.
+- Created template function `lower` for converting variable values to lowercase.
+- Created template function `replace` for replacing text in variable values.
+- Created basic frontend application.
 - Set up GitHub Actions CI/CD pipeline for multiple platforms (Windows MSVC, Linux GCC, macOS x64).
-- Converted TVariableType enum from Pascal to C++ enum class (VariableType).
-- Converted TVariable class from Pascal to C++ class with smart pointers memory management.
-- Implemented VariableType getters and setters.
-- Converted TPromptType enum from Pascal to C++ enum class (PromptType).
-- Converted TPromptInputOption class from Pascal to C++.
-- Converted TPromptInput class from Pascal to C++ using STL containers (std::vector, std::string).
-- Converted TPrompt class from Pascal to C++.
-- Converted TFileData class from Pascal to C++ (FileType).
-- Implemented appropriate references and pointers for FileType.
-- Created unit tests for VariableType class (test_VariableType).
-- Created unit tests for PromptType class (test_PromptType).
-- Created unit tests for FileType class (test_FileType).
-- Implemented C++17 standard with modern practices (RAII, smart pointers).
-- Added support for C++17 filesystem library for cross-platform file operations.
-- Configured build output directories and platform-specific compiler options.
 - Set up MSI installer generation for Windows using WiX Toolset.
 - Created PowerShell script (build-msi.ps1) for generating MSI installer on Windows.
-- Created release workflow for building artifacts across all platforms (Windows MSI, Linux tar.gz, macOS tar.gz and PKG).
-- Converted TPromptBuilder class from Pascal to C++ (PromptBuilder).
-- Converted TFileBuilder class from Pascal to C++ (FileBuilder).
-- Converted TFolderBuilder class from Pascal to C++ (FolderBuilder).
-- Converted TRemoteFileBuilder class from Pascal to C++ (RemoteFileBuilder).
-- Created basic frontend application in `frontend/` (Angular 21, Jest for tests, SCSS for styles).
-
-### Deprecated
-
-### Fix
-- Fixed unused parameter warning in `FolderBuilder::determineDirectoryPath()` by removing unused `originalPath` parameter.
-- Fixed Windows macro conflict (`max`/`min`) in `PromptBuilder.cpp` by undefining Windows macros after including `<windows.h>`.
-- Fixed remote file download functionality by simplifying libcurl integration with automatic fallback to FetchContent.
-- Changed supported template version from "1.0" to "0.1" to match project version.
 
 ### Documentation
+- Created README.md with general project documentation.
+- Created web documentation project in Angular (frontend) with pages for installation, usage, build template (variables, remote files, files, prompts, functions), and terms of use.
 - Created LICENSE file with MIT license.
 - Created TROUBLESHOOTING.md file with solutions to main compilation and deployment problems.
 - Created CONTRIBUTING.md file with instructions on how to contribute to the project.
 - Created release documentation in docs/specs/releases/v_0.1.0/ with use-cases, tasks, and release notes.
-- Documented CMake build process and dependencies.
-- Updated README.md with vcpkg installation instructions and standardized build directory (`cmake-build-debug`).
-- Added troubleshooting section for CURL/HTTPS download issues in TROUBLESHOOTING.md.
-- Added instructions for enabling tests in CLion in README.md.

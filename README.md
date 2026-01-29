@@ -16,6 +16,7 @@ Template Builder is created and maintained by [Bráulio Figueiredo](https://brau
 
 - [Project Structure](#project-structure)
 - [Release Calendar](#release-calendar)
+  - [Status legend](#status-legend)
 - [Technologies](#technologies)
 - [Build and Run](#build-and-run)
   - [Prerequisites](#prerequisites)
@@ -50,11 +51,23 @@ template-builder/
 
 ## Release Calendar
 
-| Date          | Description                                                                          | Version   | Status            |
-|---------------|--------------------------------------------------------------------------------------|-----------|-------------------|
-| March 1, 2026 | In this version we will refactor from Delphi to C++ including multi-platform support | 0.1.0     | Developing        |
-| March 1, 2026 |                                                                                      | 0.2.0     |                   |
-| March 1, 2026 |                                                                                      | 1.0.0     |                   |
+| Date         | Description                                                   | Version | Status                    |
+|--------------|---------------------------------------------------------------|---------|---------------------------|
+| Feb 18, 2026 | Created a new version in C++ including multi-platform support | 0.1.0   | Available for Publication |
+| Abr 1, 2026  |                                                               | 0.2.0   | Planned                   |
+| May 1, 2026  |                                                               | 0.3.0   | Planned                   |
+|              |                                                               | 1.0.0   | On Hold                   |
+
+### Status legend
+
+| Status                        | Description                                                                |
+|-------------------------------|----------------------------------------------------------------------------|
+| **Developing**                | Version under active development; features and fixes in progress.          |
+| **Available for Publication** | Version is feature-complete and ready to be published or released.         |
+| **Published**                 | Version has been released and is available to users.                       |
+| **Planned**                   | Version is scheduled for a future release; scope may still be defined.     |
+| **On Hold**                   | Work on this version is paused; may resume later.                          |
+| **Deprecated**                | Version is no longer recommended; users should upgrade to a newer version. |
 
 ## Technologies
 

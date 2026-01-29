@@ -1,0 +1,25 @@
+<!-- Banner -->
+<section id="banner">
+  <div class="content">
+    <header>
+      <h1>Changelog</h1>
+    </header>
+    <p>This page lists the main changes, new features, and fixes for each version of Template Builder. For the full change history, see the <a [href]="changelogUrl" target="_blank" rel="noopener noreferrer">CHANGELOG.md</a> file in the repository.</p>
+
+    @for (release of releases; track release.version) {
+      <article class="changelog-release">
+        <h2>[Version {{ release.version }}] - {{ release.date }}</h2>
+        <p class="release-description">{{ release.description }}</p>
+
+        @for (section of release.sections; track section.title) {
+          <h3>{{ section.title }}</h3>
+          <ul class="changelog-list">
+            @for (item of section.items; track item) {
+              <li>{{ item }}</li>
+            }
+          </ul>
+        }
+      </article>
+    }
+  </div>
+</section>

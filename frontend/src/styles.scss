@@ -305,6 +305,28 @@ button,
   }
 }
 
+// Footer component (sidebar section + footer)
+app-footer .contact {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    margin-bottom: 1em;
+    padding-left: 2em;
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+
+    i {
+      position: absolute;
+      left: 0;
+      color: $palette-accent;
+      margin-top: 0.25em;
+    }
+  }
+}
+
 // Images
 .image {
   border: 0;

@@ -87,28 +87,6 @@
     margin-left: calc($size-sidebar-width * -1);
   }
 
-
-  .contact {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-
-    li {
-      margin-bottom: 1em;
-      padding-left: 2em;
-      position: relative;
-      display: flex;
-      align-items: flex-start;
-
-      i {
-        position: absolute;
-        left: 0;
-        color: $palette-accent;
-        margin-top: 0.25em;
-      }
-    }
-  }
-
   @media (max-width: 1280px) {
     $pad: 1.6666666667em; // 1.5em / 0.9
 

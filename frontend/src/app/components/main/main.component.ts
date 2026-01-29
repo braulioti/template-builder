@@ -17,9 +17,6 @@ export class MainComponent {
   socialNetworks: SocialNetwork[] = [
     { name: 'Github', faClass: 'fab fa-github', url: 'https://github.com/braulioti/template-builder' }
   ];
-  socialNetworksSidebar: SocialNetwork[] = [
-    { name: environment.authorEmail, url: `mailto:${environment.authorEmail}`, faClass: 'fas fa-envelope' }
-  ];
 
   menus: Menu[] = [
     {

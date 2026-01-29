@@ -4,7 +4,6 @@ import { MenuComponent } from '../menu/menu.component';
 import { FooterComponent } from '../footer/footer.component';
 import { Menu } from '../../models/menu.interface';
 import { SocialNetwork } from '../../models/social-network.interface';
-import {environment} from "../../core/config/environment";
 
 @Component({
   selector: 'app-sidebar',
@@ -20,14 +19,13 @@ export class SidebarComponent implements OnInit {
   @Input() footerDetails = 'Template Builder is a CLI tool that generates project templates from YAML files. Define variables, prompts, files, folders, and remote downloads in a single template file and run it to scaffold new projects with interactive prompts and variable substitution.';
   @Input() footerSocialNetworks: SocialNetwork[] = [];
 
-  isActive = true; // Sidebar visível por padrão
+  isActive = true;
 
   toggleSidebar(): void {
     this.isActive = !this.isActive;
   }
 
   ngOnInit(): void {
-    // Em telas menores, o sidebar começa inativo (como no template original)
     this.checkScreenSize();
   }
 

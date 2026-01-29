@@ -3,7 +3,6 @@ import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from '../header/header.component';
 import { SocialNetwork } from '../../models/social-network.interface';
 import { Menu } from '../../models/menu.interface';
-import {environment} from "../../core/config/environment";
 
 @Component({
   selector: 'app-main',

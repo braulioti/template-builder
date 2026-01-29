@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from '../header/header.component';
 import { SocialNetwork } from '../../models/social-network.interface';
 import { Menu } from '../../models/menu.interface';
+import {environment} from "../../core/config/environment";
 
 @Component({
   selector: 'app-main',
@@ -15,6 +16,9 @@ import { Menu } from '../../models/menu.interface';
 export class MainComponent {
   socialNetworks: SocialNetwork[] = [
     { name: 'Github', faClass: 'fab fa-github', url: 'https://github.com/braulioti/template-builder' }
+  ];
+  socialNetworksSidebar: SocialNetwork[] = [
+    { name: environment.authorEmail, url: `mailto:${environment.authorEmail}`, faClass: 'fas fa-envelope' }
   ];
 
   menus: Menu[] = [

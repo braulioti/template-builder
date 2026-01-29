@@ -7,5 +7,5 @@ export interface SocialNetwork {
   /** Font Awesome icon class (e.g., 'fab fa-twitter') */
   faClass: string;
   /** URL to the social network profile */
-  url: string;
+  url?: string;
 }

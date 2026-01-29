@@ -15,6 +15,9 @@ export interface Environment {
   apiTimeout: number;
   enableAnalytics: boolean;
   enableDebug: boolean;
+  author: string;
+  authorURI: string;
+  authorEmail: string;
 }
 
 export const environment: Environment = env;

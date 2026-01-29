@@ -1,0 +1,107 @@
+<!-- Banner -->
+<section id="banner">
+  <div class="content">
+    <header>
+      <h1>Prompts</h1>
+    </header>
+    <p>Prompts are interactive questions shown to the user when running a template. Each prompt collects input through one or more inputs, binds those values to variables, and produces a result that can be used as file content. When a prompt input is bound to a variable, the variable's value is overwritten by the user's response. Prompts are executed in the order that files are created in the YAML. A variable modified by a prompt can be used in another file, and it can also be modified again by another prompt in a different file. Prompts make templates dynamic by allowing users to customize the generated output based on their responses.</p>
+
+    <h2>Attributes</h2>
+    <div class="table-wrapper">
+      <table class="attributes">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Required</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>name</code></td>
+            <td>required</td>
+            <td>Unique identifier for the prompt. Used when referencing the prompt in a file entry (e.g. <code>prompt: promptName</code>).</td>
+          </tr>
+          <tr>
+            <td><code>inputs</code></td>
+            <td>optional</td>
+            <td>Array of input questions shown to the user. Each input binds a user response to a variable. If omitted, the prompt only produces its <code>result</code> without collecting any input.</td>
+          </tr>
+          <tr>
+            <td><code>result</code></td>
+            <td>optional</td>
+            <td>Content that becomes the file content when the prompt is referenced in a file entry. Can use variable placeholders (e.g. <code>{{ variablePlaceholder }}</code>) that are replaced with the values collected from inputs. If omitted, the file will be created empty.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Inputs</h2>
+    <p>Each input in a prompt's <code>inputs</code> array represents a question shown to the user. The user's response is bound to the specified variable and can be used in the prompt's <code>result</code> or in file content.</p>
+
+    <h3>Input Attributes</h3>
+    <div class="table-wrapper">
+      <table class="attributes">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Required</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>input</code></td>
+            <td>required</td>
+            <td>Text of the question displayed to the user (e.g. <code>"Enter your project name: "</code>).</td>
+          </tr>
+          <tr>
+            <td><code>variable</code></td>
+            <td>required</td>
+            <td>Name of the variable to which the user's response will be bound. The variable must be defined in the <code>variables</code> section.</td>
+          </tr>
+          <tr>
+            <td><code>type</code></td>
+            <td>required</td>
+            <td>Type of input control. Determines how the question is presented and how the user responds. See Input Types below.</td>
+          </tr>
+          <tr>
+            <td><code>options</code></td>
+            <td>optional</td>
+            <td>Array of options for <code>Checklist</code> type. Each option has <code>name</code> (displayed) and <code>value</code> (assigned to variable). Required for Checklist, ignored for InputString and ArrayList.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Input Types</h3>
+    <div class="table-wrapper">
+      <table class="attributes">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>InputString</code></td>
+            <td>Text input field. User types a free-form text response. The response is assigned directly to the bound variable.</td>
+          </tr>
+          <tr>
+            <td><code>Checklist</code></td>
+            <td>Multiple choice selection. User can select one or more options from the provided <code>options</code> list. The selected option values are assigned to the variable.</td>
+          </tr>
+          <tr>
+            <td><code>ArrayList</code></td>
+            <td>Free-form text input that accumulates multiple entries. User types text and presses Enter to add each entry. Entries are accumulated until the user enters an empty line. All entries are stored as multiple lines separated by line breaks and assigned to the variable.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Example</h2>
+    <p>The following YAML demonstrates a prompt using all three input types: <code>InputString</code> for free-form text, <code>Checklist</code> for multiple choice selection, and <code>ArrayList</code> for accumulating multiple text entries.</p>
+    <pre><code>{{ yamlExample }}</code></pre>
+  </div>
+</section>

@@ -1,4 +1,4 @@
-@use '../../../styles/palette-values' as *;
+@use '../../../styles/variables' as *;
 
 // Banner
 #banner {
@@ -19,7 +19,7 @@
     flex-grow: 0;
     flex-shrink: 0;
     display: block;
-    margin: 0 0 $size-element-margin calc($size-element-margin * 2);
+    margin: 0 0 _size(element-margin) _multiply(_size(element-margin), 2);
     width: 50%;
 
     img {
@@ -46,7 +46,7 @@
     .image {
       flex-grow: 0;
       flex-shrink: 0;
-      margin: 0 0 calc($size-element-margin * 2) 0;
+      margin: 0 0 _multiply(_size(element-margin), 2) 0;
       height: 25em;
       max-height: 50vh;
       min-height: 18em;
@@ -63,12 +63,11 @@
 
 // Features
 .features {
-  $gutter: $size-gutter;
-  $gutter-negative: -3em;
+  $gutter: _size(gutter);
 
   display: flex;
   flex-wrap: wrap;
-  margin: 0 0 $size-element-margin $gutter-negative;
+  margin: 0 0 _size(element-margin) _multiply($gutter, -1);
   width: calc(100% + #{$gutter});
 
   article {
@@ -79,11 +78,11 @@
     width: calc(50% - #{$gutter});
 
     &:nth-child(2n - 1) {
-      margin-right: calc($gutter * 0.5);
+      margin-right: _multiply($gutter, 0.5);
     }
 
     &:nth-child(2n) {
-      margin-left: calc($gutter * 0.5);
+      margin-left: _multiply($gutter, 0.5);
     }
 
     &:nth-last-child(1),
@@ -98,13 +97,13 @@
       align-items: center;
       justify-content: center;
       height: 10em;
-      margin: 0 $size-element-margin 0 0;
+      margin: 0 _size(element-margin) 0 0;
       text-align: center;
       width: 10em;
       position: relative;
 
       i {
-        color: $palette-accent;
+        color: _palette(accent);
         font-size: 2.75rem;
         position: relative;
         z-index: 1;
@@ -113,7 +112,7 @@
       &::after {
         transform: rotate(45deg);
         border-radius: 0.25rem;
-        border: solid 2px $palette-border;
+        border: solid 2px _palette(border);
         content: '';
         display: block;
         height: 7em;
@@ -137,7 +136,7 @@
   }
 
   @media (max-width: 980px) {
-    margin: 0 0 $size-element-margin 0;
+    margin: 0 0 _size(element-margin) 0;
     width: 100%;
 
     article {
@@ -185,7 +184,7 @@
 
       .icon {
         height: 6em;
-        margin: 0 0 calc($size-element-margin * 0.75) 0;
+        margin: 0 0 _multiply(_size(element-margin), 0.75) 0;
         width: 6em;
 
         i {
@@ -204,12 +203,11 @@
 
 // Posts
 .posts {
-  $gutter: 6em; // $size-gutter * 2 = 3em * 2
-  $gutter-negative: -6em;
+  $gutter: _multiply(_size(gutter), 2);
 
   display: flex;
   flex-wrap: wrap;
-  margin: 0 0 $size-element-margin $gutter-negative;
+  margin: 0 0 _size(element-margin) _multiply($gutter, -1);
   width: calc(100% + #{$gutter});
 
   article {
@@ -220,19 +218,19 @@
     width: calc(33.333% - #{$gutter});
 
     &::before {
-      background: $palette-border;
+      background: _palette(border);
       content: '';
       display: block;
       height: calc(100% + #{$gutter});
-      left: calc($gutter * -0.5);
+      left: _multiply($gutter, -0.5);
       position: absolute;
       top: 0;
       width: 1px;
     }
 
     &::after {
-      background: $palette-border;
-      bottom: calc($gutter * -0.5);
+      background: _palette(border);
+      bottom: _multiply($gutter, -0.5);
       content: '';
       display: block;
       height: 1px;
@@ -247,7 +245,7 @@
 
     .image {
       display: block;
-      margin: 0 0 $size-element-margin 0;
+      margin: 0 0 _size(element-margin) 0;
 
       img {
         display: block;
@@ -267,10 +265,9 @@
   }
 
   @media (max-width: 736px) {
-    $gutter: 4.5em; // $size-gutter * 1.5 = 3em * 1.5
-    $gutter-negative: -4.5em;
+    $gutter: _multiply(_size(gutter), 1.5);
 
-    margin: 0 0 $size-element-margin $gutter-negative;
+    margin: 0 0 _size(element-margin) _multiply($gutter, -1);
     width: calc(100% + #{$gutter});
 
     article {
@@ -279,11 +276,11 @@
 
       &::before {
         height: calc(100% + #{$gutter});
-        left: calc($gutter * -0.5);
+        left: _multiply($gutter, -0.5);
       }
 
       &::after {
-        bottom: calc($gutter * -0.5);
+        bottom: _multiply($gutter, -0.5);
         width: calc(100% + #{$gutter});
       }
 
@@ -294,9 +291,9 @@
   }
 
   @media (max-width: 480px) {
-    $gutter: 4.5em; // $size-gutter * 1.5 = 3em * 1.5
+    $gutter: _multiply(_size(gutter), 1.5);
 
-    margin: 0 0 $size-element-margin 0;
+    margin: 0 0 _size(element-margin) 0;
     width: 100%;
 
     article {
@@ -325,6 +322,6 @@
 // Section header
 section {
   header.major {
-    margin-bottom: $size-element-margin;
+    margin-bottom: _size(element-margin);
   }
 }

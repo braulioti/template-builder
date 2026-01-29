@@ -4,14 +4,14 @@
     <h2>Menu</h2>
   </header>
   <ul>
-    @for (menu of menus; track menu.route) {
+    @for (menu of menus; track $index) {
       @if (hasChildren(menu)) {
         <li class="has-submenu">
-          <a href="#" (click)="toggleSubmenu(menu.route, $event)" [class.active]="isSubmenuOpen(menu.route)">
+          <a href="#" (click)="toggleSubmenu($index, $event)" [class.active]="isSubmenuOpen($index)">
             {{ menu.description }}
-            <i class="fas fa-chevron-down" [class.rotated]="isSubmenuOpen(menu.route)"></i>
+            <i class="fas fa-chevron-down" [class.rotated]="isSubmenuOpen($index)"></i>
           </a>
-          <ul class="submenu" [class.open]="isSubmenuOpen(menu.route)">
+          <ul class="submenu" [class.open]="isSubmenuOpen($index)">
             @for (child of menu.childrens; track child.route) {
               <li>
                 <a [routerLink]="child.route" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">{{ child.description }}</a>

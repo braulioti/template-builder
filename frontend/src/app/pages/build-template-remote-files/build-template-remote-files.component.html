@@ -1,0 +1,38 @@
+<!-- Banner -->
+<section id="banner">
+  <div class="content">
+    <header>
+      <h1>Remote Files</h1>
+    </header>
+    <p>Remote files let your template download content from URLs (e.g. scripts, configs, or assets) and place them into the generated project. You declare each remote file in the template YAML under the <code>remote</code> key, with <code>uri</code> (the URL to fetch) and <code>path</code> (where to save it). The Template Builder fetches the file and writes it at the given path when the template is run.</p>
+
+    <h2>Attributes</h2>
+    <div class="table-wrapper">
+      <table class="attributes">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Required</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>uri</code></td>
+            <td>required</td>
+            <td>URL of the file to download. Must be a direct link to the resource (e.g. <code>https://example.com/file.svg</code>), not a wiki or HTML page that displays the file.</td>
+          </tr>
+          <tr>
+            <td><code>path</code></td>
+            <td>required</td>
+            <td>Destination path where the downloaded file will be saved in the generated project. Relative to the project output directory (e.g. <code>assets/HelloWorld.svg</code>, <code>languages/compile-mo.php</code>).</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Example</h2>
+    <p>The following YAML downloads the <a href="https://commons.wikimedia.org/wiki/File:HelloWorld.svg" target="_blank" rel="noopener noreferrer">Hello World SVG from Wikimedia Commons</a> (public domain) and saves with another name in the generated project.</p>
+    <pre><code>{{ yamlExample }}</code></pre>
+  </div>
+</section>

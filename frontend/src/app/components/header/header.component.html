@@ -3,7 +3,7 @@
   <ul class="icons">
     @for (social of socialNetworks; track social.name) {
       <li>
-        <a [href]="social.url" [attr.aria-label]="social.name">
+        <a [href]="social.url" [attr.aria-label]="social.name" target="_blank">
           <i [class]="social.faClass"></i>
           <span class="label">{{ social.name }}</span>
         </a>

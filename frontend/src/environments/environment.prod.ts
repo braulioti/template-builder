@@ -12,4 +12,7 @@ export const environment = {
   apiTimeout: 30000,
   enableAnalytics: false,
   enableDebug: false,
+  author: 'Bráulio Figueiredo',
+  authorURI: 'https://brau.io',
+  authorEmail: 'braulio@braulioti.com',
 };

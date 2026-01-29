@@ -1,8 +1,10 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
+import {Component, OnInit, AfterViewInit, ViewChild, ViewEncapsulation, ChangeDetectorRef, Input} from '@angular/core';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { MainComponent } from './components/main/main.component';
 import { ConfigService } from './core/config/config.service';
 import { Menu } from './models/menu.interface';
+import { SocialNetwork } from './models/social-network.interface';
+import { environment } from './core/config/environment';
 
 @Component({
   selector: 'app-root',
@@ -17,6 +19,10 @@ export class AppComponent implements OnInit, AfterViewInit {
   @ViewChild('main') main!: MainComponent;
 
   menus: Menu[] = [];
+  socialNetworks: SocialNetwork[] = [];
+  footerSocialNetworks: SocialNetwork[] = [];
+  @Input() footerTitle = 'About this project';
+  @Input() footerDetails = 'Template Builder is a CLI tool that generates project templates from YAML files. Define variables, prompts, files, folders, and remote downloads in a single template file and run it to scaffold new projects with interactive prompts and variable substitution.';
 
   constructor(
     private config: ConfigService,
@@ -29,9 +35,13 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    // Initialize menus after view is initialized
+    // Initialize menus and social networks after view is initialized
     if (this.main) {
       this.menus = this.main.menus;
+      this.socialNetworks = this.main.socialNetworks;
+      this.footerSocialNetworks = [
+        { name: environment.authorEmail, url: `mailto:${environment.authorEmail}`, faClass: 'fas fa-envelope' }
+      ];
       this.cdr.detectChanges();
     }
 

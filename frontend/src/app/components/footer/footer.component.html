@@ -1,0 +1,28 @@
+<!-- Section -->
+<section>
+  <header class="major">
+    <h2>{{ title }}</h2>
+  </header>
+  <p>{{ details }}</p>
+  <ul class="contact">
+    @for (social of socialNetworks; track social.name) {
+      <li>
+        <i [class]="social.faClass"></i>
+        @if (social.url) {
+          <a [href]="social.url" [attr.aria-label]="social.name" target="_blank" rel="noopener noreferrer">{{ social.name }}</a>
+        } @else {
+          <span class="label">{{ social.name }}</span>
+        }
+      </li>
+    }
+  </ul>
+  <br />
+</section>
+
+<!-- Footer -->
+<footer id="footer">
+  <p class="copyright">
+    &copy; {{ environment.appTitle }}. All rights reserved.
+    Powered By: <a href="{{ environment.authorURI }}">{{ environment.author }}</a>.
+  </p>
+</footer>

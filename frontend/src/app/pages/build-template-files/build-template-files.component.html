@@ -1,0 +1,52 @@
+<!-- Banner -->
+<section id="banner">
+  <div class="content">
+    <header>
+      <h1>Files</h1>
+    </header>
+    <p>Files are the output of your template: each entry under the <code>files</code> key defines a file to be created in the generated project. You can supply the text inline or via a prompt; Template Builder creates each file and writes the result when the template is run.</p>
+
+    <h2>Attributes</h2>
+    <div class="table-wrapper">
+      <table class="attributes">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Required</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>path</code></td>
+            <td>required</td>
+            <td>Destination path of the file in the generated project. Relative to the project output directory (e.g. <code>inc/customize-register.php</code>, <code>style.css</code>).</td>
+          </tr>
+          <tr>
+            <td><code>content</code></td>
+            <td>optional</td>
+            <td>Inline content of the file. Can be plain text or use variable placeholders (e.g. <code>{{ variablePlaceholder }}</code>). If omitted and no <code>prompt</code> is set, the file is created empty.</td>
+          </tr>
+          <tr>
+            <td><code>prompt</code></td>
+            <td>optional</td>
+            <td>Name of a prompt defined in the <code>prompts</code> section. The prompt’s <code>result</code> becomes the file content. Useful when content is long or shared across multiple files.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Generate a File</h2>
+    <p>For each entry in <code>files</code>, Template Builder creates the file at the destination path. If any subfolders in that path do not exist, they are created automatically. When both optional attributes are omitted—no inline content and no prompt—the file is generated empty. This is useful for placeholder files or when you intend to fill them later.</p>
+
+    <h2>Prompt</h2>
+    <p>During file generation, a prompt can be called to fill variables. When a file entry references a prompt, the prompt's inputs are shown to the user, their responses are bound to the associated variables, and the prompt's result becomes the file content. For more details on how prompts work, see the <a routerLink="/en/build-template/prompts">Prompts</a> section.</p>
+
+    <h2>Content</h2>
+    <p>The <code>content</code> attribute holds the full content of the file. You can use <a routerLink="/en/build-template/variables">variables</a> and <a routerLink="/en/build-template/functions">functions</a> inside the content; the Template Builder replaces placeholders with the resolved values when generating the file. If <code>content</code> is omitted and no <code>prompt</code> is set, the Template Builder creates an empty file.</p>
+
+    <h2>Example</h2>
+    <p>The following YAML demonstrates different ways to create files: using a variable in content, creating an empty file, using fixed content, and placing a file in a subfolder.</p>
+    <pre><code>{{ yamlExample }}</code></pre>
+  </div>
+</section>

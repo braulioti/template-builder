@@ -107,85 +107,68 @@ void ParserYAML::loadVariables(const YAML::Node& root) {
     }
 }
 
+void ParserYAML::loadPromptInput(Prompt* promptObj, const YAML::Node& inputItem, size_t inputIndex, size_t promptIndex) {
+    auto promptInput = std::make_unique<PromptInput>();
+    promptInput->setInput(inputItem["input"].Scalar());
+    std::string variableName = inputItem["variable"].as<std::string>();
+    Variable* foundVariable = findVariableByName(variableName);
+    if (foundVariable == nullptr) {
+        throw std::runtime_error(
+            "Variable \"" + variableName + "\" not found for input at index " +
+            std::to_string(inputIndex) + " in prompt at index " + std::to_string(promptIndex) + "."
+        );
+    }
+    promptInput->setVariable(foundVariable);
+    promptInput->setType(parsePromptType(inputItem["type"].as<std::string>()));
+    if (inputItem["options"]) {
+        const YAML::Node& optionsNode = inputItem["options"];
+        if (!optionsNode.IsSequence()) {
+            throw std::runtime_error(
+                "\"options\" must be a sequence (array) for input at index " +
+                std::to_string(inputIndex) + " in prompt at index " + std::to_string(promptIndex) + "."
+            );
+        }
+        for (size_t k = 0; k < optionsNode.size(); ++k) {
+            const YAML::Node& optionItem = optionsNode[k];
+            auto optionObj = std::make_unique<PromptInputOption>(
+                optionItem["name"].as<std::string>(),
+                optionItem["value"].as<std::string>()
+            );
+            promptInput->addOption(std::move(optionObj));
+        }
+    }
+    promptObj->addInput(std::move(promptInput));
+}
+
+void ParserYAML::loadSinglePrompt(const YAML::Node& promptItem, size_t promptIndex) {
+    auto promptObj = std::make_unique<Prompt>();
+    promptObj->setName(promptItem["name"].as<std::string>());
+    if (promptItem["result"]) {
+        promptObj->setResult(promptItem["result"].as<std::string>());
+    }
+    if (promptItem["inputs"]) {
+        const YAML::Node& inputsNode = promptItem["inputs"];
+        if (!inputsNode.IsSequence()) {
+            throw std::runtime_error("\"inputs\" must be a sequence (array) for prompt at index " + std::to_string(promptIndex) + ".");
+        }
+        for (size_t j = 0; j < inputsNode.size(); ++j) {
+            loadPromptInput(promptObj.get(), inputsNode[j], j, promptIndex);
+        }
+    }
+    m_prompts.push_back(std::move(promptObj));
+}
+
 void ParserYAML::loadPrompts(const YAML::Node& root) {
     if (!root["prompts"]) {
-        return; // No prompts section, list remains empty
+        return;
     }
-
     const YAML::Node& promptsNode = root["prompts"];
     if (!promptsNode.IsSequence()) {
         throw std::runtime_error("\"prompts\" must be a sequence (array) in YAML.");
     }
-
     m_prompts.clear();
     for (size_t i = 0; i < promptsNode.size(); ++i) {
-        const YAML::Node& promptItem = promptsNode[i];
-
-        auto promptObj = std::make_unique<Prompt>();
-        promptObj->setName(promptItem["name"].as<std::string>());
-        
-        if (promptItem["result"]) {
-            promptObj->setResult(promptItem["result"].as<std::string>());
-        }
-
-        // Load inputs
-        if (promptItem["inputs"]) {
-            const YAML::Node& inputsNode = promptItem["inputs"];
-            if (!inputsNode.IsSequence()) {
-                throw std::runtime_error("\"inputs\" must be a sequence (array) for prompt at index " + std::to_string(i) + ".");
-            }
-
-            for (size_t j = 0; j < inputsNode.size(); ++j) {
-                const YAML::Node& inputItem = inputsNode[j];
-                
-                auto promptInput = std::make_unique<PromptInput>();
-                // Use Scalar() to preserve trailing spaces - as<std::string>() may trim them
-                std::string inputValue = inputItem["input"].Scalar();
-                promptInput->setInput(inputValue);
-
-                // Find variable by name
-                std::string variableName = inputItem["variable"].as<std::string>();
-                Variable* foundVariable = findVariableByName(variableName);
-                
-                if (foundVariable == nullptr) {
-                    throw std::runtime_error(
-                        "Variable \"" + variableName + "\" not found for input at index " + 
-                        std::to_string(j) + " in prompt at index " + std::to_string(i) + "."
-                    );
-                }
-
-                promptInput->setVariable(foundVariable);
-
-                // Convert type string to enum
-                std::string typeStr = inputItem["type"].as<std::string>();
-                promptInput->setType(parsePromptType(typeStr));
-
-                // Load options
-                if (inputItem["options"]) {
-                    const YAML::Node& optionsNode = inputItem["options"];
-                    if (optionsNode.IsSequence()) {
-                        for (size_t k = 0; k < optionsNode.size(); ++k) {
-                            const YAML::Node& optionItem = optionsNode[k];
-                            
-                            auto optionObj = std::make_unique<PromptInputOption>(
-                                optionItem["name"].as<std::string>(),
-                                optionItem["value"].as<std::string>()
-                            );
-                            promptInput->addOption(std::move(optionObj));
-                        }
-                    } else {
-                        throw std::runtime_error(
-                            "\"options\" must be a sequence (array) for input at index " + 
-                            std::to_string(j) + " in prompt at index " + std::to_string(i) + "."
-                        );
-                    }
-                }
-
-                promptObj->addInput(std::move(promptInput));
-            }
-        }
-
-        m_prompts.push_back(std::move(promptObj));
+        loadSinglePrompt(promptsNode[i], i);
     }
 }
 
@@ -266,51 +249,50 @@ void ParserYAML::loadRemoteFiles(const YAML::Node& root) {
     }
 }
 
-void ParserYAML::buildAll() {
-    // Build folders first - continue even if one fails
-    // Folders must be created before files to ensure directory structure exists
+void ParserYAML::buildFolders() {
     for (const auto& folderItem : m_folders) {
         try {
             m_folderBuilder->build(folderItem.get());
             std::cout << "Created folder " << folderItem->getPath() << std::endl;
         } catch (const std::exception& e) {
             std::cerr << "Error creating folder " << folderItem->getPath() << ": " << e.what() << std::endl;
-            // Continue processing other folders
         } catch (...) {
             std::cerr << "Unknown error creating folder " << folderItem->getPath() << std::endl;
-            // Continue processing other folders
         }
     }
+}
 
-    // Build files after folders - continue even if one fails
+void ParserYAML::buildFiles() {
     for (const auto& fileItem : m_files) {
         try {
             m_fileBuilder->build(fileItem.get());
             std::cout << "Created file " << fileItem->getPath() << std::endl;
         } catch (const std::exception& e) {
             std::cerr << "Error creating file " << fileItem->getPath() << ": " << e.what() << std::endl;
-            // Continue processing other files
         } catch (...) {
             std::cerr << "Unknown error creating file " << fileItem->getPath() << std::endl;
-            // Continue processing other files
         }
-        // Ensure we continue to the next file even if there was an error
         std::cout.flush();
         std::cerr.flush();
     }
+}
 
-    // Download remote files - continue even if one fails
+void ParserYAML::buildRemoteFiles() {
     for (const auto& remoteFileItem : m_remoteFiles) {
         try {
             m_remoteFileBuilder->build(remoteFileItem.get());
         } catch (const std::exception& e) {
             std::cerr << "Error downloading remote file " << remoteFileItem->getPath() << ": " << e.what() << std::endl;
-            // Continue processing other remote files
         } catch (...) {
             std::cerr << "Unknown error downloading remote file " << remoteFileItem->getPath() << std::endl;
-            // Continue processing other remote files
         }
     }
+}
+
+void ParserYAML::buildAll() {
+    buildFolders();
+    buildFiles();
+    buildRemoteFiles();
 }
 
 Variable* ParserYAML::findVariableByName(const std::string& name) const {

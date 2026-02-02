@@ -7,7 +7,7 @@ const config = {
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
   collectCoverageFrom: ['src/**/*.ts', '!src/**/*.spec.ts', '!src/main.ts'],
   coverageDirectory: 'coverage',
-  coverageReporters: ['html', 'text-summary'],
+  coverageReporters: ['html', 'text-summary', 'lcov'],
   moduleNameMapper: {
     '^@app/(.*)$': '<rootDir>/src/app/$1',
   },

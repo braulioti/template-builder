@@ -82,6 +82,49 @@ void RemoteFileBuilder::ensureDirectoryExists(const std::filesystem::path& fileP
     }
 }
 
+namespace {
+
+void setCurlOptions(CURL* curl, const std::string& uri, std::ofstream* outFile) {
+    curl_easy_setopt(curl, CURLOPT_URL, uri.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, outFile);
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 5L);
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 TemplateBuilder/1.0");
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);
+    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 10L);
+}
+
+void removeFileIfExists(const std::filesystem::path& filePath) {
+    if (std::filesystem::exists(filePath)) {
+        std::filesystem::remove(filePath);
+    }
+}
+
+bool checkDownloadResult(CURLcode res, long httpCode, const std::filesystem::path& filePath) {
+    if (res != CURLE_OK) {
+        removeFileIfExists(filePath);
+        std::cerr << " (CURL error: " << curl_easy_strerror(res) << ")" << std::endl;
+        return false;
+    }
+    if (httpCode != 200) {
+        removeFileIfExists(filePath);
+        std::cerr << " (HTTP " << httpCode << ")" << std::endl;
+        return false;
+    }
+    bool fileWritten = std::filesystem::exists(filePath) && std::filesystem::file_size(filePath) > 0;
+    if (!fileWritten) {
+        removeFileIfExists(filePath);
+        std::cerr << " (File was not written or is empty)" << std::endl;
+        return false;
+    }
+    return true;
+}
+
+} // namespace
+
 bool RemoteFileBuilder::downloadFile(const std::string& uri, const std::filesystem::path& filePath) const {
     CURL* curl = curl_easy_init();
     if (!curl) {
@@ -95,79 +138,18 @@ bool RemoteFileBuilder::downloadFile(const std::string& uri, const std::filesyst
         return false;
     }
 
-    // Set URL
-    curl_easy_setopt(curl, CURLOPT_URL, uri.c_str());
-    
-    // Set write callback
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &outFile);
-    
-    // Follow redirects (important for GitHub raw URLs)
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 5L);
-    
-    // Set User-Agent (some servers like GitHub require this)
-    // Using a more realistic User-Agent to avoid blocking
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 TemplateBuilder/1.0");
-    
-    // SSL options
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
-    
-    // Timeout options
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);
-    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 10L);
-
+    setCurlOptions(curl, uri, &outFile);
     CURLcode res = curl_easy_perform(curl);
-    
-    // Flush and close file before checking results
     outFile.flush();
     outFile.close();
-    
+
     long httpCode = 0;
     if (res == CURLE_OK) {
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
     }
-    
-    // Check if file was written successfully
-    bool fileExists = std::filesystem::exists(filePath);
-    bool fileWritten = fileExists && std::filesystem::file_size(filePath) > 0;
-
-    if (res != CURLE_OK) {
-        // Get error message from curl
-        const char* errorMsg = curl_easy_strerror(res);
-        curl_easy_cleanup(curl);
-        
-        // Clean up partial file on error
-        if (fileExists) {
-            std::filesystem::remove(filePath);
-        }
-        
-        std::cerr << " (CURL error: " << errorMsg << ")" << std::endl;
-        return false;
-    }
-
     curl_easy_cleanup(curl);
 
-    if (httpCode != 200) {
-        // Clean up partial file on error
-        if (fileExists) {
-            std::filesystem::remove(filePath);
-        }
-        std::cerr << " (HTTP " << httpCode << ")" << std::endl;
-        return false;
-    }
-
-    if (!fileWritten) {
-        // Clean up empty file
-        if (fileExists) {
-            std::filesystem::remove(filePath);
-        }
-        std::cerr << " (File was not written or is empty)" << std::endl;
-        return false;
-    }
-
-    return true;
+    return checkDownloadResult(res, httpCode, filePath);
 }
 
 void RemoteFileBuilder::showDownloadStatus(const std::string& path) const {

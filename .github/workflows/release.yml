@@ -489,6 +489,7 @@ jobs:
       VERSION: ${{ github.ref_name }}
       IMAGE: ${{ vars.NEXUS_REGISTRY }}/template-builder:${{ github.ref_name }}
       DEPLOY_PATH: ${{ vars.PRODUCTION_DEPLOY_PATH != '' && vars.PRODUCTION_DEPLOY_PATH || '/opt/template-builder' }}
+      PRODUCTION_PORT: ${{ vars.PRODUCTION_PORT != '' && vars.PRODUCTION_PORT || '80' }}
     steps:
       - name: Check deploy variables
         id: deploy_vars
@@ -513,6 +514,14 @@ jobs:
       - uses: actions/checkout@v4
         if: steps.deploy_vars.outputs.skip != 'true'
 
+      - name: Create .env for docker-compose
+        if: steps.deploy_vars.outputs.skip != 'true'
+        run: |
+          echo "IMAGE=${{ env.IMAGE }}" > deploy.env
+          echo "PORT=${{ env.PRODUCTION_PORT }}" >> deploy.env
+          echo "Created deploy.env:"
+          cat deploy.env
+
       - name: Create deployment directory on server
         if: steps.deploy_vars.outputs.skip != 'true'
         uses: appleboy/ssh-action@v1.0.3
@@ -522,17 +531,17 @@ jobs:
           key: ${{ secrets.PRODUCTION_SSH_KEY }}
           script: mkdir -p ${{ env.DEPLOY_PATH }}
 
-      - name: Copy docker-compose to production
+      - name: Copy docker-compose and .env to production
         if: steps.deploy_vars.outputs.skip != 'true'
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ vars.PRODUCTION_HOST }}
           username: ${{ vars.PRODUCTION_USER }}
           key: ${{ secrets.PRODUCTION_SSH_KEY }}
-          source: "docker-compose.yml"
+          source: "docker-compose.yml,deploy.env"
           target: ${{ env.DEPLOY_PATH }}
 
-      - name: Deploy with docker-compose
+      - name: Rename .env on server and deploy
         if: steps.deploy_vars.outputs.skip != 'true'
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -541,6 +550,6 @@ jobs:
           key: ${{ secrets.PRODUCTION_SSH_KEY }}
           script: |
             cd ${{ env.DEPLOY_PATH }}
-            export IMAGE=${{ env.IMAGE }}
+            mv deploy.env .env
             docker compose pull
             docker compose up -d

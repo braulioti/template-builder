@@ -473,15 +473,36 @@ jobs:
     name: Publish docker-compose to production
     needs: [release, docker]
     runs-on: ubuntu-latest
-    if: vars.PRODUCTION_HOST != ''
     env:
       VERSION: ${{ github.ref_name }}
       IMAGE: ${{ vars.NEXUS_REGISTRY }}/template-builder:${{ github.ref_name }}
       DEPLOY_PATH: ${{ vars.PRODUCTION_DEPLOY_PATH != '' && vars.PRODUCTION_DEPLOY_PATH || '/opt/template-builder' }}
     steps:
+      - name: Check deploy variables
+        id: deploy_vars
+        env:
+          PRODUCTION_HOST: ${{ vars.PRODUCTION_HOST }}
+          PRODUCTION_USER: ${{ vars.PRODUCTION_USER }}
+        run: |
+          echo "PRODUCTION_HOST is set: $([ -n \"$PRODUCTION_HOST\" ] && echo 'yes' || echo 'no')"
+          echo "PRODUCTION_USER is set: $([ -n \"$PRODUCTION_USER\" ] && echo 'yes' || echo 'no')"
+          if [ -z "$PRODUCTION_HOST" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "::notice::Deploy skipped: PRODUCTION_HOST not set. Add it in Settings → Secrets and variables → Actions → Variables (repository variables)."
+            exit 0
+          fi
+          if [ -z "$PRODUCTION_USER" ]; then
+            echo "::error::PRODUCTION_USER is required. Add it in Settings → Secrets and variables → Actions → Variables."
+            exit 1
+          fi
+          echo "skip=false" >> $GITHUB_OUTPUT
+          echo "Deploy will run."
+
       - uses: actions/checkout@v4
+        if: steps.deploy_vars.outputs.skip != 'true'
 
       - name: Create deployment directory on server
+        if: steps.deploy_vars.outputs.skip != 'true'
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ vars.PRODUCTION_HOST }}
@@ -490,6 +511,7 @@ jobs:
           script: mkdir -p ${{ env.DEPLOY_PATH }}
 
       - name: Copy docker-compose to production
+        if: steps.deploy_vars.outputs.skip != 'true'
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ vars.PRODUCTION_HOST }}
@@ -499,6 +521,7 @@ jobs:
           target: ${{ env.DEPLOY_PATH }}
 
       - name: Deploy with docker-compose
+        if: steps.deploy_vars.outputs.skip != 'true'
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ vars.PRODUCTION_HOST }}

@@ -412,6 +412,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
+          # Contexto: só frontend/ e docker/ (.dockerignore exclui executáveis e resto do repo)
           context: .
           push: ${{ vars.NEXUS_REGISTRY != '' }}
           tags: ${{ steps.tags.outputs.tags }}
@@ -429,6 +430,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: release
+          pattern: |
+            windows
+            linux
+            macos
 
       - name: List downloaded files
         run: |

@@ -378,11 +378,24 @@ jobs:
     name: Build and push image to Nexus
     needs: [angular]
     runs-on: ubuntu-latest
+    # Usar o mesmo environment do deploy: assim NEXUS_* e PRODUCTION_* vêm do mesmo lugar (Environment "production" ou variáveis do repositório)
+    environment: production
     env:
       VERSION: ${{ github.ref_name }}
       IMAGE_NAME: template-builder
     steps:
       - uses: actions/checkout@v4
+
+      - name: Check Nexus configuration (required for push and deploy)
+        id: nexus_check
+        run: |
+          if [ -z "${{ vars.NEXUS_REGISTRY }}" ] || [ -z "${{ secrets.NEXUS_USERNAME }}" ] || [ -z "${{ secrets.NEXUS_PASSWORD }}" ]; then
+            echo "push=false" >> $GITHUB_OUTPUT
+            echo "::warning::NEXUS_REGISTRY, NEXUS_USERNAME or NEXUS_PASSWORD not set. Docker image will be built but NOT pushed to Nexus. To publish the Angular app to Nexus and production, add in Settings → Secrets and variables → Actions: Variable NEXUS_REGISTRY, Secrets NEXUS_USERNAME and NEXUS_PASSWORD."
+          else
+            echo "push=true" >> $GITHUB_OUTPUT
+            echo "Nexus configured. Image will be pushed to registry."
+          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -390,7 +403,7 @@ jobs:
       - name: Prepare image tags
         id: tags
         run: |
-          if [ -n "${{ vars.NEXUS_REGISTRY }}" ]; then
+          if [ "${{ steps.nexus_check.outputs.push }}" = "true" ]; then
             echo "tags<<EOF" >> $GITHUB_OUTPUT
             echo "${{ vars.NEXUS_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}" >> $GITHUB_OUTPUT
             echo "${{ vars.NEXUS_REGISTRY }}/${{ env.IMAGE_NAME }}:latest" >> $GITHUB_OUTPUT
@@ -402,19 +415,18 @@ jobs:
           fi
 
       - name: Log in to Nexus Registry
-        if: vars.NEXUS_REGISTRY != ''
+        if: steps.nexus_check.outputs.push == 'true'
         uses: docker/login-action@v3
         with:
           registry: ${{ vars.NEXUS_REGISTRY }}
           username: ${{ secrets.NEXUS_USERNAME }}
           password: ${{ secrets.NEXUS_PASSWORD }}
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image (Angular frontend)
         uses: docker/build-push-action@v6
         with:
-          # Contexto: só frontend/ e docker/ (.dockerignore exclui executáveis e resto do repo)
           context: .
-          push: ${{ vars.NEXUS_REGISTRY != '' }}
+          push: ${{ steps.nexus_check.outputs.push == 'true' }}
           tags: ${{ steps.tags.outputs.tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

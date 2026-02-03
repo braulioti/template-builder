@@ -374,8 +374,52 @@ jobs:
             build/bin/TemplateBuilder
           if-no-files-found: warn
 
+  docker:
+    name: Build and push image to Nexus
+    needs: [angular]
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ github.ref_name }}
+      IMAGE_NAME: template-builder
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Prepare image tags
+        id: tags
+        run: |
+          if [ -n "${{ vars.NEXUS_REGISTRY }}" ]; then
+            echo "tags<<EOF" >> $GITHUB_OUTPUT
+            echo "${{ vars.NEXUS_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}" >> $GITHUB_OUTPUT
+            echo "${{ vars.NEXUS_REGISTRY }}/${{ env.IMAGE_NAME }}:latest" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "tags<<EOF" >> $GITHUB_OUTPUT
+            echo "${{ env.IMAGE_NAME }}:${{ env.VERSION }}" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Log in to Nexus Registry
+        if: vars.NEXUS_REGISTRY != ''
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ vars.NEXUS_REGISTRY }}
+          username: ${{ secrets.NEXUS_USERNAME }}
+          password: ${{ secrets.NEXUS_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: ${{ vars.NEXUS_REGISTRY != '' }}
+          tags: ${{ steps.tags.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
   release:
-    needs: [windows, linux, macos, angular]
+    needs: [windows, linux, macos, angular, docker]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -419,3 +463,44 @@ jobs:
             release/macos/TemplateBuilder
           generate_release_notes: true
           fail_on_unmatched_files: false
+
+  deploy:
+    name: Publish docker-compose to production
+    needs: [release, docker]
+    runs-on: ubuntu-latest
+    if: vars.PRODUCTION_HOST != ''
+    env:
+      VERSION: ${{ github.ref_name }}
+      IMAGE: ${{ vars.NEXUS_REGISTRY }}/template-builder:${{ github.ref_name }}
+      DEPLOY_PATH: ${{ vars.PRODUCTION_DEPLOY_PATH != '' && vars.PRODUCTION_DEPLOY_PATH || '/opt/template-builder' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create deployment directory on server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ vars.PRODUCTION_HOST }}
+          username: ${{ vars.PRODUCTION_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          script: mkdir -p ${{ env.DEPLOY_PATH }}
+
+      - name: Copy docker-compose to production
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ vars.PRODUCTION_HOST }}
+          username: ${{ vars.PRODUCTION_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          source: "docker-compose.yml"
+          target: ${{ env.DEPLOY_PATH }}
+
+      - name: Deploy with docker-compose
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ vars.PRODUCTION_HOST }}
+          username: ${{ vars.PRODUCTION_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          script: |
+            cd ${{ env.DEPLOY_PATH }}
+            export IMAGE=${{ env.IMAGE }}
+            docker compose pull
+            docker compose up -d

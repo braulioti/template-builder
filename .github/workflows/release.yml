@@ -246,6 +246,10 @@ jobs:
               
               # Also copy to installer/bin for consistency
               Copy-Item $msiPath -Destination "$installerDir\TemplateBuilder.msi" -Force
+              
+              # Create portable zip (exe + DLLs) for users who prefer zip over MSI
+              Write-Host "Creating portable zip..."
+              Compress-Archive -Path "$installerDir\*" -DestinationPath "$workspace\TemplateBuilder-windows.zip" -Force
             } else {
               Write-Error "MSI file not found after build at: $msiPath"
               exit 1
@@ -255,8 +259,13 @@ jobs:
             $wixPaths | ForEach-Object { Write-Host "  - $_" }
             Write-Host "Also checked PATH"
             Write-Warning "Creating zip as fallback..."
-            Compress-Archive -Path "$installerDir\TemplateBuilder.exe" -DestinationPath "$workspace\TemplateBuilder-windows.zip" -Force
+            Compress-Archive -Path "$installerDir\*" -DestinationPath "$workspace\TemplateBuilder-windows.zip" -Force
           }
+
+      - name: Prepare release artifacts
+        run: |
+          # Copy exe to root for artifact upload (TemplateBuilder.exe at root)
+          Copy-Item "build\bin\Release\TemplateBuilder.exe" -Destination "TemplateBuilder.exe" -Force
 
       - name: List files before upload
         run: |
@@ -474,10 +483,10 @@ jobs:
             release/windows/TemplateBuilder.exe
             release/windows/TemplateBuilder-windows.zip
             release/linux/template-builder-linux.tar.gz
-            release/linux/TemplateBuilder
+            release/linux/build/bin/TemplateBuilder
             release/macos/template-builder-macos.tar.gz
             release/macos/template-builder.pkg
-            release/macos/TemplateBuilder
+            release/macos/build/bin/TemplateBuilder
           generate_release_notes: true
           fail_on_unmatched_files: false
 

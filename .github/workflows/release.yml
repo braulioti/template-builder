@@ -447,10 +447,23 @@ jobs:
       contents: write
 
     steps:
-      - name: Download artifacts
+      - name: Download Windows artifact
         uses: actions/download-artifact@v4
         with:
-          path: release
+          name: windows
+          path: release/windows
+
+      - name: Download Linux artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: linux
+          path: release/linux
+
+      - name: Download macOS artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: macos
+          path: release/macos
 
       - name: List downloaded files
         run: |

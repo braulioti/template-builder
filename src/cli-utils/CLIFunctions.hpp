@@ -6,6 +6,26 @@
 
 namespace TemplateBuilder {
 
+struct FunctionExpressionParams {
+    int parenDepth = 0;
+    bool inQuotes = false;
+    char quoteChar = '\0';
+    bool foundFunc = false;
+};
+
+struct ProcessUnquotedContext {
+    std::string& result;
+    size_t j;
+    size_t i;
+    size_t startPos;
+    size_t& funcStart;
+    std::function<std::string(const std::string&)>& parseFunctionExpr;
+
+    ProcessUnquotedContext(std::string& r, size_t j_, size_t i_, size_t startPos_, size_t& funcStart_,
+        std::function<std::string(const std::string&)>& parseFn)
+        : result(r), j(j_), i(i_), startPos(startPos_), funcStart(funcStart_), parseFunctionExpr(parseFn) {}
+};
+
 class CLIFunctions {
 public:
     CLIFunctions() = default;

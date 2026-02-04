@@ -32,47 +32,69 @@ std::string unescapeQuotedString(const std::string& s) {
     return result;
 }
 
-std::vector<std::string> parseArgumentsFromString(const std::string& argsString) {
-    std::vector<std::string> parsedArguments;
-    if (argsString.empty()) {
-        return parsedArguments;
-    }
+struct ArgumentParserState {
+    std::vector<std::string> arguments;
     size_t startPos = 0;
     bool inQuotes = false;
     char quoteChar = '\0';
     int functionDepth = 0;
+};
+
+void addArgumentIfNonEmpty(ArgumentParserState& state, const std::string& argsString, size_t endPos) {
+    std::string arg = trimArg(argsString.substr(state.startPos, endPos - state.startPos));
+    if (!arg.empty()) {
+        state.arguments.push_back(arg);
+    }
+}
+
+void processUnquotedChar(ArgumentParserState& state, const std::string& argsString, size_t j) {
+    char c = argsString[j];
+    if (c == '"' || c == '\'') {
+        state.inQuotes = true;
+        state.quoteChar = c;
+        return;
+    }
+    if (c == '(') {
+        state.functionDepth++;
+        return;
+    }
+    if (c == ')') {
+        state.functionDepth--;
+        return;
+    }
+    if (c == ',' && state.functionDepth == 0) {
+        addArgumentIfNonEmpty(state, argsString, j);
+        state.startPos = j + 1;
+    }
+}
+
+bool processQuotedChar(ArgumentParserState& state, const std::string& argsString, size_t j) {
+    if (argsString[j] != state.quoteChar) {
+        return false;
+    }
+    if (j + 1 < argsString.length() && argsString[j + 1] == state.quoteChar) {
+        return true;  // escaped quote, skip next char
+    }
+    state.inQuotes = false;
+    return false;
+}
+
+std::vector<std::string> parseArgumentsFromString(const std::string& argsString) {
+    ArgumentParserState state;
+    if (argsString.empty()) {
+        return state.arguments;
+    }
     for (size_t j = 0; j < argsString.length(); ++j) {
-        char currentChar = argsString[j];
-        if (!inQuotes) {
-            if (currentChar == '"' || currentChar == '\'') {
-                inQuotes = true;
-                quoteChar = currentChar;
-            } else if (currentChar == '(') {
-                ++functionDepth;
-            } else if (currentChar == ')') {
-                --functionDepth;
-            } else if (currentChar == ',' && functionDepth == 0) {
-                std::string arg = trimArg(argsString.substr(startPos, j - startPos));
-                if (!arg.empty()) {
-                    parsedArguments.push_back(arg);
-                }
-                startPos = j + 1;
-            }
-        } else if (currentChar == quoteChar) {
-            if (j + 1 < argsString.length() && argsString[j + 1] == quoteChar) {
+        if (state.inQuotes) {
+            if (processQuotedChar(state, argsString, j)) {
                 ++j;
-            } else {
-                inQuotes = false;
             }
+        } else {
+            processUnquotedChar(state, argsString, j);
         }
     }
-    if (startPos < argsString.length()) {
-        std::string lastArg = trimArg(argsString.substr(startPos));
-        if (!lastArg.empty()) {
-            parsedArguments.push_back(lastArg);
-        }
-    }
-    return parsedArguments;
+    addArgumentIfNonEmpty(state, argsString, argsString.length());
+    return state.arguments;
 }
 
 std::string parseArgument(const std::string& argStr, std::function<std::string(const std::string&)> resolveVariable,
@@ -153,6 +175,38 @@ std::string CLIFunctions::executeFunction(const std::string& functionName, const
     }
 }
 
+enum class UnquotedAction { Continue, Break, ProcessedAndBreak };
+
+UnquotedAction processUnquotedChar(FunctionExpressionParams& params, ProcessUnquotedContext& ctx) {
+    if (ctx.result[ctx.j] == '"' || ctx.result[ctx.j] == '\'') {
+        params.inQuotes = true;
+        params.quoteChar = ctx.result[ctx.j];
+        return UnquotedAction::Continue;
+    }
+    if (ctx.result[ctx.j] == '(') {
+        if (params.parenDepth == 0) {
+            ctx.funcStart = ctx.i + 2;
+            params.foundFunc = true;
+        }
+        ++params.parenDepth;
+        return UnquotedAction::Continue;
+    }
+    if (ctx.result[ctx.j] == ')') {
+        --params.parenDepth;
+        if (params.parenDepth == 0 && params.foundFunc && ctx.j + 2 < ctx.result.length() && ctx.result[ctx.j + 1] == '}' && ctx.result[ctx.j + 2] == '}') {
+            std::string functionExpression = ctx.result.substr(ctx.funcStart, ctx.j - ctx.funcStart + 1);
+            std::string functionResult = ctx.parseFunctionExpr(functionExpression);
+            ctx.result.replace(ctx.startPos, ctx.j + 3 - ctx.startPos, functionResult);
+            return UnquotedAction::ProcessedAndBreak;
+        }
+        return UnquotedAction::Continue;
+    }
+    if (ctx.j + 1 < ctx.result.length() && ctx.result[ctx.j] == '}' && ctx.result[ctx.j + 1] == '}' && !params.foundFunc) {
+        return UnquotedAction::Break;
+    }
+    return UnquotedAction::Continue;
+}
+
 void CLIFunctions::processFunctionExpressions(std::string& result, std::function<std::string(const std::string&)> parseFunctionExpr) {
     const int maxIterations = 100;
     for (int iteration = 0; iteration < maxIterations; ++iteration) {
@@ -163,39 +217,24 @@ void CLIFunctions::processFunctionExpressions(std::string& result, std::function
             }
             size_t startPos = i;
             size_t funcStart = 0;
-            int parenDepth = 0;
-            bool inQuotes = false;
-            char quoteChar = '\0';
-            bool foundFunc = false;
+            FunctionExpressionParams params;
             size_t j = i + 2;
             while (j + 1 < result.length()) {
-                if (!inQuotes) {
-                    if (result[j] == '"' || result[j] == '\'') {
-                        inQuotes = true;
-                        quoteChar = result[j];
-                    } else if (result[j] == '(') {
-                        if (parenDepth == 0) {
-                            funcStart = i + 2;
-                            foundFunc = true;
-                        }
-                        ++parenDepth;
-                    } else if (result[j] == ')') {
-                        --parenDepth;
-                        if (parenDepth == 0 && foundFunc && j + 2 < result.length() && result[j + 1] == '}' && result[j + 2] == '}') {
-                            std::string functionExpression = result.substr(funcStart, j - funcStart + 1);
-                            std::string functionResult = parseFunctionExpr(functionExpression);
-                            result.replace(startPos, j + 3 - startPos, functionResult);
-                            processed = true;
-                            break;
-                        }
-                    } else if (j + 1 < result.length() && result[j] == '}' && result[j + 1] == '}' && !foundFunc) {
+                if (!params.inQuotes) {
+                    ProcessUnquotedContext ctx(result, j, i, startPos, funcStart, parseFunctionExpr);
+                    UnquotedAction action = processUnquotedChar(params, ctx);
+                    if (action == UnquotedAction::ProcessedAndBreak) {
+                        processed = true;
                         break;
                     }
-                } else if (result[j] == quoteChar) {
-                    if (j + 1 < result.length() && result[j + 1] == quoteChar) {
+                    if (action == UnquotedAction::Break) {
+                        break;
+                    }
+                } else if (result[j] == params.quoteChar) {
+                    if (j + 1 < result.length() && result[j + 1] == params.quoteChar) {
                         ++j;
                     } else {
-                        inQuotes = false;
+                        params.inQuotes = false;
                     }
                 }
                 ++j;

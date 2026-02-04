@@ -177,31 +177,52 @@ std::string CLIFunctions::executeFunction(const std::string& functionName, const
 
 enum class UnquotedAction { Continue, Break, ProcessedAndBreak };
 
+bool isClosingBraces(const ProcessUnquotedContext& ctx) {
+    return ctx.j + 1 < ctx.result.length() && ctx.result[ctx.j] == '}' && ctx.result[ctx.j + 1] == '}';
+}
+
+bool isEndOfFunctionCall(const ProcessUnquotedContext& ctx) {
+    return ctx.j + 2 < ctx.result.length() && ctx.result[ctx.j + 1] == '}' && ctx.result[ctx.j + 2] == '}';
+}
+
+UnquotedAction handleQuoteInUnquoted(FunctionExpressionParams& params, ProcessUnquotedContext& ctx) {
+    params.inQuotes = true;
+    params.quoteChar = ctx.result[ctx.j];
+    return UnquotedAction::Continue;
+}
+
+UnquotedAction handleOpenParenInUnquoted(FunctionExpressionParams& params, ProcessUnquotedContext& ctx) {
+    if (params.parenDepth == 0) {
+        ctx.funcStart = ctx.i + 2;
+        params.foundFunc = true;
+    }
+    ++params.parenDepth;
+    return UnquotedAction::Continue;
+}
+
+UnquotedAction handleCloseParenInUnquoted(FunctionExpressionParams& params, ProcessUnquotedContext& ctx) {
+    --params.parenDepth;
+    if (params.parenDepth == 0 && params.foundFunc && isEndOfFunctionCall(ctx)) {
+        std::string functionExpression = ctx.result.substr(ctx.funcStart, ctx.j - ctx.funcStart + 1);
+        std::string functionResult = ctx.parseFunctionExpr(functionExpression);
+        ctx.result.replace(ctx.startPos, ctx.j + 3 - ctx.startPos, functionResult);
+        return UnquotedAction::ProcessedAndBreak;
+    }
+    return UnquotedAction::Continue;
+}
+
 UnquotedAction processUnquotedChar(FunctionExpressionParams& params, ProcessUnquotedContext& ctx) {
-    if (ctx.result[ctx.j] == '"' || ctx.result[ctx.j] == '\'') {
-        params.inQuotes = true;
-        params.quoteChar = ctx.result[ctx.j];
-        return UnquotedAction::Continue;
+    const char c = ctx.result[ctx.j];
+    if (c == '"' || c == '\'') {
+        return handleQuoteInUnquoted(params, ctx);
     }
-    if (ctx.result[ctx.j] == '(') {
-        if (params.parenDepth == 0) {
-            ctx.funcStart = ctx.i + 2;
-            params.foundFunc = true;
-        }
-        ++params.parenDepth;
-        return UnquotedAction::Continue;
+    if (c == '(') {
+        return handleOpenParenInUnquoted(params, ctx);
     }
-    if (ctx.result[ctx.j] == ')') {
-        --params.parenDepth;
-        if (params.parenDepth == 0 && params.foundFunc && ctx.j + 2 < ctx.result.length() && ctx.result[ctx.j + 1] == '}' && ctx.result[ctx.j + 2] == '}') {
-            std::string functionExpression = ctx.result.substr(ctx.funcStart, ctx.j - ctx.funcStart + 1);
-            std::string functionResult = ctx.parseFunctionExpr(functionExpression);
-            ctx.result.replace(ctx.startPos, ctx.j + 3 - ctx.startPos, functionResult);
-            return UnquotedAction::ProcessedAndBreak;
-        }
-        return UnquotedAction::Continue;
+    if (c == ')') {
+        return handleCloseParenInUnquoted(params, ctx);
     }
-    if (ctx.j + 1 < ctx.result.length() && ctx.result[ctx.j] == '}' && ctx.result[ctx.j + 1] == '}' && !params.foundFunc) {
+    if (isClosingBraces(ctx) && !params.foundFunc) {
         return UnquotedAction::Break;
     }
     return UnquotedAction::Continue;

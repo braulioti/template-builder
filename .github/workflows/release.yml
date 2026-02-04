@@ -451,44 +451,37 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: release
-          pattern: |
-            windows
-            linux
-            macos
 
       - name: List downloaded files
         run: |
-          echo "Files in release directory:"
-          find release -type f | sort
-
-      - name: List all downloaded files
-        run: |
           echo "=== All files in release directory ==="
           find release -type f | sort
-          echo ""
-          echo "=== Windows files ==="
-          find release/windows -type f 2>/dev/null || echo "No windows directory"
-          echo ""
-          echo "=== Linux files ==="
-          find release/linux -type f 2>/dev/null || echo "No linux directory"
-          echo ""
-          echo "=== macOS files ==="
-          find release/macos -type f 2>/dev/null || echo "No macos directory"
+
+      - name: Prepare release assets
+        run: |
+          mkdir -p dist
+          # Windows
+          cp release/windows/TemplateBuilder.msi dist/ || exit 1
+          cp release/windows/TemplateBuilder.exe dist/TemplateBuilder-windows.exe || exit 1
+          cp release/windows/TemplateBuilder-windows.zip dist/ || exit 1
+          # Linux
+          cp release/linux/template-builder-linux.tar.gz dist/ || exit 1
+          cp release/linux/build/bin/TemplateBuilder dist/template-builder-linux || exit 1
+          # macOS
+          cp release/macos/template-builder-macos.tar.gz dist/ || exit 1
+          cp release/macos/build/bin/TemplateBuilder dist/template-builder-macos || exit 1
+          if [ -f release/macos/template-builder.pkg ]; then
+            cp release/macos/template-builder.pkg dist/ || exit 1
+          fi
+          echo "=== Release assets ready ==="
+          ls -la dist/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b
         with:
-          files: |
-            release/windows/TemplateBuilder.msi
-            release/windows/TemplateBuilder.exe
-            release/windows/TemplateBuilder-windows.zip
-            release/linux/template-builder-linux.tar.gz
-            release/linux/build/bin/TemplateBuilder
-            release/macos/template-builder-macos.tar.gz
-            release/macos/template-builder.pkg
-            release/macos/build/bin/TemplateBuilder
+          files: dist/*
           generate_release_notes: true
-          fail_on_unmatched_files: false
+          fail_on_unmatched_files: true
 
   deploy:
     name: Publish docker-compose to production

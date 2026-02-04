@@ -8,6 +8,7 @@
 #include <cctype>
 #include <limits>
 #include <cstdio>
+#include <cstdlib>
 
 #ifdef _WIN32
 #include <io.h>
@@ -20,6 +21,10 @@
 namespace TemplateBuilder {
 
 static bool stdinIsInteractive() {
+    const char* forceInteractive = std::getenv("TEMPLATE_BUILDER_INTERACTIVE");
+    if (forceInteractive && (forceInteractive[0] == '1' || forceInteractive[0] == 'y' || forceInteractive[0] == 'Y' || forceInteractive[0] == 't' || forceInteractive[0] == 'T')) {
+        return true;
+    }
 #ifdef _WIN32
     return _isatty(_fileno(stdin)) != 0;
 #else
@@ -305,8 +310,13 @@ std::string PromptBuilder::build(Prompt* prompt, const std::vector<Variable*>& v
         return "";
     }
     try {
+        bool isFirstInput = true;
         for (const auto& promptInput : prompt->getInputs()) {
             if (promptInput) {
+                if (isFirstInput) {
+                    std::cout << std::endl;
+                    isFirstInput = false;
+                }
                 try {
                     processPromptInput(promptInput.get());
                 } catch (const std::exception& e) {

@@ -387,7 +387,7 @@ jobs:
     name: Build and push image to Nexus
     needs: [angular]
     runs-on: ubuntu-latest
-    # Usar o mesmo environment do deploy: assim NEXUS_* e PRODUCTION_* vêm do mesmo lugar (Environment "production" ou variáveis do repositório)
+    # Use the same environment as deploy: so NEXUS_* and PRODUCTION_* are sourced from the same place (Environment "production" or repository variables)
     environment: production
     env:
       VERSION: ${{ github.ref_name }}

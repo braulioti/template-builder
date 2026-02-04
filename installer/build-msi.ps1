@@ -17,6 +17,7 @@ $ProjectRoot = Split-Path -Parent $ScriptDir
 if ([string]::IsNullOrEmpty($ExePath)) {
     # Try multiple possible locations
     $possiblePaths = @(
+        (Join-Path $ProjectRoot "cmake-build-debug-mingw\bin\TemplateBuilder.exe"),
         (Join-Path $ProjectRoot "cmake-build-debug\bin\TemplateBuilder.exe"),
         (Join-Path $ProjectRoot "build\bin\Release\TemplateBuilder.exe"),
         (Join-Path $ProjectRoot "build\bin\Debug\TemplateBuilder.exe"),

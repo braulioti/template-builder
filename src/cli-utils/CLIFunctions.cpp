@@ -228,43 +228,58 @@ UnquotedAction processUnquotedChar(FunctionExpressionParams& params, ProcessUnqu
     return UnquotedAction::Continue;
 }
 
+static size_t findNextExpressionStart(const std::string& result, size_t startIndex) {
+    for (size_t i = startIndex; i + 2 <= result.length(); ++i) {
+        if (result[i] == '{' && result[i + 1] == '{') {
+            return i;
+        }
+    }
+    return result.length();
+}
+
+static bool advancePastQuotedChar(FunctionExpressionParams& params, const std::string& result, size_t& j) {
+    if (result[j] != params.quoteChar) {
+        return false;
+    }
+    if (j + 1 < result.length() && result[j + 1] == params.quoteChar) {
+        ++j;
+    } else {
+        params.inQuotes = false;
+    }
+    return true;
+}
+
+static bool processOneExpression(std::string& result, std::function<std::string(const std::string&)>& parseFunctionExpr) {
+    size_t i = findNextExpressionStart(result, 0);
+    while (i + 2 < result.length()) {
+        size_t startPos = i;
+        size_t funcStart = 0;
+        FunctionExpressionParams params;
+        size_t j = i + 2;
+        while (j + 1 < result.length()) {
+            if (!params.inQuotes) {
+                ProcessUnquotedContext ctx(result, j, i, startPos, funcStart, parseFunctionExpr);
+                UnquotedAction action = processUnquotedChar(params, ctx);
+                if (action == UnquotedAction::ProcessedAndBreak) {
+                    return true;
+                }
+                if (action == UnquotedAction::Break) {
+                    break;
+                }
+            } else if (advancePastQuotedChar(params, result, j)) {
+                // quoted char handled
+            }
+            ++j;
+        }
+        i = findNextExpressionStart(result, i + 1);
+    }
+    return false;
+}
+
 void CLIFunctions::processFunctionExpressions(std::string& result, std::function<std::string(const std::string&)> parseFunctionExpr) {
     const int maxIterations = 100;
     for (int iteration = 0; iteration < maxIterations; ++iteration) {
-        bool processed = false;
-        for (size_t i = 0; i + 2 < result.length(); ++i) {
-            if (result[i] != '{' || result[i + 1] != '{') {
-                continue;
-            }
-            size_t startPos = i;
-            size_t funcStart = 0;
-            FunctionExpressionParams params;
-            size_t j = i + 2;
-            while (j + 1 < result.length()) {
-                if (!params.inQuotes) {
-                    ProcessUnquotedContext ctx(result, j, i, startPos, funcStart, parseFunctionExpr);
-                    UnquotedAction action = processUnquotedChar(params, ctx);
-                    if (action == UnquotedAction::ProcessedAndBreak) {
-                        processed = true;
-                        break;
-                    }
-                    if (action == UnquotedAction::Break) {
-                        break;
-                    }
-                } else if (result[j] == params.quoteChar) {
-                    if (j + 1 < result.length() && result[j + 1] == params.quoteChar) {
-                        ++j;
-                    } else {
-                        params.inQuotes = false;
-                    }
-                }
-                ++j;
-            }
-            if (processed) {
-                break;
-            }
-        }
-        if (!processed) {
+        if (!processOneExpression(result, parseFunctionExpr)) {
             break;
         }
     }

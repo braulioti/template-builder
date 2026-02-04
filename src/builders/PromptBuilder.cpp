@@ -197,6 +197,34 @@ static std::string getTrimmedVariableValue(Variable* variable) {
     return v;
 }
 
+static std::vector<std::string> splitVariableValueIntoLines(const std::string& variableValue) {
+    std::vector<std::string> lines;
+    std::istringstream iss(variableValue);
+    std::string line;
+    while (std::getline(iss, line)) {
+        if (!line.empty() && line.back() == '\r') {
+            line.pop_back();
+        }
+        line.erase(0, line.find_first_not_of(" \t\n\r"));
+        line.erase(line.find_last_not_of(" \t\n\r") + 1);
+        if (!line.empty()) {
+            lines.push_back(line);
+        }
+    }
+    return lines;
+}
+
+static std::string joinLinesWithPrefix(const std::vector<std::string>& lines, const std::string& prefix) {
+    std::string processedValue;
+    for (size_t j = 0; j < lines.size(); ++j) {
+        if (j > 0) {
+            processedValue += "\r\n";
+        }
+        processedValue += prefix + lines[j];
+    }
+    return processedValue;
+}
+
 void PromptBuilder::processPrefixPatterns(std::string& result, const std::vector<Variable*>& variables) {
     std::regex prefixPattern("\\{\\{\"([^\"]+)\"\\s*\\|\\s*(\\w+)\\}\\}");
     std::sregex_iterator iter(result.begin(), result.end(), prefixPattern);
@@ -214,26 +242,8 @@ void PromptBuilder::processPrefixPatterns(std::string& result, const std::vector
         std::string prefix = replacements[i].first;
         std::string varName = replacements[i].second;
         std::string variableValue = resolveVariableValue(variables, varName);
-        std::vector<std::string> lines;
-        std::istringstream iss(variableValue);
-        std::string line;
-        while (std::getline(iss, line)) {
-            if (!line.empty() && line.back() == '\r') {
-                line.pop_back();
-            }
-            line.erase(0, line.find_first_not_of(" \t\n\r"));
-            line.erase(line.find_last_not_of(" \t\n\r") + 1);
-            if (!line.empty()) {
-                lines.push_back(line);
-            }
-        }
-        std::string processedValue;
-        for (size_t j = 0; j < lines.size(); ++j) {
-            if (j > 0) {
-                processedValue += "\r\n";
-            }
-            processedValue += prefix + lines[j];
-        }
+        std::vector<std::string> lines = splitVariableValueIntoLines(variableValue);
+        std::string processedValue = joinLinesWithPrefix(lines, prefix);
         result.replace(pos, len, processedValue);
     }
 }

@@ -1,21 +1,15 @@
 #include "builders/PromptBuilder.hpp"
+#include "cli-utils/CLINavigate.hpp"
 #include <iostream>
 #include <sstream>
 #include <algorithm>
 #include <stdexcept>
 #include <cctype>
-#include <thread>
-#include <chrono>
 #include <limits>
 #include <cstdio>
 
 #ifdef _WIN32
-#include <windows.h>
-#include <conio.h>
 #include <io.h>
-// Undefine Windows macros that conflict with C++ standard library
-#undef max
-#undef min
 #else
 #include <termios.h>
 #include <unistd.h>
@@ -31,46 +25,6 @@ static bool stdinIsInteractive() {
     return isatty(fileno(stdin)) != 0;
 #endif
 }
-
-// Cross-platform console key reading helper
-#ifdef _WIN32
-bool readConsoleKey(unsigned short& key, bool& keyPressed) {
-    keyPressed = false;
-    HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
-    if (hStdin == INVALID_HANDLE_VALUE) {
-        return false;
-    }
-
-    INPUT_RECORD inputRecord;
-    DWORD numRead;
-
-    if (!PeekConsoleInput(hStdin, &inputRecord, 1, &numRead)) {
-        return false;
-    }
-
-    if (numRead == 0) {
-        return false;
-    }
-
-    if (ReadConsoleInput(hStdin, &inputRecord, 1, &numRead)) {
-        if (inputRecord.EventType == KEY_EVENT && inputRecord.Event.KeyEvent.bKeyDown) {
-            key = inputRecord.Event.KeyEvent.wVirtualKeyCode;
-            keyPressed = true;
-            return true;
-        }
-    }
-
-    return false;
-}
-#else
-// Simplified version for non-Windows platforms
-bool readConsoleKey(unsigned short& key, bool& keyPressed) {
-    // For non-Windows, we'll use a simpler approach
-    // This is a basic implementation - may need enhancement for full cross-platform support
-    keyPressed = false;
-    return false;
-}
-#endif
 
 void PromptBuilder::getInputString(PromptInput* promptInput) {
     if (!promptInput) {
@@ -140,42 +94,6 @@ std::string PromptBuilder::buildChecklistSelectedValues(const std::vector<bool>&
     return selectedValues;
 }
 
-void PromptBuilder::runChecklistLoop(PromptInput* promptInput, std::vector<bool>& selected, size_t& currentIndex, bool& done) {
-    const auto& options = promptInput->getOptions();
-    while (!done) {
-        for (size_t i = 0; i < options.size(); ++i) {
-            std::cout << (i == currentIndex ? "> " : "  ");
-            std::cout << (selected[i] ? "[ X ] " : "[   ] ");
-            std::cout << options[i]->getName() << std::endl;
-        }
-        std::cout << "Use Up/Down arrows to navigate, Space to select/deselect, Enter to confirm" << std::endl;
-#ifdef _WIN32
-        while (true) {
-            unsigned short key = 0;
-            bool keyPressed = false;
-            if (readConsoleKey(key, keyPressed)) {
-                for (size_t i = 0; i < options.size() + 1; ++i) {
-                    std::cout << "\033[A\033[2K";
-                }
-                if (key == VK_UP && currentIndex > 0) {
-                    --currentIndex;
-                } else if (key == VK_DOWN && currentIndex < options.size() - 1) {
-                    ++currentIndex;
-                } else if (key == VK_SPACE) {
-                    selected[currentIndex] = !selected[currentIndex];
-                } else if (key == VK_RETURN) {
-                    done = true;
-                }
-                break;
-            }
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        }
-#else
-        done = true;
-#endif
-    }
-}
-
 void PromptBuilder::getChecklist(PromptInput* promptInput) {
     if (!promptInput) {
         return;
@@ -192,7 +110,7 @@ void PromptBuilder::getChecklist(PromptInput* promptInput) {
     size_t currentIndex = 0;
     bool done = false;
     std::cout << std::endl << promptInput->getInput() << std::endl << std::endl;
-    runChecklistLoop(promptInput, selected, currentIndex, done);
+    CLINavigate::runChecklistLoop(promptInput, selected, currentIndex, done);
     std::cout << "\033[A\033[2K" << std::endl;
     promptInput->getVariable()->setValue(buildChecklistSelectedValues(selected, options));
 }

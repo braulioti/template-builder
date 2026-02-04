@@ -43,7 +43,6 @@ private:
     // getChecklist helpers
     static void validateChecklistInput(PromptInput* promptInput);
     static std::string buildChecklistSelectedValues(const std::vector<bool>& selected, const std::vector<std::unique_ptr<PromptInputOption>>& options);
-    void runChecklistLoop(PromptInput* promptInput, std::vector<bool>& selected, size_t& currentIndex, bool& done);
 
     // getArrayList helpers
     static std::vector<std::string> readArrayListLines();

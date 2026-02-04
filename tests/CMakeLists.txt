@@ -120,6 +120,8 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
             ${CMAKE_SOURCE_DIR}/src/builders/FolderBuilder.cpp
             ${CMAKE_SOURCE_DIR}/src/builders/RemoteFileBuilder.cpp
             ${CMAKE_SOURCE_DIR}/src/builders/PromptBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/cli-utils/CLINavigate.cpp
+            ${CMAKE_SOURCE_DIR}/src/cli-utils/CLIFunctions.cpp
             ${CMAKE_SOURCE_DIR}/src/types/FileType.cpp
             ${CMAKE_SOURCE_DIR}/src/types/RemoteFileType.cpp
             ${CMAKE_SOURCE_DIR}/src/types/PromptType.cpp
@@ -128,6 +130,8 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
     elseif(${TEST_NAME} STREQUAL "test_PromptBuilder")
         target_sources(${TEST_NAME} PRIVATE
             ${CMAKE_SOURCE_DIR}/src/builders/PromptBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/cli-utils/CLINavigate.cpp
+            ${CMAKE_SOURCE_DIR}/src/cli-utils/CLIFunctions.cpp
             ${CMAKE_SOURCE_DIR}/src/types/PromptType.cpp
             ${CMAKE_SOURCE_DIR}/src/types/VariableType.cpp
         )
@@ -135,6 +139,8 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
         target_sources(${TEST_NAME} PRIVATE
             ${CMAKE_SOURCE_DIR}/src/builders/FileBuilder.cpp
             ${CMAKE_SOURCE_DIR}/src/builders/PromptBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/cli-utils/CLINavigate.cpp
+            ${CMAKE_SOURCE_DIR}/src/cli-utils/CLIFunctions.cpp
             ${CMAKE_SOURCE_DIR}/src/types/FileType.cpp
             ${CMAKE_SOURCE_DIR}/src/types/PromptType.cpp
             ${CMAKE_SOURCE_DIR}/src/types/VariableType.cpp
@@ -156,9 +162,22 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
             ${CMAKE_SOURCE_DIR}/src/builders/FolderBuilder.cpp
             ${CMAKE_SOURCE_DIR}/src/builders/RemoteFileBuilder.cpp
             ${CMAKE_SOURCE_DIR}/src/builders/PromptBuilder.cpp
+            ${CMAKE_SOURCE_DIR}/src/cli-utils/CLINavigate.cpp
+            ${CMAKE_SOURCE_DIR}/src/cli-utils/CLIFunctions.cpp
             ${CMAKE_SOURCE_DIR}/src/types/FileType.cpp
             ${CMAKE_SOURCE_DIR}/src/types/RemoteFileType.cpp
             ${CMAKE_SOURCE_DIR}/src/types/PromptType.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/VariableType.cpp
+        )
+    elseif(${TEST_NAME} STREQUAL "test_CLINavigate")
+        target_sources(${TEST_NAME} PRIVATE
+            ${CMAKE_SOURCE_DIR}/src/cli-utils/CLINavigate.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/PromptType.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/VariableType.cpp
+        )
+    elseif(${TEST_NAME} STREQUAL "test_CLIFunctions")
+        target_sources(${TEST_NAME} PRIVATE
+            ${CMAKE_SOURCE_DIR}/src/cli-utils/CLIFunctions.cpp
             ${CMAKE_SOURCE_DIR}/src/types/VariableType.cpp
         )
     endif()
@@ -195,6 +214,8 @@ add_unit_test(test_FileBuilder test_FileBuilder.cpp)
 add_unit_test(test_FolderBuilder test_FolderBuilder.cpp)
 add_unit_test(test_RemoteFileBuilder test_RemoteFileBuilder.cpp)
 add_unit_test(test_ParseYAML test_ParseYAML.cpp)
+add_unit_test(test_CLINavigate test_CLINavigate.cpp)
+add_unit_test(test_CLIFunctions test_CLIFunctions.cpp)
 
 # Message
 message(STATUS "Unit tests configuration: Tests will be built when BUILD_TESTS is ON")

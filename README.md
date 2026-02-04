@@ -51,12 +51,12 @@ template-builder/
 
 ## Release Calendar
 
-| Date         | Description                                                   | Version | Status                    |
-|--------------|---------------------------------------------------------------|---------|---------------------------|
-| Feb 18, 2026 | Created a new version in C++ including multi-platform support | 0.1.0   | Available for Publication |
-| Abr 1, 2026  |                                                               | 0.2.0   | Planned                   |
-| May 1, 2026  |                                                               | 0.3.0   | Planned                   |
-|              |                                                               | 1.0.0   | On Hold                   |
+| Date        | Description                                                   | Version | Status                    |
+|-------------|---------------------------------------------------------------|---------|---------------------------|
+| Feb 9, 2026 | Created a new version in C++ including multi-platform support | 0.1.0   | Available for Publication |
+| Abr 1, 2026 |                                                               | 0.2.0   | Planned                   |
+| May 1, 2026 |                                                               | 0.3.0   | Planned                   |
+|             |                                                               | 1.0.0   | On Hold                   |
 
 ### Status legend
 

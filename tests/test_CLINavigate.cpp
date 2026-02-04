@@ -38,7 +38,8 @@ TEST_F(CLINavigateTest, RunChecklistLoopWithValidPrompt) {
     // On Windows the loop waits for keyboard input; skip to avoid blocking in CI
     GTEST_SKIP() << "runChecklistLoop is interactive on Windows, skipped in unit test";
 #else
-    CLINavigate::runChecklistLoop(promptInput.get(), selected, currentIndex, done);
+    ChecklistLoopParams params(promptInput.get(), selected, currentIndex, done);
+    CLINavigate::runChecklistLoop(params);
 
     EXPECT_TRUE(done);
     EXPECT_EQ(selected.size(), 3u);
@@ -59,7 +60,8 @@ TEST_F(CLINavigateTest, RunChecklistLoopWithSingleOption) {
 #ifdef _WIN32
     GTEST_SKIP() << "runChecklistLoop is interactive on Windows, skipped in unit test";
 #else
-    CLINavigate::runChecklistLoop(singleOption.get(), selected, currentIndex, done);
+    ChecklistLoopParams params(singleOption.get(), selected, currentIndex, done);
+    CLINavigate::runChecklistLoop(params);
 
     EXPECT_TRUE(done);
     EXPECT_EQ(selected.size(), 1u);
@@ -75,7 +77,8 @@ TEST_F(CLINavigateTest, RunChecklistLoopPreservesSelectedSize) {
 #ifdef _WIN32
     GTEST_SKIP() << "runChecklistLoop is interactive on Windows, skipped in unit test";
 #else
-    CLINavigate::runChecklistLoop(promptInput.get(), selected, currentIndex, done);
+    ChecklistLoopParams params(promptInput.get(), selected, currentIndex, done);
+    CLINavigate::runChecklistLoop(params);
 
     EXPECT_TRUE(done);
     EXPECT_EQ(selected.size(), 3u);

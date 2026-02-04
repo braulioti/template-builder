@@ -56,12 +56,12 @@ bool readConsoleKey(unsigned short& key, bool& keyPressed) {
 } // namespace
 #endif
 
-void CLINavigate::runChecklistLoop(PromptInput* promptInput, std::vector<bool>& selected, size_t& currentIndex, bool& done) {
-    const auto& options = promptInput->getOptions();
-    while (!done) {
+void CLINavigate::runChecklistLoop(ChecklistLoopParams& params) {
+    const auto& options = params.promptInput->getOptions();
+    while (!params.done) {
         for (size_t i = 0; i < options.size(); ++i) {
-            std::cout << (i == currentIndex ? "> " : "  ");
-            std::cout << (selected[i] ? "[ X ] " : "[   ] ");
+            std::cout << (i == params.currentIndex ? "> " : "  ");
+            std::cout << (params.selected[i] ? "[ X ] " : "[   ] ");
             std::cout << options[i]->getName() << std::endl;
         }
         std::cout << "Use Up/Down arrows to navigate, Space to select/deselect, Enter to confirm" << std::endl;
@@ -73,21 +73,21 @@ void CLINavigate::runChecklistLoop(PromptInput* promptInput, std::vector<bool>& 
                 for (size_t i = 0; i < options.size() + 1; ++i) {
                     std::cout << "\033[A\033[2K";
                 }
-                if (key == VK_UP && currentIndex > 0) {
-                    --currentIndex;
-                } else if (key == VK_DOWN && currentIndex < options.size() - 1) {
-                    ++currentIndex;
+                if (key == VK_UP && params.currentIndex > 0) {
+                    --params.currentIndex;
+                } else if (key == VK_DOWN && params.currentIndex < options.size() - 1) {
+                    ++params.currentIndex;
                 } else if (key == VK_SPACE) {
-                    selected[currentIndex] = !selected[currentIndex];
+                    params.selected[params.currentIndex] = !params.selected[params.currentIndex];
                 } else if (key == VK_RETURN) {
-                    done = true;
+                    params.done = true;
                 }
                 break;
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
 #else
-        done = true;
+        params.done = true;
 #endif
     }
 }

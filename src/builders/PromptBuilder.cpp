@@ -110,7 +110,8 @@ void PromptBuilder::getChecklist(PromptInput* promptInput) {
     size_t currentIndex = 0;
     bool done = false;
     std::cout << std::endl << promptInput->getInput() << std::endl << std::endl;
-    CLINavigate::runChecklistLoop(promptInput, selected, currentIndex, done);
+    ChecklistLoopParams params(promptInput, selected, currentIndex, done);
+    CLINavigate::runChecklistLoop(params);
     std::cout << "\033[A\033[2K" << std::endl;
     promptInput->getVariable()->setValue(buildChecklistSelectedValues(selected, options));
 }

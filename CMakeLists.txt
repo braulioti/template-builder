@@ -119,6 +119,7 @@ set(SOURCES
     src/builders/RemoteFileBuilder.cpp
     src/services/ParseYAML.cpp
     src/cli-utils/CLINavigate.cpp
+    src/cli-utils/CLIFunctions.cpp
 )
 
 # Headers
@@ -135,6 +136,7 @@ set(HEADERS
     src/builders/RemoteFileBuilder.hpp
     src/services/ParseYAML.hpp
     src/cli-utils/CLINavigate.hpp
+    src/cli-utils/CLIFunctions.hpp
 )
 
 # Create executable

@@ -27,16 +27,8 @@ private:
     // Variable resolution
     std::string resolveVariableValue(const std::vector<Variable*>& variables, const std::string& variableName);
 
-    // Function parsing and execution
-    std::string parseFunctionExpression(const std::vector<Variable*>& variables, const std::string& expression);
-    std::string executeFunction(const std::string& functionName, const std::vector<std::string>& arguments);
-    std::string parseArgument(const std::vector<Variable*>& variables, const std::string& argStr);
-    static std::string trimArg(const std::string& s);
-    static std::vector<std::string> parseArgumentsFromString(const std::string& argsString);
-
     // getContent helpers
     void processPrefixPatterns(std::string& result, const std::vector<Variable*>& variables);
-    void processFunctionExpressions(std::string& result, const std::vector<Variable*>& variables);
     static void processVariablePlaceholders(std::string& result, const std::vector<Variable*>& variables);
     static void clearUnknownPlaceholders(std::string& result);
 

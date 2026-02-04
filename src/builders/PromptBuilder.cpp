@@ -118,80 +118,49 @@ void PromptBuilder::getInputString(PromptInput* promptInput) {
     }
 }
 
-void PromptBuilder::getChecklist(PromptInput* promptInput) {
-    if (!promptInput) {
-        return;
-    }
-
-    if (!promptInput->getVariable()) {
+void PromptBuilder::validateChecklistInput(PromptInput* promptInput) {
+    if (!promptInput || !promptInput->getVariable()) {
         throw std::runtime_error("Variable is nullptr in PromptInput.");
     }
-
-    const auto& options = promptInput->getOptions();
-    if (options.empty()) {
+    if (promptInput->getOptions().empty()) {
         throw std::runtime_error("No options available for checklist input.");
     }
+}
 
-    // In non-interactive environments (unit tests/CI), don't block waiting for key presses.
-    if (!stdinIsInteractive()) {
-        if (!promptInput->getVariable()->hasValue()) {
-            promptInput->getVariable()->setValue("");
+std::string PromptBuilder::buildChecklistSelectedValues(const std::vector<bool>& selected, const std::vector<std::unique_ptr<PromptInputOption>>& options) {
+    std::string selectedValues;
+    for (size_t i = 0; i < options.size(); ++i) {
+        if (selected[i]) {
+            if (!selectedValues.empty()) {
+                selectedValues += "\r\n";
+            }
+            selectedValues += options[i]->getValue();
         }
-        return;
     }
+    return selectedValues;
+}
 
-    std::vector<bool> selected(options.size(), false);
-    size_t currentIndex = 0;
-    bool done = false;
-
-    // Display prompt
-    std::cout << std::endl;
-    std::cout << promptInput->getInput() << std::endl;
-    std::cout << std::endl;
-
-    // Main loop for navigation and selection
+void PromptBuilder::runChecklistLoop(PromptInput* promptInput, std::vector<bool>& selected, size_t& currentIndex, bool& done) {
+    const auto& options = promptInput->getOptions();
     while (!done) {
-        // Redraw options
         for (size_t i = 0; i < options.size(); ++i) {
-            if (i == currentIndex) {
-                std::cout << "> ";
-            } else {
-                std::cout << "  ";
-            }
-
-            if (selected[i]) {
-                std::cout << "[ X ] ";
-            } else {
-                std::cout << "[   ] ";
-            }
-
+            std::cout << (i == currentIndex ? "> " : "  ");
+            std::cout << (selected[i] ? "[ X ] " : "[   ] ");
             std::cout << options[i]->getName() << std::endl;
         }
-
         std::cout << "Use Up/Down arrows to navigate, Space to select/deselect, Enter to confirm" << std::endl;
-
-        // Read key input
 #ifdef _WIN32
         while (true) {
             unsigned short key = 0;
             bool keyPressed = false;
-
             if (readConsoleKey(key, keyPressed)) {
-                // Clear all displayed lines
                 for (size_t i = 0; i < options.size() + 1; ++i) {
-                    std::cout << "\033[A";  // Move cursor up
-                    std::cout << "\033[2K"; // Clear line
+                    std::cout << "\033[A\033[2K";
                 }
-
-                // Process key
-                if (key == VK_UP) {
-                    if (currentIndex > 0) {
-                        --currentIndex;
-                    }
-                } else if (key == VK_DOWN) {
-                    if (currentIndex < options.size() - 1) {
-                        ++currentIndex;
-                    }
+                if (key == VK_UP && currentIndex > 0) {
+                    --currentIndex;
+                } else if (key == VK_DOWN && currentIndex < options.size() - 1) {
+                    ++currentIndex;
                 } else if (key == VK_SPACE) {
                     selected[currentIndex] = !selected[currentIndex];
                 } else if (key == VK_RETURN) {
@@ -202,78 +171,51 @@ void PromptBuilder::getChecklist(PromptInput* promptInput) {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
 #else
-        // For non-Windows platforms, checklist functionality requires terminal input handling
-        // This is a simplified implementation - full cross-platform support would require
-        // termios (Linux) or similar APIs for non-blocking key input
-        // For now, we'll just mark as done to allow the test to continue
         done = true;
 #endif
     }
-
-    // Clear the instruction line
-    std::cout << "\033[A";  // Move cursor up
-    std::cout << "\033[2K"; // Clear line
-
-    // Build result string with selected values
-    std::string selectedValues;
-    for (size_t i = 0; i < options.size(); ++i) {
-        if (selected[i]) {
-            if (!selectedValues.empty()) {
-                selectedValues += "\r\n";
-            }
-            selectedValues += options[i]->getValue();
-        }
-    }
-
-    std::cout << std::endl;
-    // Store result in variable
-    promptInput->getVariable()->setValue(selectedValues);
 }
 
-void PromptBuilder::getArrayList(PromptInput* promptInput) {
+void PromptBuilder::getChecklist(PromptInput* promptInput) {
     if (!promptInput) {
         return;
     }
-
-    if (!promptInput->getVariable()) {
-        throw std::runtime_error("Variable is nullptr in PromptInput.");
-    }
-
-    // In non-interactive environments (unit tests/CI), don't block waiting for multi-line input.
+    validateChecklistInput(promptInput);
     if (!stdinIsInteractive()) {
         if (!promptInput->getVariable()->hasValue()) {
             promptInput->getVariable()->setValue("");
         }
         return;
     }
+    const auto& options = promptInput->getOptions();
+    std::vector<bool> selected(options.size(), false);
+    size_t currentIndex = 0;
+    bool done = false;
+    std::cout << std::endl << promptInput->getInput() << std::endl << std::endl;
+    runChecklistLoop(promptInput, selected, currentIndex, done);
+    std::cout << "\033[A\033[2K" << std::endl;
+    promptInput->getVariable()->setValue(buildChecklistSelectedValues(selected, options));
+}
 
+std::vector<std::string> PromptBuilder::readArrayListLines() {
     std::vector<std::string> lines;
-
-    // Display prompt
-    std::cout << std::endl;
-    std::cout << promptInput->getInput() << std::endl;
-    std::cout << "Enter each option and press Enter. Leave empty and press Enter to finish:" << std::endl;
-    std::cout << std::endl;
-
-    // Read multiple lines until empty line
     while (true) {
         std::cout << "> ";
         std::string userInput;
         std::getline(std::cin, userInput);
-
-        // Trim whitespace
         userInput.erase(0, userInput.find_first_not_of(" \t\n\r"));
-        userInput.erase(userInput.find_last_not_of(" \t\n\r") + 1);
-
-        // If line is not empty, add to list
         if (!userInput.empty()) {
-            lines.push_back(userInput);
-        } else {
+            userInput.erase(userInput.find_last_not_of(" \t\n\r") + 1);
+        }
+        if (userInput.empty()) {
             break;
         }
+        lines.push_back(userInput);
     }
+    return lines;
+}
 
-    // Store result as multiple lines separated by line breaks
+std::string PromptBuilder::joinLinesWithCrLf(const std::vector<std::string>& lines) {
     std::string result;
     for (size_t i = 0; i < lines.size(); ++i) {
         if (i > 0) {
@@ -281,8 +223,26 @@ void PromptBuilder::getArrayList(PromptInput* promptInput) {
         }
         result += lines[i];
     }
+    return result;
+}
 
-    promptInput->getVariable()->setValue(result);
+void PromptBuilder::getArrayList(PromptInput* promptInput) {
+    if (!promptInput) {
+        return;
+    }
+    if (!promptInput->getVariable()) {
+        throw std::runtime_error("Variable is nullptr in PromptInput.");
+    }
+    if (!stdinIsInteractive()) {
+        if (!promptInput->getVariable()->hasValue()) {
+            promptInput->getVariable()->setValue("");
+        }
+        return;
+    }
+    std::cout << std::endl << promptInput->getInput() << std::endl
+              << "Enter each option and press Enter. Leave empty and press Enter to finish:" << std::endl << std::endl;
+    std::vector<std::string> lines = readArrayListLines();
+    promptInput->getVariable()->setValue(joinLinesWithCrLf(lines));
     std::cout << std::endl;
 }
 
@@ -307,21 +267,24 @@ std::string PromptBuilder::executeFunction(const std::string& functionName, cons
 
     // Convert function name to lowercase for comparison
     std::string lowerFunctionName = functionName;
-    std::transform(lowerFunctionName.begin(), lowerFunctionName.end(), lowerFunctionName.begin(), ::tolower);
+    std::transform(lowerFunctionName.begin(), lowerFunctionName.end(), lowerFunctionName.begin(),
+                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
 
     if (lowerFunctionName == "upper") {
         if (argCount != 1) {
             throw std::runtime_error("Function 'upper' expects 1 argument, got " + std::to_string(argCount));
         }
         std::string result = arguments[0];
-        std::transform(result.begin(), result.end(), result.begin(), ::toupper);
+        std::transform(result.begin(), result.end(), result.begin(),
+                       [](unsigned char c) { return static_cast<char>(std::toupper(c)); });
         return result;
     } else if (lowerFunctionName == "lower") {
         if (argCount != 1) {
             throw std::runtime_error("Function 'lower' expects 1 argument, got " + std::to_string(argCount));
         }
         std::string result = arguments[0];
-        std::transform(result.begin(), result.end(), result.begin(), ::tolower);
+        std::transform(result.begin(), result.end(), result.begin(),
+                       [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
         return result;
     } else if (lowerFunctionName == "replace") {
         if (argCount != 3) {
@@ -342,341 +305,263 @@ std::string PromptBuilder::executeFunction(const std::string& functionName, cons
     }
 }
 
-std::string PromptBuilder::parseArgument(const std::vector<Variable*>& variables, const std::string& argStr) {
-    // Trim whitespace
-    std::string trimmed = argStr;
-    trimmed.erase(0, trimmed.find_first_not_of(" \t\n\r"));
-    trimmed.erase(trimmed.find_last_not_of(" \t\n\r") + 1);
+std::string PromptBuilder::trimArg(const std::string& s) {
+    std::string t = s;
+    t.erase(0, t.find_first_not_of(" \t\n\r"));
+    if (!t.empty()) {
+        t.erase(t.find_last_not_of(" \t\n\r") + 1);
+    }
+    return t;
+}
 
-    // Check if it's a string literal (starts and ends with quotes)
-    if (trimmed.length() >= 2) {
-        if ((trimmed[0] == '"' && trimmed[trimmed.length() - 1] == '"') ||
-            (trimmed[0] == '\'' && trimmed[trimmed.length() - 1] == '\'')) {
-            // Remove quotes and unescape
-            std::string result = trimmed.substr(1, trimmed.length() - 2);
-            
-            // Unescape quotes
-            size_t pos = 0;
-            if (trimmed[0] == '"') {
-                while ((pos = result.find("\"\"", pos)) != std::string::npos) {
-                    result.replace(pos, 2, "\"");
-                    pos += 1;
+static bool isQuotedString(const std::string& s) {
+    return s.length() >= 2 &&
+           ((s.front() == '"' && s.back() == '"') || (s.front() == '\'' && s.back() == '\''));
+}
+
+static std::string unescapeQuotedString(const std::string& s) {
+    std::string result = s.substr(1, s.length() - 2);
+    const std::string escaped = (s.front() == '"') ? "\"\"" : "''";
+    const char replacement = s.front();
+    size_t pos = 0;
+    while ((pos = result.find(escaped, pos)) != std::string::npos) {
+        result.replace(pos, 2, 1, replacement);
+        pos += 1;
+    }
+    return result;
+}
+
+std::string PromptBuilder::parseArgument(const std::vector<Variable*>& variables, const std::string& argStr) {
+    std::string trimmed = trimArg(argStr);
+    if (isQuotedString(trimmed)) {
+        return unescapeQuotedString(trimmed);
+    }
+    if (trimmed.find('(') != std::string::npos) {
+        return parseFunctionExpression(variables, trimmed);
+    }
+    return resolveVariableValue(variables, trimmed);
+}
+
+std::vector<std::string> PromptBuilder::parseArgumentsFromString(const std::string& argsString) {
+    std::vector<std::string> parsedArguments;
+    if (argsString.empty()) {
+        return parsedArguments;
+    }
+    size_t startPos = 0;
+    bool inQuotes = false;
+    char quoteChar = '\0';
+    int functionDepth = 0;
+    for (size_t j = 0; j < argsString.length(); ++j) {
+        char currentChar = argsString[j];
+        if (!inQuotes) {
+            if (currentChar == '"' || currentChar == '\'') {
+                inQuotes = true;
+                quoteChar = currentChar;
+            } else if (currentChar == '(') {
+                ++functionDepth;
+            } else if (currentChar == ')') {
+                --functionDepth;
+            } else if (currentChar == ',' && functionDepth == 0) {
+                std::string arg = trimArg(argsString.substr(startPos, j - startPos));
+                if (!arg.empty()) {
+                    parsedArguments.push_back(arg);
                 }
-            } else {
-                while ((pos = result.find("''", pos)) != std::string::npos) {
-                    result.replace(pos, 2, "'");
-                    pos += 1;
-                }
+                startPos = j + 1;
             }
-            return result;
+        } else if (currentChar == quoteChar) {
+            if (j + 1 < argsString.length() && argsString[j + 1] == quoteChar) {
+                ++j;
+            } else {
+                inQuotes = false;
+            }
         }
     }
-
-    // Check if it's a nested function call
-    if (trimmed.find('(') != std::string::npos) {
-        // It's a nested function - parse it recursively
-        return parseFunctionExpression(variables, trimmed);
-    } else {
-        // It's a variable name
-        return resolveVariableValue(variables, trimmed);
+    if (startPos < argsString.length()) {
+        std::string lastArg = trimArg(argsString.substr(startPos));
+        if (!lastArg.empty()) {
+            parsedArguments.push_back(lastArg);
+        }
     }
+    return parsedArguments;
 }
 
 std::string PromptBuilder::parseFunctionExpression(const std::vector<Variable*>& variables, const std::string& expression) {
-    // Find function name and arguments
     size_t openParenPos = expression.find('(');
     if (openParenPos == std::string::npos) {
         throw std::runtime_error("Invalid function expression: " + expression);
     }
-
-    std::string functionName = expression.substr(0, openParenPos);
-    // Trim whitespace
-    functionName.erase(0, functionName.find_first_not_of(" \t\n\r"));
-    functionName.erase(functionName.find_last_not_of(" \t\n\r") + 1);
-
-    // Get arguments string (everything after '(')
+    std::string functionName = trimArg(expression.substr(0, openParenPos));
     std::string argsString = expression.substr(openParenPos + 1);
-    
-    // Remove trailing ')' characters
     while (!argsString.empty() && argsString.back() == ')') {
         argsString.pop_back();
     }
-
-    // Parse arguments
-    std::vector<std::string> parsedArguments;
-    
-    if (!argsString.empty()) {
-        // Trim whitespace
-        argsString.erase(0, argsString.find_first_not_of(" \t\n\r"));
-        argsString.erase(argsString.find_last_not_of(" \t\n\r") + 1);
-
-        if (!argsString.empty()) {
-            size_t startPos = 0;
-            bool inQuotes = false;
-            char quoteChar = '\0';
-            int functionDepth = 0;
-            size_t j = 0;
-
-            while (j < argsString.length()) {
-                char currentChar = argsString[j];
-
-                if (!inQuotes) {
-                    if (currentChar == '"' || currentChar == '\'') {
-                        inQuotes = true;
-                        quoteChar = currentChar;
-                    } else if (currentChar == '(') {
-                        ++functionDepth;
-                    } else if (currentChar == ')') {
-                        --functionDepth;
-                    } else if (currentChar == ',' && functionDepth == 0) {
-                        // Found an argument separator
-                        std::string arg = argsString.substr(startPos, j - startPos);
-                        // Trim whitespace
-                        arg.erase(0, arg.find_first_not_of(" \t\n\r"));
-                        arg.erase(arg.find_last_not_of(" \t\n\r") + 1);
-                        if (!arg.empty()) {
-                            parsedArguments.push_back(arg);
-                        }
-                        startPos = j + 1;
-                    }
-                } else {
-                    if (currentChar == quoteChar) {
-                        // Check if it's an escaped quote
-                        if (j + 1 < argsString.length() && argsString[j + 1] == quoteChar) {
-                            ++j; // Skip escaped quote
-                        } else {
-                            inQuotes = false;
-                        }
-                    }
-                }
-
-                ++j;
-            }
-
-            // Add the last argument (or the only argument if there are no commas)
-            if (startPos < argsString.length()) {
-                std::string lastArg = argsString.substr(startPos);
-                // Trim whitespace
-                lastArg.erase(0, lastArg.find_first_not_of(" \t\n\r"));
-                lastArg.erase(lastArg.find_last_not_of(" \t\n\r") + 1);
-                if (!lastArg.empty()) {
-                    parsedArguments.push_back(lastArg);
-                }
-            }
-        }
-    }
-
-    // Resolve arguments
+    argsString = trimArg(argsString);
+    std::vector<std::string> parsedArguments = parseArgumentsFromString(argsString);
     std::vector<std::string> resolvedArguments;
     for (const auto& arg : parsedArguments) {
         resolvedArguments.push_back(parseArgument(variables, arg));
     }
-
-    // Execute function
     return executeFunction(functionName, resolvedArguments);
+}
+
+static std::string getTrimmedVariableValue(Variable* variable) {
+    if (!variable || !variable->hasValue()) {
+        return "";
+    }
+    std::string v = variable->getValue();
+    if (v.empty()) {
+        return v;
+    }
+    v.erase(0, v.find_first_not_of(" \t\n\r"));
+    if (!v.empty()) {
+        v.erase(v.find_last_not_of(" \t\n\r") + 1);
+    }
+    return v;
+}
+
+void PromptBuilder::processPrefixPatterns(std::string& result, const std::vector<Variable*>& variables) {
+    std::regex prefixPattern("\\{\\{\"([^\"]+)\"\\s*\\|\\s*(\\w+)\\}\\}");
+    std::sregex_iterator iter(result.begin(), result.end(), prefixPattern);
+    std::sregex_iterator end;
+    std::vector<std::pair<size_t, size_t>> matches;
+    std::vector<std::pair<std::string, std::string>> replacements;
+    for (; iter != end; ++iter) {
+        std::smatch match = *iter;
+        matches.push_back({match.position(), match.length()});
+        replacements.push_back({match[1].str(), match[2].str()});
+    }
+    for (int i = static_cast<int>(matches.size()) - 1; i >= 0; --i) {
+        size_t pos = matches[i].first;
+        size_t len = matches[i].second;
+        std::string prefix = replacements[i].first;
+        std::string varName = replacements[i].second;
+        std::string variableValue = resolveVariableValue(variables, varName);
+        std::vector<std::string> lines;
+        std::istringstream iss(variableValue);
+        std::string line;
+        while (std::getline(iss, line)) {
+            if (!line.empty() && line.back() == '\r') {
+                line.pop_back();
+            }
+            line.erase(0, line.find_first_not_of(" \t\n\r"));
+            line.erase(line.find_last_not_of(" \t\n\r") + 1);
+            if (!line.empty()) {
+                lines.push_back(line);
+            }
+        }
+        std::string processedValue;
+        for (size_t j = 0; j < lines.size(); ++j) {
+            if (j > 0) {
+                processedValue += "\r\n";
+            }
+            processedValue += prefix + lines[j];
+        }
+        result.replace(pos, len, processedValue);
+    }
+}
+
+void PromptBuilder::processFunctionExpressions(std::string& result, const std::vector<Variable*>& variables) {
+    const int maxIterations = 100;
+    for (int iteration = 0; iteration < maxIterations; ++iteration) {
+        bool processed = false;
+        for (size_t i = 0; i + 2 < result.length(); ++i) {
+            if (result[i] != '{' || result[i + 1] != '{') {
+                continue;
+            }
+            size_t startPos = i;
+            size_t funcStart = 0;
+            int parenDepth = 0;
+            bool inQuotes = false;
+            char quoteChar = '\0';
+            bool foundFunc = false;
+            size_t j = i + 2;
+            while (j + 1 < result.length()) {
+                if (!inQuotes) {
+                    if (result[j] == '"' || result[j] == '\'') {
+                        inQuotes = true;
+                        quoteChar = result[j];
+                    } else if (result[j] == '(') {
+                        if (parenDepth == 0) {
+                            funcStart = i + 2;
+                            foundFunc = true;
+                        }
+                        ++parenDepth;
+                    } else if (result[j] == ')') {
+                        --parenDepth;
+                        if (parenDepth == 0 && foundFunc && j + 2 < result.length() && result[j + 1] == '}' && result[j + 2] == '}') {
+                            std::string functionExpression = result.substr(funcStart, j - funcStart + 1);
+                            std::string functionResult = parseFunctionExpression(variables, functionExpression);
+                            result.replace(startPos, j + 3 - startPos, functionResult);
+                            processed = true;
+                            break;
+                        }
+                    } else if (j + 1 < result.length() && result[j] == '}' && result[j + 1] == '}' && !foundFunc) {
+                        break;
+                    }
+                } else if (result[j] == quoteChar) {
+                    if (j + 1 < result.length() && result[j + 1] == quoteChar) {
+                        ++j;
+                    } else {
+                        inQuotes = false;
+                    }
+                }
+                ++j;
+            }
+            if (processed) {
+                break;
+            }
+        }
+        if (!processed) {
+            break;
+        }
+    }
+}
+
+void PromptBuilder::processVariablePlaceholders(std::string& result, const std::vector<Variable*>& variables) {
+    for (Variable* variable : variables) {
+        if (!variable) {
+            continue;
+        }
+        std::string variableName = variable->getName();
+        std::string variableValue = getTrimmedVariableValue(variable);
+        std::string placeholder = "{{" + variableName + "}}";
+        size_t pos = 0;
+        while ((pos = result.find(placeholder, pos)) != std::string::npos) {
+            result.replace(pos, placeholder.length(), variableValue);
+            pos += variableValue.length();
+        }
+    }
+}
+
+void PromptBuilder::clearUnknownPlaceholders(std::string& result) {
+    static const std::regex unknownPlaceholderPattern(R"(\{\{([A-Za-z_][A-Za-z0-9_]*)\}\})");
+    result = std::regex_replace(result, unknownPlaceholderPattern, "");
 }
 
 std::string PromptBuilder::getContent(const std::string& content, const std::vector<Variable*>& variables) {
     try {
-        // If content is empty, return empty string (will be replaced with space in FileBuilder if needed)
-        if (content.empty()) {
+        if (content.empty() || variables.empty()) {
             return content;
         }
-        
-        // If variables are empty, return content as-is
-        if (variables.empty()) {
-            return content;
-        }
-
         std::string result = content;
-
-    // First, process special pattern {{"prefix" | variableName}}
-    // Pattern: {{"..." | varName}} or {{'...' | varName}}
-    // Only process if result is not empty
-    if (!result.empty()) {
-        std::regex prefixPattern("\\{\\{\"([^\"]+)\"\\s*\\|\\s*(\\w+)\\}\\}");
-        std::sregex_iterator iter(result.begin(), result.end(), prefixPattern);
-        std::sregex_iterator end;
-
-        // Collect all matches first (we need to process from end to start to maintain positions)
-        std::vector<std::pair<size_t, size_t>> matches; // (position, length)
-        std::vector<std::pair<std::string, std::string>> replacements; // (prefix, varName)
-        
-        for (; iter != end; ++iter) {
-            std::smatch match = *iter;
-            matches.push_back({match.position(), match.length()});
-            replacements.push_back({match[1].str(), match[2].str()});
-        }
-
-        // Process matches from end to start
-        for (int i = static_cast<int>(matches.size()) - 1; i >= 0; --i) {
-            size_t pos = matches[i].first;
-            size_t len = matches[i].second;
-            std::string prefix = replacements[i].first;
-            std::string varName = replacements[i].second;
-
-            // Find the variable value
-            std::string variableValue = resolveVariableValue(variables, varName);
-
-            // Process the value: split by lines and add prefix to each
-            std::vector<std::string> lines;
-            std::istringstream iss(variableValue);
-            std::string line;
-            while (std::getline(iss, line)) {
-                // Remove \r if present
-                if (!line.empty() && line.back() == '\r') {
-                    line.pop_back();
-                }
-                // Trim whitespace
-                line.erase(0, line.find_first_not_of(" \t\n\r"));
-                line.erase(line.find_last_not_of(" \t\n\r") + 1);
-                if (!line.empty()) {
-                    lines.push_back(line);
-                }
-            }
-
-            std::string processedValue;
-            for (size_t j = 0; j < lines.size(); ++j) {
-                if (j > 0) {
-                    processedValue += "\r\n";
-                }
-                processedValue += prefix + lines[j];
-            }
-
-            // Replace the matched pattern with processed value
-            result.replace(pos, len, processedValue);
-        }
-    }
-
-    // Second, process function expressions {{upper(variable)}}, {{lower(variable)}}, {{replace(" ", "_", variable)}}, etc.
-    // Pattern: {{functionName(arg1, arg2, ...)}}
-    // Process recursively - ParseFunctionExpression handles nested functions internally
-    // Only process if result is not empty
-    if (!result.empty()) {
-        const int maxIterations = 100; // Safety limit
-        int iteration = 0;
-
-        while (iteration < maxIterations) {
-            bool processed = false;
-            size_t i = 0;
-
-            // Find function expressions manually to properly handle nested functions
-            while (i < result.length() - 2) {
-            // Look for {{ that starts a function expression
-            if (result[i] == '{' && result[i + 1] == '{') {
-                size_t startPos = i;
-                size_t funcStart = 0;
-                int parenDepth = 0;
-                bool inQuotes = false;
-                char quoteChar = '\0';
-                bool foundFunc = false;
-                size_t j = i + 2; // Skip {{
-
-                // Look for function name and opening parenthesis
-                while (j < result.length() - 1) {
-                    if (!inQuotes) {
-                        if (result[j] == '"' || result[j] == '\'') {
-                            inQuotes = true;
-                            quoteChar = result[j];
-                        } else if (result[j] == '(') {
-                            if (parenDepth == 0) {
-                                funcStart = i + 2; // Start of function expression (after {{)
-                                foundFunc = true;
-                            }
-                            ++parenDepth;
-                        } else if (result[j] == ')') {
-                            --parenDepth;
-                            if (parenDepth == 0 && foundFunc) {
-                                // Found closing paren, check for }}
-                                if (j + 2 < result.length() && result[j + 1] == '}' && result[j + 2] == '}') {
-                                    // Found complete function expression {{func(...)}}
-                                    // Include the closing ')' in the expression
-                                    std::string functionExpression = result.substr(funcStart, j - funcStart + 1);
-                                    std::string functionResult = parseFunctionExpression(variables, functionExpression);
-
-                                    // Replace {{...}} with result
-                                    size_t replaceLen = j + 3 - startPos;
-                                    result.replace(startPos, replaceLen, functionResult);
-
-                                    processed = true;
-                                    break; // Exit inner while loop to restart from beginning
-                                }
-                            }
-                        } else if (j + 1 < result.length() && result[j] == '}' && result[j + 1] == '}' && !foundFunc) {
-                            // Not a function, skip this {{ and continue searching
-                            break; // Exit inner while loop, continue outer while loop
-                        }
-                    } else {
-                        if (result[j] == quoteChar) {
-                            // Check if escaped
-                            if (j + 1 < result.length() && result[j + 1] == quoteChar) {
-                                ++j; // Skip escaped quote
-                            } else {
-                                inQuotes = false;
-                            }
-                        }
-                    }
-                    ++j;
-                }
-
-                // If we processed a function, break from outer loop to restart
-                if (processed) {
-                    break; // Exit outer while loop to restart from beginning
-                }
-            }
-            ++i;
-        }
-
-            if (!processed) {
-                break; // No more functions to process
-            }
-            ++iteration;
-        }
-    }
-
-    // Finally, replace normal placeholders {{variableName}} with variable values
-    // Only process if result is not empty
-    if (!result.empty()) {
-        for (Variable* variable : variables) {
-        if (variable) {
-            std::string variableName = variable->getName();
-            std::string variableValue;
-            if (variable->hasValue()) {
-                variableValue = variable->getValue();
-                // Trim leading and trailing whitespace/newlines to prevent unwanted line breaks
-                // This preserves the original line structure when multiple variables are on the same line
-                if (!variableValue.empty()) {
-                    // Remove leading whitespace/newlines
-                    variableValue.erase(0, variableValue.find_first_not_of(" \t\n\r"));
-                    // Remove trailing whitespace/newlines
-                    if (!variableValue.empty()) {
-                        variableValue.erase(variableValue.find_last_not_of(" \t\n\r") + 1);
-                    }
-                }
-            }
-
-            std::string placeholder = "{{" + variableName + "}}";
-            size_t pos = 0;
-            while ((pos = result.find(placeholder, pos)) != std::string::npos) {
-                result.replace(pos, placeholder.length(), variableValue);
-                pos += variableValue.length();
-            }
-        }
-        }
-    }
-
-    // If variables were provided, remove any remaining simple placeholders
-    // (e.g., {{nonexistent}}) by replacing them with an empty string.
-    // This keeps behavior consistent with tests expecting missing variables to resolve to "".
-    if (!result.empty() && !variables.empty()) {
-        static const std::regex unknownPlaceholderPattern(R"(\{\{([A-Za-z_][A-Za-z0-9_]*)\}\})");
-        result = std::regex_replace(result, unknownPlaceholderPattern, "");
-    }
-
-    return result;
+        processPrefixPatterns(result, variables);
+        processFunctionExpressions(result, variables);
+        processVariablePlaceholders(result, variables);
+        clearUnknownPlaceholders(result);
+        return result;
     } catch (const std::exception& e) {
-        // Re-throw with more context
         throw std::runtime_error("Error processing content template: " + std::string(e.what()));
+    }
+}
+
+void PromptBuilder::processPromptInput(PromptInput* promptInput) {
+    PromptType type = promptInput->getType();
+    if (type == PromptType::ptInputString) {
+        getInputString(promptInput);
+    } else if (type == PromptType::ptChecklist) {
+        getChecklist(promptInput);
+    } else if (type == PromptType::ptArrayList) {
+        getArrayList(promptInput);
     }
 }
 
@@ -684,32 +569,18 @@ std::string PromptBuilder::build(Prompt* prompt, const std::vector<Variable*>& v
     if (!prompt) {
         return "";
     }
-
     try {
-        // Iterate over all inputs
-        const auto& inputs = prompt->getInputs();
-        for (const auto& promptInput : inputs) {
+        for (const auto& promptInput : prompt->getInputs()) {
             if (promptInput) {
                 try {
-                    PromptType type = promptInput->getType();
-                    if (type == PromptType::ptInputString) {
-                        getInputString(promptInput.get());
-                    } else if (type == PromptType::ptChecklist) {
-                        getChecklist(promptInput.get());
-                    } else if (type == PromptType::ptArrayList) {
-                        getArrayList(promptInput.get());
-                    }
+                    processPromptInput(promptInput.get());
                 } catch (const std::exception& e) {
-                    // Re-throw with more context
                     throw std::runtime_error("Error processing prompt input: " + std::string(e.what()));
                 }
             }
         }
-
-        // Process the result template with variable substitution
         return getContent(prompt->getResult(), variables);
     } catch (const std::exception& e) {
-        // Re-throw with more context
         throw std::runtime_error("Error building prompt: " + std::string(e.what()));
     }
 }

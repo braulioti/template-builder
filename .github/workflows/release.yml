@@ -246,6 +246,10 @@ jobs:
               
               # Also copy to installer/bin for consistency
               Copy-Item $msiPath -Destination "$installerDir\TemplateBuilder.msi" -Force
+              
+              # Create portable zip (exe + DLLs) for users who prefer zip over MSI
+              Write-Host "Creating portable zip..."
+              Compress-Archive -Path "$installerDir\*" -DestinationPath "$workspace\TemplateBuilder-windows.zip" -Force
             } else {
               Write-Error "MSI file not found after build at: $msiPath"
               exit 1
@@ -255,8 +259,13 @@ jobs:
             $wixPaths | ForEach-Object { Write-Host "  - $_" }
             Write-Host "Also checked PATH"
             Write-Warning "Creating zip as fallback..."
-            Compress-Archive -Path "$installerDir\TemplateBuilder.exe" -DestinationPath "$workspace\TemplateBuilder-windows.zip" -Force
+            Compress-Archive -Path "$installerDir\*" -DestinationPath "$workspace\TemplateBuilder-windows.zip" -Force
           }
+
+      - name: Prepare release artifacts
+        run: |
+          # Copy exe to root for artifact upload (TemplateBuilder.exe at root)
+          Copy-Item "build\bin\Release\TemplateBuilder.exe" -Destination "TemplateBuilder.exe" -Force
 
       - name: List files before upload
         run: |
@@ -311,6 +320,31 @@ jobs:
             build/bin/TemplateBuilder
           if-no-files-found: warn
 
+  angular:
+    name: Angular Build & Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Build
+        run: npm run build
+
   macos:
     runs-on: macos-latest
 
@@ -349,48 +383,186 @@ jobs:
             build/bin/TemplateBuilder
           if-no-files-found: warn
 
+  docker:
+    name: Build and push image to Nexus
+    needs: [angular]
+    runs-on: ubuntu-latest
+    # Usar o mesmo environment do deploy: assim NEXUS_* e PRODUCTION_* vêm do mesmo lugar (Environment "production" ou variáveis do repositório)
+    environment: production
+    env:
+      VERSION: ${{ github.ref_name }}
+      IMAGE_NAME: template-builder
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Nexus configuration (required for push and deploy)
+        id: nexus_check
+        run: |
+          if [ -z "${{ vars.NEXUS_REGISTRY }}" ] || [ -z "${{ secrets.NEXUS_USERNAME }}" ] || [ -z "${{ secrets.NEXUS_PASSWORD }}" ]; then
+            echo "push=false" >> $GITHUB_OUTPUT
+            echo "::warning::NEXUS_REGISTRY, NEXUS_USERNAME or NEXUS_PASSWORD not set. Docker image will be built but NOT pushed to Nexus. To publish the Angular app to Nexus and production, add in Settings → Secrets and variables → Actions: Variable NEXUS_REGISTRY, Secrets NEXUS_USERNAME and NEXUS_PASSWORD."
+          else
+            echo "push=true" >> $GITHUB_OUTPUT
+            echo "Nexus configured. Image will be pushed to registry."
+          fi
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Prepare image tags
+        id: tags
+        run: |
+          if [ "${{ steps.nexus_check.outputs.push }}" = "true" ]; then
+            echo "tags<<EOF" >> $GITHUB_OUTPUT
+            echo "${{ vars.NEXUS_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}" >> $GITHUB_OUTPUT
+            echo "${{ vars.NEXUS_REGISTRY }}/${{ env.IMAGE_NAME }}:latest" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "tags<<EOF" >> $GITHUB_OUTPUT
+            echo "${{ env.IMAGE_NAME }}:${{ env.VERSION }}" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Log in to Nexus Registry
+        if: steps.nexus_check.outputs.push == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ vars.NEXUS_REGISTRY }}
+          username: ${{ secrets.NEXUS_USERNAME }}
+          password: ${{ secrets.NEXUS_PASSWORD }}
+
+      - name: Build and push Docker image (Angular frontend)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: ${{ steps.nexus_check.outputs.push == 'true' }}
+          tags: ${{ steps.tags.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
   release:
-    needs: [windows, linux, macos]
+    needs: [windows, linux, macos, angular, docker]
     runs-on: ubuntu-latest
     permissions:
       contents: write
 
     steps:
-      - name: Download artifacts
+      - name: Download Windows artifact
         uses: actions/download-artifact@v4
         with:
-          path: release
+          name: windows
+          path: release/windows
+
+      - name: Download Linux artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: linux
+          path: release/linux
+
+      - name: Download macOS artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: macos
+          path: release/macos
 
       - name: List downloaded files
         run: |
-          echo "Files in release directory:"
-          find release -type f | sort
-
-      - name: List all downloaded files
-        run: |
           echo "=== All files in release directory ==="
           find release -type f | sort
-          echo ""
-          echo "=== Windows files ==="
-          find release/windows -type f 2>/dev/null || echo "No windows directory"
-          echo ""
-          echo "=== Linux files ==="
-          find release/linux -type f 2>/dev/null || echo "No linux directory"
-          echo ""
-          echo "=== macOS files ==="
-          find release/macos -type f 2>/dev/null || echo "No macos directory"
+
+      - name: Prepare release assets
+        run: |
+          mkdir -p dist
+          # Windows
+          cp release/windows/TemplateBuilder.msi dist/ || exit 1
+          cp release/windows/TemplateBuilder.exe dist/TemplateBuilder-windows.exe || exit 1
+          cp release/windows/TemplateBuilder-windows.zip dist/ || exit 1
+          # Linux
+          cp release/linux/template-builder-linux.tar.gz dist/ || exit 1
+          cp release/linux/build/bin/TemplateBuilder dist/template-builder-linux || exit 1
+          # macOS
+          cp release/macos/template-builder-macos.tar.gz dist/ || exit 1
+          cp release/macos/build/bin/TemplateBuilder dist/template-builder-macos || exit 1
+          if [ -f release/macos/template-builder.pkg ]; then
+            cp release/macos/template-builder.pkg dist/ || exit 1
+          fi
+          echo "=== Release assets ready ==="
+          ls -la dist/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b
         with:
-          files: |
-            release/windows/TemplateBuilder.msi
-            release/windows/TemplateBuilder.exe
-            release/windows/TemplateBuilder-windows.zip
-            release/linux/template-builder-linux.tar.gz
-            release/linux/TemplateBuilder
-            release/macos/template-builder-macos.tar.gz
-            release/macos/template-builder.pkg
-            release/macos/TemplateBuilder
+          files: dist/*
           generate_release_notes: true
-          fail_on_unmatched_files: false
+          fail_on_unmatched_files: true
+
+  deploy:
+    name: Publish docker-compose to production
+    needs: [release, docker]
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ github.ref_name }}
+      IMAGE: ${{ vars.NEXUS_REGISTRY }}/template-builder:${{ github.ref_name }}
+      DEPLOY_PATH: ${{ vars.PRODUCTION_DEPLOY_PATH != '' && vars.PRODUCTION_DEPLOY_PATH || '/opt/template-builder' }}
+      PRODUCTION_PORT: ${{ vars.PRODUCTION_PORT != '' && vars.PRODUCTION_PORT || '80' }}
+    steps:
+      - name: Check deploy variables
+        id: deploy_vars
+        env:
+          PRODUCTION_HOST: ${{ vars.PRODUCTION_HOST }}
+          PRODUCTION_USER: ${{ vars.PRODUCTION_USER }}
+        run: |
+          echo "PRODUCTION_HOST is set: $([ -n \"$PRODUCTION_HOST\" ] && echo 'yes' || echo 'no')"
+          echo "PRODUCTION_USER is set: $([ -n \"$PRODUCTION_USER\" ] && echo 'yes' || echo 'no')"
+          if [ -z "$PRODUCTION_HOST" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "::notice::Deploy skipped: PRODUCTION_HOST not set. Add it in Settings → Secrets and variables → Actions → Variables (repository variables)."
+            exit 0
+          fi
+          if [ -z "$PRODUCTION_USER" ]; then
+            echo "::error::PRODUCTION_USER is required. Add it in Settings → Secrets and variables → Actions → Variables."
+            exit 1
+          fi
+          echo "skip=false" >> $GITHUB_OUTPUT
+          echo "Deploy will run."
+
+      - uses: actions/checkout@v4
+        if: steps.deploy_vars.outputs.skip != 'true'
+
+      - name: Create .env for docker-compose
+        if: steps.deploy_vars.outputs.skip != 'true'
+        run: |
+          echo "IMAGE=${{ env.IMAGE }}" > deploy.env
+          echo "PORT=${{ env.PRODUCTION_PORT }}" >> deploy.env
+          echo "Created deploy.env:"
+          cat deploy.env
+
+      - name: Create deployment directory on server
+        if: steps.deploy_vars.outputs.skip != 'true'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ vars.PRODUCTION_HOST }}
+          username: ${{ vars.PRODUCTION_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          script: mkdir -p ${{ env.DEPLOY_PATH }}
+
+      - name: Copy docker-compose and .env to production
+        if: steps.deploy_vars.outputs.skip != 'true'
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ vars.PRODUCTION_HOST }}
+          username: ${{ vars.PRODUCTION_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          source: "docker-compose.yml,deploy.env"
+          target: ${{ env.DEPLOY_PATH }}
+
+      - name: Rename .env on server and deploy
+        if: steps.deploy_vars.outputs.skip != 'true'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ vars.PRODUCTION_HOST }}
+          username: ${{ vars.PRODUCTION_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          script: |
+            cd ${{ env.DEPLOY_PATH }}
+            mv deploy.env .env

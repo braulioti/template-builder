@@ -4,6 +4,8 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/f69823e9d31f443d89212528e308c716)](https://app.codacy.com/gh/braulioti/template-builder/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?logo=github-actions&logoColor=white)](./.github)
 [![C++](https://img.shields.io/badge/C++-00599C?style=flat-square&logo=C%2B%2B&logoColor=white)](https://visualstudio.microsoft.com/vs/features/cplusplus/)
+[![Angular 21](https://img.shields.io/badge/Angular-21-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.dev/)
+[![Jest](https://img.shields.io/badge/Jest-323330?style=for-the-badge&logo=Jest&logoColor=white)](https://jestjs.io/)
 [![Licence](https://img.shields.io/github/license/Ileriayo/markdown-badges?style=for-the-badge)](./LICENSE)
 
 Template Builder is a CLI tool that allows users to create custom project templates from YAML configuration files. The tool generates ready-made project structures by creating folders, generating files, and collecting user input through interactive CLI prompts defined in YAML files.
@@ -14,6 +16,7 @@ Template Builder is created and maintained by [Bráulio Figueiredo](https://brau
 
 - [Project Structure](#project-structure)
 - [Release Calendar](#release-calendar)
+  - [Status legend](#status-legend)
 - [Technologies](#technologies)
 - [Build and Run](#build-and-run)
   - [Prerequisites](#prerequisites)
@@ -48,11 +51,23 @@ template-builder/
 
 ## Release Calendar
 
-| Date | Description | Version | Status     |
-|------|-------------|---------|------------|
-| March 1, 2026 | In this version we will refactor from Delphi to C++ including multi-platform support | 0.1.0 | Developing |
-| March 1, 2026 |  | 0.2.0 |            |
-| March 1, 2026 |  | 1.0.0 |            |
+| Date        | Description                                                   | Version | Status                    |
+|-------------|---------------------------------------------------------------|---------|---------------------------|
+| Feb 9, 2026 | Created a new version in C++ including multi-platform support | 0.1.0   | Available for Publication |
+| Abr 1, 2026 |                                                               | 0.2.0   | Planned                   |
+| May 1, 2026 |                                                               | 0.3.0   | Planned                   |
+|             |                                                               | 1.0.0   | On Hold                   |
+
+### Status legend
+
+| Status                        | Description                                                                |
+|-------------------------------|----------------------------------------------------------------------------|
+| **Developing**                | Version under active development; features and fixes in progress.          |
+| **Available for Publication** | Version is feature-complete and ready to be published or released.         |
+| **Published**                 | Version has been released and is available to users.                       |
+| **Planned**                   | Version is scheduled for a future release; scope may still be defined.     |
+| **On Hold**                   | Work on this version is paused; may resume later.                          |
+| **Deprecated**                | Version is no longer recommended; users should upgrade to a newer version. |
 
 ## Technologies
 
@@ -61,6 +76,8 @@ template-builder/
 - Google Test (v1.14.0)
 - YAML Library: yaml-cpp
 - WIX Toolset V6.0
+- Angular 21
+- Jest + jest-preset-angular
 
 ## Build and Run
 

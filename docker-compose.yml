@@ -1,0 +1,11 @@
+# Production docker-compose for Template Builder frontend.
+# Image is built in CI and pushed to Nexus. Set IMAGE or use default.
+# Example: IMAGE=nexus.example.com:8082/template-builder:1.0.0 docker compose up -d
+
+services:
+  frontend:
+    image: ${IMAGE:-template-builder:latest}
+    container_name: template-builder-frontend
+    restart: unless-stopped
+    ports:
+      - "${PORT:-80}:80"

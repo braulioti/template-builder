@@ -1,0 +1,68 @@
+@use '../../../styles/palette-values' as *;
+
+// Banner
+#banner {
+  padding: 6em 0 0 0;
+  display: flex;
+
+  h1 {
+    margin-top: -0.125em;
+  }
+
+  .content {
+    flex-grow: 1;
+    flex-shrink: 1;
+    width: 100%;
+  }
+}
+
+// Section header
+section {
+  header.major {
+    margin-bottom: $size-element-margin;
+  }
+}
+
+// Table wrapper (Packages and Installers, Samples)
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 0 $size-element-margin 0;
+}
+
+// Releases tables: Packages and Installers + Samples (zebra striping)
+table.releases {
+  width: 100%;
+  border-collapse: collapse;
+
+  thead {
+    background-color: $palette-border-bg;
+    border-bottom: solid 2px $palette-border;
+  }
+
+  th {
+    color: $palette-fg-bold;
+    font-weight: 700;
+    padding: 0.75em;
+    text-align: left;
+  }
+
+  td {
+    padding: 0.75em;
+    border-bottom: solid 1px $palette-border;
+  }
+
+  // Zebra striping: odd rows
+  tbody tr:nth-child(odd) {
+    background-color: $palette-border-bg;
+  }
+
+  // Zebra striping: even rows (explicit for clarity)
+  tbody tr:nth-child(even) {
+    background-color: $palette-bg;
+  }
+
+  tbody tr:hover {
+    background-color: rgba(59, 174, 212, 0.06);
+  }
+}

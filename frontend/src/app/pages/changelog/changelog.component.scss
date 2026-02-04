@@ -1,0 +1,53 @@
+@use '../../../styles/palette-values' as *;
+
+// Banner
+#banner {
+  padding: 6em 0 0 0;
+  display: flex;
+
+  h1 {
+    margin-top: -0.125em;
+  }
+
+  .content {
+    flex-grow: 1;
+    flex-shrink: 1;
+    width: 100%;
+  }
+
+  h2 {
+    margin-top: $size-element-margin;
+  }
+
+  h3 {
+    margin-top: $size-element-margin;
+    font-size: 1.1em;
+  }
+
+  .changelog-release {
+    margin-bottom: $size-element-margin;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .release-description {
+    margin-top: 0.5em;
+    margin-bottom: 1em;
+  }
+
+  .changelog-list {
+    list-style: disc;
+    padding-left: 1.5em;
+    margin: 0 0 1em 0;
+
+    li {
+      margin-bottom: 0.5em;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}

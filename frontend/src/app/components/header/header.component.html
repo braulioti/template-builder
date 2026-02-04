@@ -1,0 +1,13 @@
+<header id="header">
+  <a routerLink="/en" class="logo"><strong>{{ title }}</strong></a>
+  <ul class="icons">
+    @for (social of socialNetworks; track social.name) {
+      <li>
+        <a [href]="social.url" [attr.aria-label]="social.name" target="_blank">
+          <i [class]="social.faClass"></i>
+          <span class="label">{{ social.name }}</span>
+        </a>
+      </li>
+    }
+  </ul>
+</header>

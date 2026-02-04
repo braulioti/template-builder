@@ -45,9 +45,16 @@ private:
     // Loading methods
     void loadVariables(const YAML::Node& root);
     void loadPrompts(const YAML::Node& root);
+    void loadSinglePrompt(const YAML::Node& promptItem, size_t promptIndex);
+    void loadPromptInput(Prompt* promptObj, const YAML::Node& inputItem, size_t inputIndex, size_t promptIndex);
     void loadFiles(const YAML::Node& root);
     void loadFolders(const YAML::Node& root);
     void loadRemoteFiles(const YAML::Node& root);
+
+    // buildAll helpers
+    void buildFolders();
+    void buildFiles();
+    void buildRemoteFiles();
 
     // Validation
     void validateVersion(const std::string& version) const;

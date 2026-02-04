@@ -1,0 +1,157 @@
+@use 'sass:color';
+@use '../../../styles/palette-values' as *;
+
+#search {
+  form {
+    position: relative;
+
+    &::before {
+      content: '\f002';
+      font-family: 'Font Awesome 5 Free';
+      font-weight: 900;
+      color: $palette-fg;
+      cursor: default;
+      display: block;
+      font-size: 1.5em;
+      height: calc($size-element-height / 1.375);
+      line-height: calc($size-element-height / 1.375);
+      opacity: 0.325;
+      position: absolute;
+      right: 0;
+      text-align: center;
+      top: 0;
+      width: calc($size-element-height / 1.375);
+    }
+
+    input[type="text"] {
+      padding-right: $size-element-height;
+      width: 100%;
+      height: $size-element-height;
+      border: 1px solid $palette-border;
+      border-radius: $size-border-radius;
+      padding-left: 1em;
+    }
+  }
+}
+
+  #sidebar {
+  $pad: 2.2222222222em; // 2em / 0.9
+
+  flex-grow: 0;
+  flex-shrink: 0;
+  transition: margin-left 0.5s ease, box-shadow 0.5s ease;
+  background-color: #f5f6f7 !important; // $palette-bg-alt
+  font-size: 0.9em;
+  position: relative;
+  width: $size-sidebar-width;
+  min-height: 100vh;
+  height: 100%;
+
+  h2 {
+    font-size: 1.3888888889em; // 1.25em / 0.9
+  }
+
+  > .inner {
+    padding: $pad;
+    position: relative;
+    width: $size-sidebar-width;
+
+    > * {
+      border-bottom: solid 2px $palette-border;
+      margin: 0 0 calc($size-element-margin * 1.75) 0;
+      padding: 0 0 calc($size-element-margin * 1.75) 0;
+
+      > :last-child {
+        margin-bottom: 0;
+      }
+
+      &:last-child {
+        border-bottom: 0;
+        margin-bottom: 0;
+        padding-bottom: 0;
+      }
+    }
+
+    > .alt {
+      // Use direct color value to ensure type recognition
+      background-color: color.scale(#f5f6f7, $lightness: -2%);
+      border-bottom: 0;
+      margin: calc($pad * -1) 0 calc($pad * 2) calc($pad * -1);
+      padding: $pad;
+      $pad-double: $pad * 2;
+      width: calc(100% + #{$pad-double});
+    }
+  }
+
+  &.inactive {
+    margin-left: calc($size-sidebar-width * -1);
+  }
+
+  @media (max-width: 1280px) {
+    $pad: 1.6666666667em; // 1.5em / 0.9
+
+    width: $size-sidebar-width-alt;
+
+    > .inner {
+      padding: $pad;
+      width: $size-sidebar-width-alt;
+
+      > .alt {
+        margin: ($pad * -1) 0 ($pad * 2) ($pad * -1);
+        padding: $pad;
+        width: calc(100% + #{$pad * 2});
+      }
+    }
+
+    .toggle {
+      height: 6.25em;
+      left: $size-sidebar-width-alt;
+      line-height: 6.25em;
+      text-indent: 5em;
+      width: 5em;
+
+      &::before {
+        font-size: 1.5rem;
+      }
+    }
+
+    &.inactive {
+      margin-left: calc($size-sidebar-width-alt * -1);
+    }
+  }
+
+  @media (max-width: 980px) {
+    box-shadow: 0 0 5em 0 rgba(0, 0, 0, 0.175);
+    height: 100%;
+    left: 0;
+    position: fixed;
+    top: 0;
+    z-index: $misc-z-index-base;
+
+    &.inactive {
+      box-shadow: none;
+      margin-left: calc($size-sidebar-width-alt * -1);
+
+    }
+
+    > .inner {
+      height: 100%;
+      left: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+      position: absolute;
+      top: 0;
+
+      &::after {
+        content: '';
+        display: block;
+        height: 4em;
+        width: 100%;
+      }
+    }
+
+  }
+
+  @media (max-width: 736px) {
+  }
+}

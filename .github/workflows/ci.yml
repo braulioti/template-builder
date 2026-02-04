@@ -26,7 +26,7 @@ jobs:
         working-directory: build
         run: |
           $exePath = "bin\${{ matrix.config }}\TemplateBuilder.exe"
-          $yamlPath = "${{ github.workspace }}\samples\sample.yaml"
+          $yamlPath = "${{ github.workspace }}\samples\readme.yaml"
           if (Test-Path $exePath) {
             if (Test-Path $yamlPath) {
               & $exePath $yamlPath
@@ -93,7 +93,7 @@ jobs:
       
       - name: Test
         working-directory: build
-        run: ./bin/TemplateBuilder ${{ github.workspace }}/samples/sample.yaml
+        run: ./bin/TemplateBuilder ${{ github.workspace }}/samples/readme.yaml
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -120,7 +120,7 @@ jobs:
       
       - name: Test
         working-directory: build
-        run: ./bin/TemplateBuilder ${{ github.workspace }}/samples/sample.yaml
+        run: ./bin/TemplateBuilder ${{ github.workspace }}/samples/readme.yaml
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -147,7 +147,7 @@ jobs:
       
       - name: Test
         working-directory: build
-        run: ./bin/TemplateBuilder ${{ github.workspace }}/samples/sample.yaml
+        run: ./bin/TemplateBuilder ${{ github.workspace }}/samples/readme.yaml
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -155,6 +155,31 @@ jobs:
           name: macos-arm64-${{ matrix.config }}
           path: build/bin/TemplateBuilder
           if-no-files-found: warn
+
+  angular:
+    name: Angular Build & Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run tests
+        run: npm run test
+      
+      - name: Build
+        run: npm run build
 
   coverage:
     name: Code Coverage
@@ -307,6 +332,21 @@ jobs:
           echo "Coverage file size: $(wc -c < coverage.info) bytes"
           head -20 coverage.info
       
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+      
+      - name: Run Angular tests with coverage
+        working-directory: frontend
+        run: npm run test:coverage
+      
       - name: Check Codacy token
         run: |
           if [ -z "${{ secrets.CODACY_PROJECT_TOKEN }}" ]; then
@@ -330,14 +370,24 @@ jobs:
             exit 0
           fi
           
-          # Download and upload coverage using official Codacy script
+          # Upload C++ coverage (partial - multiple reports)
           bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
             --project-token "${{ secrets.CODACY_PROJECT_TOKEN }}" \
             --language CPP \
-            -r build-coverage/coverage.info
+            -r build-coverage/coverage.info \
+            --partial
           
-          # Exit with error if reporter failed
-          if [ $? -ne 0 ]; then
-            echo "ERROR: Failed to upload coverage to Codacy"
-            exit 1
+          # Upload TypeScript/Angular coverage (partial - multiple reports)
+          if [ -f frontend/coverage/lcov.info ]; then
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+              --project-token "${{ secrets.CODACY_PROJECT_TOKEN }}" \
+              --language TypeScript \
+              -r frontend/coverage/lcov.info \
+              --partial
+          else
+            echo "⚠️  Angular coverage file not found, skipping TypeScript upload"
           fi
+          
+          # Finalize coverage report (required when using --partial)
+          bash <(curl -Ls https://coverage.codacy.com/get.sh) final \
+            --project-token "${{ secrets.CODACY_PROJECT_TOKEN }}"

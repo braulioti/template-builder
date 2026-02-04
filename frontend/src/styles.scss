@@ -2,7 +2,7 @@
 @use 'sass:meta';
 @use 'styles/palette-values' as *;
 
-/* Global styles - Editorial Theme */
+/* Global styles */
 @import url('https://fonts.googleapis.com/css?family=Open+Sans:400,600,400italic,600italic|Roboto+Slab:400,700');
 
 * {
@@ -372,4 +372,8 @@ app-footer .contact {
       width: 100%;
     }
   }
+}
+
+.text-center {
+  text-align: center;
 }

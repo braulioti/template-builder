@@ -3,6 +3,7 @@
 // it without pulling in this file's `main()`.
 #include <iostream>
 #include <string>
+#include <cstdlib>
 #include "template-builder.hpp"
 
 #ifdef _WIN32
@@ -30,15 +31,21 @@ int main(int argc, char* argv[]) {
     std::cout << "***************************************************" << std::endl;
     std::cout << std::endl;
     auto* info = curl_version_info(CURLVERSION_NOW);
-    std::cout << "SSL: " << (info->ssl_version ? info->ssl_version : "NONE") << std::endl;
 
-    // Check if YAML file path was provided
-    if (!validateArguments(argc)) {
+    std::string yamlFilePath;
+    bool forceInteractive = false;
+    if (!validateArguments(argc, argv, yamlFilePath, forceInteractive)) {
         showUsage(argv[0]);
         return 1;
     }
 
-    std::string yamlFilePath = argv[1];
+    if (forceInteractive) {
+#ifdef _WIN32
+        _putenv_s("TEMPLATE_BUILDER_INTERACTIVE", "1");
+#else
+        setenv("TEMPLATE_BUILDER_INTERACTIVE", "1", 1);
+#endif
+    }
 
     // Check if file exists
     if (!fileExists(yamlFilePath)) {

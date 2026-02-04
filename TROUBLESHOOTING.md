@@ -247,6 +247,30 @@ If you're using vcpkg to manage dependencies, follow these steps to install curl
 
 ## Common Issues
 
+### Prompts do not appear (style.css, promptStyle, and other prompts not being called)
+
+**Symptoms:**
+- Files that use prompts (e.g. `style.css` with `promptStyle`) are created with empty or default content
+- No interactive prompts appear (e.g. "Enter your project name: ", "Enter the description: ")
+
+**Cause:** The application detects whether stdin is connected to a terminal. When running from an IDE (CLion, etc.) or in non-interactive mode, prompts are skipped.
+
+**Solution:** Use the `-i` or `--interactive` flag to force prompts:
+
+```powershell
+# Windows
+.\cmake-build-debug\bin\Debug\TemplateBuilder.exe -i samples\wordpress-theme.yaml
+```
+
+```bash
+# Linux/macOS
+./cmake-build-debug/bin/TemplateBuilder -i samples/wordpress-theme.yaml
+```
+
+In CLion: Run → Edit Configurations → add `-i` to Program arguments (before the YAML file path).
+
+---
+
 ### Project compiles but executable is not found
 
 **Solution:**

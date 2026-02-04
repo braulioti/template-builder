@@ -4,6 +4,7 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/f69823e9d31f443d89212528e308c716)](https://app.codacy.com/gh/braulioti/template-builder/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?logo=github-actions&logoColor=white)](./.github)
 [![C++](https://img.shields.io/badge/C++-00599C?style=flat-square&logo=C%2B%2B&logoColor=white)](https://visualstudio.microsoft.com/vs/features/cplusplus/)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff)](https://www.docker.com/)
 [![Angular 21](https://img.shields.io/badge/Angular-21-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.dev/)
 [![Jest](https://img.shields.io/badge/Jest-323330?style=for-the-badge&logo=Jest&logoColor=white)](https://jestjs.io/)
 [![Licence](https://img.shields.io/github/license/Ileriayo/markdown-badges?style=for-the-badge)](./LICENSE)
@@ -22,6 +23,10 @@ Template Builder is created and maintained by [Bráulio Figueiredo](https://brau
   - [Prerequisites](#prerequisites)
   - [Building the Project](#building-the-project)
   - [Running the Application](#running-the-application)
+- [Deploy](#deploy)
+  - [Nexus (Docker image)](#nexus-docker-image)
+  - [Production server (docker-compose)](#production-server-docker-compose)
+  - [Local docker-compose usage](#local-docker-compose-usage)
 - [Tests](#tests)
   - [Running Tests](#running-tests)
 - [Generating Windows MSI Installer](#generating-windows-msi-installer)
@@ -51,12 +56,12 @@ template-builder/
 
 ## Release Calendar
 
-| Date        | Description                                                   | Version | Status                    |
-|-------------|---------------------------------------------------------------|---------|---------------------------|
-| Feb 9, 2026 | Created a new version in C++ including multi-platform support | 0.1.0   | Available for Publication |
-| Abr 1, 2026 |                                                               | 0.2.0   | Planned                   |
-| May 1, 2026 |                                                               | 0.3.0   | Planned                   |
-|             |                                                               | 1.0.0   | On Hold                   |
+| Date         | Description                                                   | Version | Status    |
+|--------------|---------------------------------------------------------------|---------|-----------|
+| Feb 5, 2026  | Created a new version in C++ including multi-platform support | 0.1.0   | Published |
+| Mar 10, 2026 |                                                               | 0.2.0   | Planned   |
+| Abr 10, 2026 |                                                               | 0.3.0   | Planned   |
+|              |                                                               | 1.0.0   | On Hold   |
 
 ### Status legend
 
@@ -78,6 +83,7 @@ template-builder/
 - WIX Toolset V6.0
 - Angular 21
 - Jest + jest-preset-angular
+- Nexus
 
 ## Build and Run
 
@@ -143,12 +149,17 @@ Execute the application with a YAML template file:
 
 **Linux/macOS**:
 ```bash
-./cmake-build-debug/bin/TemplateBuilder samples/sample.yaml
+./cmake-build-debug/bin/TemplateBuilder samples/wordpress-theme.yaml
 ```
 
 **Windows**:
 ```bash
-cmake-build-debug\bin\TemplateBuilder.exe samples\sample.yaml
+cmake-build-debug\bin\TemplateBuilder.exe samples\wordpress-theme.yaml
+```
+
+**Note:** If running from an IDE (e.g. CLion) and prompts do not appear, add the `-i` flag to force interactive mode:
+```bash
+./cmake-build-debug/bin/TemplateBuilder -i samples/wordpress-theme.yaml
 ```
 
 The application will:
@@ -159,6 +170,64 @@ The application will:
 5. Display a success message upon completion
 
 Sample templates are available in the `samples/` directory
+
+## Deploy
+
+### Deploy and Release (CI/CD)
+
+When creating a **release** (tag `v*`), the continuous integration:
+
+1. **Builds the Docker image** and publishes it to **Nexus** (image registry).
+2. **Publishes docker-compose** to the production server and runs the application.
+
+### Nexus (Docker image)
+
+Configure in the repository (Settings → Secrets and variables → Actions):
+
+| Type     | Name             | Description                                |
+|----------|------------------|--------------------------------------------|
+| Variable | `NEXUS_REGISTRY` | Nexus host (e.g. `nexus.company.com:8082`) |
+| Secret   | `NEXUS_USERNAME` | Nexus username                             |
+| Secret   | `NEXUS_PASSWORD` | Nexus password                             |
+
+If `NEXUS_REGISTRY` is not defined, the workflow still builds the image but does not push to Nexus.
+
+### Production server (docker-compose)
+
+To publish docker-compose and run the app in production:
+
+| Type     | Name                     | Description                                                           |
+|----------|--------------------------|-----------------------------------------------------------------------|
+| Variable | `PRODUCTION_HOST`        | Server host or IP (e.g. `app.company.com`)                            |
+| Variable | `PRODUCTION_USER`        | SSH user (e.g. `deploy`)                                              |
+| Variable | `PRODUCTION_PORT`        | (Optional) Host port for the container (default: `80`)                |
+| Variable | `PRODUCTION_DEPLOY_PATH` | (Optional) Directory on the server (default: `/opt/template-builder`) |
+| Secret   | `PRODUCTION_SSH_KEY`     | SSH private key for server access                                     |
+
+The deploy job creates an `.env` file on the server with the latest image published to Nexus (`IMAGE`) and the port (`PORT` = `PRODUCTION_PORT` or 80), then runs `docker compose up -d`.
+
+On the production server you need:
+
+- Docker and Docker Compose (v2) installed.
+- The SSH user with permission to run `docker compose` (e.g. user in the `docker` group).
+- If Nexus is private: run `docker login` on the server to the Nexus registry (or configure `~/.docker/config.json`) so that `docker compose pull` can download the image.
+
+### Local docker-compose usage
+
+To run with the Nexus image:
+
+```bash
+export IMAGE=nexus.company.com:8082/template-builder:1.0.0
+docker compose up -d
+```
+
+Or define the port:
+
+```bash
+export IMAGE=nexus.company.com:8082/template-builder:1.0.0
+export PORT=8080
+docker compose up -d
+```
 
 ## Tests
 

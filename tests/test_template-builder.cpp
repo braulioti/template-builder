@@ -28,12 +28,29 @@ protected:
 
 TEST_F(TemplateBuilderTest, ValidateArguments_WithValidArgs_ReturnsTrue) {
     int argc = 2;
-    EXPECT_TRUE(validateArguments(argc));
+    char* argv[] = {const_cast<char*>("program"), const_cast<char*>("file.yaml")};
+    std::string yamlPath;
+    bool forceInteractive = false;
+    EXPECT_TRUE(validateArguments(argc, argv, yamlPath, forceInteractive));
+    EXPECT_EQ("file.yaml", yamlPath);
+}
+
+TEST_F(TemplateBuilderTest, ValidateArguments_WithInteractiveFlag_ReturnsTrue) {
+    int argc = 3;
+    char* argv[] = {const_cast<char*>("program"), const_cast<char*>("-i"), const_cast<char*>("file.yaml")};
+    std::string yamlPath;
+    bool forceInteractive = false;
+    EXPECT_TRUE(validateArguments(argc, argv, yamlPath, forceInteractive));
+    EXPECT_EQ("file.yaml", yamlPath);
+    EXPECT_TRUE(forceInteractive);
 }
 
 TEST_F(TemplateBuilderTest, ValidateArguments_WithInsufficientArgs_ReturnsFalse) {
     int argc = 1;
-    EXPECT_FALSE(validateArguments(argc));
+    char* argv[] = {const_cast<char*>("program")};
+    std::string yamlPath;
+    bool forceInteractive = false;
+    EXPECT_FALSE(validateArguments(argc, argv, yamlPath, forceInteractive));
 }
 
 TEST_F(TemplateBuilderTest, FileExists_WithExistingFile_ReturnsTrue) {

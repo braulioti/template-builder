@@ -12,11 +12,27 @@
 #include "services/ParseYAML.hpp"
 
 void showUsage(const char* programName) {
-    std::cout << "Usage: " << programName << " <arquivo.yaml>" << std::endl;
+    std::cout << "Usage: " << programName << " [options] <file.yaml>" << std::endl;
+    std::cout << "Options:" << std::endl;
+    std::cout << "  -i, --interactive  Force interactive prompts (use when running from an IDE)" << std::endl;
 }
 
-bool validateArguments(int argc) {
-    return argc >= 2;
+bool validateArguments(int argc, char* argv[], std::string& outYamlPath, bool& outForceInteractive) {
+    outYamlPath.clear();
+    outForceInteractive = false;
+    if (argc < 2) {
+        return false;
+    }
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];
+        if (arg == "-i" || arg == "--interactive") {
+            outForceInteractive = true;
+        } else if (!arg.empty() && arg[0] != '-') {
+            outYamlPath = arg;
+            break;
+        }
+    }
+    return !outYamlPath.empty();
 }
 
 bool fileExists(const std::string& filePath) {

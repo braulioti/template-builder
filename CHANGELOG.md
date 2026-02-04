@@ -1,6 +1,6 @@
 # Changelog
 
-## [Version 0.1.0] - 2026-02-09
+## [Version 0.1.0] - 2026-02-05
 
 This release marks the initial C++ port of the Template Builder project in modern C++17. The primary objective is to enable cross-platform compilation and distribution across Windows, Linux, and macOS while maintaining full compatibility with existing YAML templates. This conversion establishes a solid foundation with a CMake-based build system, integrates yaml-cpp for YAML parsing, implements Google Test framework for comprehensive unit testing, and sets up CI/CD pipelines for continuous integration across all target platforms. The conversion preserves all existing functionality including variable management, interactive prompts, file generation, directory creation, template functions, and UTF-8 encoding support, ensuring seamless migration for existing users.
 

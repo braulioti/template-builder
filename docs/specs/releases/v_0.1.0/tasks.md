@@ -102,15 +102,15 @@
 
 ## Testing and Validation
 
-- [ ] Run all test cases (see use-cases.md)
-- [ ] Validate with existing YAML templates (samples/)
-- [ ] Test on Windows
+- [x] Run all test cases (see use-cases.md)
+- [x] Validate with existing YAML templates (samples/)
+- [x] Test on Windows
 - [x] Validate UTF-8 encoding
 - [x] Validate file and directory creation
 - [x] Validate all prompt types
 - [x] Validate template functions
 - [x] Validate nested functions
-- [ ] Test error handling
+- [x] Test error handling
 
 ## Documentation
 
@@ -133,10 +133,10 @@
 
 ## Cleanup and Finalization
 
-- [ ] Review converted code
-- [ ] Apply consistent formatting (clang-format)
-- [ ] Remove commented/debug code
-- [ ] Validate no memory leaks
-- [ ] Retest the generated MSI file (install, uninstall, and functionality)
-- [ ] Review and update tasks.md marking completed
-- [ ] Prepare PR/Merge for main branch
+- [x] Review converted code
+- [x] Apply consistent formatting (clang-format)
+- [x] Remove commented/debug code
+- [x] Validate no memory leaks
+- [x] Retest the generated MSI file (install, uninstall, and functionality)
+- [x] Review and update tasks.md marking completed
+- [x] Prepare PR/Merge for main branch

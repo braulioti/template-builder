@@ -1,5 +1,17 @@
 # Changelog
 
+## [Version 0.2.0] - XXXX-XX-XX
+
+This release focuses on enhancing the Template Builder CLI with repository support, improved command-line interface, and better installation management. The main goals are to enable users to download samples from a repository, list available templates, and improve the overall user experience with better help documentation and installation handling.
+
+### Feature
+
+### Deprecated
+
+### Fix
+
+### Documentation
+
 ## [Version 0.1.0] - 2026-02-05
 
 This release marks the initial C++ port of the Template Builder project in modern C++17. The primary objective is to enable cross-platform compilation and distribution across Windows, Linux, and macOS while maintaining full compatibility with existing YAML templates. This conversion establishes a solid foundation with a CMake-based build system, integrates yaml-cpp for YAML parsing, implements Google Test framework for comprehensive unit testing, and sets up CI/CD pipelines for continuous integration across all target platforms. The conversion preserves all existing functionality including variable management, interactive prompts, file generation, directory creation, template functions, and UTF-8 encoding support, ensuring seamless migration for existing users.

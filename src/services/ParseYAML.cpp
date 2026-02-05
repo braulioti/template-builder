@@ -9,7 +9,7 @@ namespace TemplateBuilder {
 
 namespace {
     // Keep older templates working while supporting the current spec.
-    constexpr const char* SUPPORTED_VERSIONS[] = {"0.1", "1.0"};
+    constexpr const char* SUPPORTED_VERSIONS[] = {"0.1", "0.2"};
     constexpr size_t SUPPORTED_VERSIONS_COUNT = sizeof(SUPPORTED_VERSIONS) / sizeof(SUPPORTED_VERSIONS[0]);
 }
 

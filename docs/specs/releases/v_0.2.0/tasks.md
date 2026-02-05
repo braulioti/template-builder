@@ -1,15 +1,5 @@
 # Tasks - Release v0.2.0
 
-## Setup and Infrastructure
-
-- [ ] Research and select ZIP library (minizip, libzip, or similar)
-- [ ] Research and select HTTP client library (libcurl, cpp-httplib, or similar)
-- [ ] Research and select argument parser library (cxxopts or implement custom)
-- [ ] Add new dependencies to CMakeLists.txt
-- [ ] Configure dependency management (FetchContent or package manager)
-- [ ] Update CI/CD to include new dependencies
-- [ ] Create directory structure for new services
-
 ## Command-Line Argument Service
 
 ### ArgumentParserService.hpp/cpp
@@ -22,8 +12,6 @@
 - [ ] Add support for `-h` / `--help`
 - [ ] Add support for `-r` / `--repository <sample-name>`
 - [ ] Add support for `-l` / `--list`
-- [ ] Add support for `--extract <zip-file> --output <path>`
-- [ ] Maintain backward compatibility with existing usage
 - [ ] Add unit tests for argument parsing
 - [ ] Add unit tests for validation
 - [ ] Add unit tests for help generation
@@ -44,22 +32,18 @@
 - [ ] Add unit tests for downloading
 - [ ] Add integration tests with mock repository
 
-## ZIP Extraction Service
+## YAML-driven ZIP Extraction
 
-### ZipExtractorService.hpp/cpp
-- [ ] Create ZipExtractorService class
-- [ ] Implement ZIP file reading
-- [ ] Implement file extraction to directory
-- [ ] Implement nested directory extraction
-- [ ] Implement progress feedback
-- [ ] Add error handling for corrupted files
-- [ ] Add error handling for insufficient space
-- [ ] Add error handling for permission issues
+### ExtractBuilder and ParseYAML integration
+- [ ] Define YAML format for `extract` section (e.g. sequence of `zip` + `path` items)
+- [ ] Add ExtractBuilder (or equivalent) to interpret extract entries and perform extraction
+- [ ] In ParseYAML: add `loadExtracts(root)` and store extract items; call ExtractBuilder from `buildAll()`
+- [ ] ExtractBuilder uses a ZIP library (minizip, libzip, etc.) to read and extract archives
+- [ ] Implement extraction to directory (create destination if needed, preserve directory structure)
+- [ ] Add error handling for corrupted files, insufficient space, permission issues
 - [ ] Preserve file permissions where possible
-- [ ] Add support for large files
-- [ ] Add unit tests for extraction
-- [ ] Add unit tests for error handling
-- [ ] Add tests for nested directories
+- [ ] Add unit tests for ExtractBuilder
+- [ ] Add unit tests for loadExtracts and buildAll with extract section
 
 ## Help System
 
@@ -128,6 +112,40 @@
 - [ ] Format author information nicely
 - [ ] Handle missing metadata fields gracefully
 
+## InputList Prompt Type
+
+### PromptType and Parser
+- [ ] Add `ptInputList` to PromptType enum (PromptType.hpp)
+- [ ] In ParseYAML::parsePromptType, map `InputList` / `inputlist` to ptInputList
+- [ ] Ensure InputList uses same `options` structure as Checklist/ArrayList (name/value)
+
+### PromptBuilder
+- [ ] Implement getInputList (or equivalent) in PromptBuilder: display options, single selection, set variable to selected option value
+- [ ] In processPromptInput, handle PromptType::ptInputList and call getInputList
+- [ ] Non-interactive mode: same behavior as other prompts (default/empty when stdin not interactive)
+
+### Tests and validation
+- [ ] Add unit tests for parsePromptType with InputList
+- [ ] Add unit tests for InputList prompt (single selection, variable value)
+- [ ] Validate UC29 - InputList use case (single selection from list)
+
+## Project Logo and Branding
+
+- [ ] Create project logo (asset suitable for favicon, project image, and ASCII conversion)
+- [ ] Add logo as favicon in the Angular frontend (e.g. index.html / angular.json assets)
+- [ ] Use logo as project/repository image and in branding assets (e.g. Open Graph)
+- [ ] Add ASCII art version of the logo to the CLI startup banner (e.g. in template-builder.cpp)
+- [ ] Ensure logo displays correctly in terminal (ASCII art) and in browser (favicon)
+
+## Frontend - Refactor component CSS
+
+- [ ] Refactor CSS/SCSS currently in component files (e.g. `*.component.scss` in `app/components` and `app/pages`)
+- [ ] Identify shared styles and move to global styles (e.g. `src/styles/`) or shared partials
+- [ ] Consolidate variables, mixins, and common layout/theme rules to avoid duplication
+- [ ] Keep component-scoped styles only where encapsulation is required; move reusable rules to shared stylesheets
+- [ ] Ensure build and visual appearance remain correct after refactor
+- [ ] Update stylelint/Prettier if needed for new structure
+
 ## Main Program Updates
 
 ### main.cpp updates
@@ -135,8 +153,7 @@
 - [ ] Add routing for `-h` / `--help` command
 - [ ] Add routing for `-l` / `--list` command
 - [ ] Add routing for `-r` / `--repository` command
-- [ ] Add routing for `--extract` command
-- [ ] Maintain existing YAML processing flow
+- [ ] Maintain existing YAML processing flow (extraction is triggered by YAML `extract` section, not CLI)
 - [ ] Update error messages
 - [ ] Add version display
 - [ ] Integrate enhanced version validation
@@ -177,7 +194,7 @@
 - [ ] Test complete flow: `-l` command
 - [ ] Test complete flow: `-r sample-name` command
 - [ ] Test complete flow: `-h` command
-- [ ] Test complete flow: `--extract` command
+- [ ] Test complete flow: YAML template with `extract` section (ExtractBuilder runs during buildAll)
 - [ ] Test backward compatibility with existing YAML processing
 - [ ] Test error scenarios (network failures, invalid files, etc.)
 
@@ -202,13 +219,15 @@
 - [ ] Validate UC26 - YAML Version Validation
 - [ ] Validate UC27 - Template Details Parsing
 - [ ] Validate UC28 - Template Details Display
+- [ ] Validate UC29 - InputList prompt (single selection from list)
+- [ ] Validate project logo: favicon in web app, project image, ASCII art in CLI
 
 ## Documentation
 
 - [ ] Update README.md with new CLI parameters
 - [ ] Document repository structure
 - [ ] Document sample download process
-- [ ] Document ZIP extraction feature
+- [ ] Document YAML `extract` section and ExtractBuilder (ZIP extraction feature)
 - [ ] Update installation guide with MSI upgrade info
 - [ ] Create examples for new features
 - [ ] Update CHANGELOG.md

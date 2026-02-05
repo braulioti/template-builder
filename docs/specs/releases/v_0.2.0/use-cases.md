@@ -125,14 +125,14 @@ TemplateBuilder -r non-existent-sample  # Should show error
 
 ---
 
-## UC19 - Extract ZIP File
+## UC19 - Extract ZIP File (YAML-driven)
 
-**Description**: The system must extract ZIP archives to a specified directory.
+**Description**: The system must extract ZIP archives when defined in the YAML template. Extraction is declared in an `extract` section and interpreted by an ExtractBuilder (or equivalent builder) during template processing—there is no separate CLI command for extraction.
 
 **Scenarios**:
-- **UC19a**: Extract ZIP with `--extract file.zip --output /path/to/dest`
-- **UC19b**: Extract ZIP to current directory (default output)
-- **UC19c**: Extract ZIP with nested directories
+- **UC19a**: Template has `extract` section with zip path and destination path
+- **UC19b**: Extract ZIP to path relative to current working directory
+- **UC19c**: Extract ZIP with nested directories (structure preserved)
 - **UC19d**: Extract corrupted ZIP (error handling)
 - **UC19e**: Extract ZIP to non-existent directory (should create)
 - **UC19f**: Extract ZIP with insufficient space (error handling)
@@ -140,29 +140,39 @@ TemplateBuilder -r non-existent-sample  # Should show error
 
 **Preconditions**: 
 - Template Builder is installed
-- ZIP file exists and is accessible
+- YAML template contains an `extract` section
+- ZIP file path in YAML exists and is accessible (or is a supported URI)
 - Sufficient disk space available
 - Write permissions to destination directory
 
 **Steps**:
-1. Execute: `TemplateBuilder --extract archive.zip --output /path/to/destination`
-2. System reads ZIP file
-3. System creates destination directory if needed
-4. System extracts all files preserving directory structure
-5. System displays progress feedback
+1. Execute: `TemplateBuilder template.yaml`
+2. Parser loads YAML and parses the `extract` section
+3. ExtractBuilder (or equivalent) processes each extract item
+4. System creates destination directory if needed
+5. System extracts all files preserving directory structure
+6. System displays progress/feedback per extraction
 
 **Expected Result**: 
-- All files are extracted correctly
+- All files from each declared ZIP are extracted correctly
 - Directory structure is preserved
 - File permissions are preserved where possible
-- Progress feedback is shown for large archives
-- Success message is displayed
+- Success message is displayed for each extraction
+
+**YAML format (example)**:
+```yaml
+version: 0.2
+extract:
+  - zip: "path/to/archive.zip"
+    path: "output/dir"
+  - zip: "another.zip"
+    path: "."
+```
 
 **Test Commands**:
 ```bash
-TemplateBuilder --extract sample.zip --output ./extracted
-TemplateBuilder --extract sample.zip  # Extract to current directory
-TemplateBuilder --extract corrupted.zip --output ./extracted  # Should show error
+TemplateBuilder template-with-extract.yaml   # template contains extract section
+TemplateBuilder template-with-corrupted-extract.yaml  # Should show error
 ```
 
 **Error Scenarios**:
@@ -170,6 +180,7 @@ TemplateBuilder --extract corrupted.zip --output ./extracted  # Should show erro
 - Insufficient space: Display error with space requirements
 - Permission denied: Display error with suggestion to check permissions
 - Invalid destination: Display error if destination path is invalid
+- Missing zip file: Display error indicating zip path not found
 
 ---
 
@@ -567,3 +578,61 @@ TemplateBuilder template-with-metadata.yaml
 4. Verify formatting is readable and consistent
 5. Verify install parameter is correctly displayed
 6. Verify email and URL are clickable/accessible if possible
+
+---
+
+## UC29 - Prompts - InputList (single selection from list)
+
+**Description**: The system must support a new prompt input type **InputList** where the user chooses one item from a list of options. The selected option’s value is assigned to the associated variable (single selection only, unlike Checklist).
+
+**Scenarios**:
+- **UC29a**: YAML defines InputList prompt with options
+- **UC29b**: User selects one option; variable receives that option’s value
+- **UC29c**: InputList with empty or single option (edge cases / validation)
+- **UC29d**: InputList in non-interactive mode (default value or empty per existing behavior)
+
+**Preconditions**: 
+- Template Builder is installed
+- YAML template contains a prompt with `type: InputList` and an `options` sequence
+
+**Steps**:
+1. Execute: `TemplateBuilder template.yaml`
+2. When the prompt runs, system displays the prompt text and the list of options
+3. User selects one item (e.g. by number, arrow keys, or equivalent)
+4. System stores the selected option’s `value` in the variable
+
+**Expected Result**: 
+- Prompt is displayed with all options
+- Exactly one selection is made; variable contains that option’s `value`
+- Template content using `{{variable}}` receives the selected value
+- Behavior is consistent with other prompt types for non-interactive mode
+
+**YAML format**:
+```yaml
+prompts:
+  - name: chooseLicense
+    inputs:
+      - variable: license
+        input: "Choose license: "
+        type: InputList
+        options:
+          - name: "MIT"
+            value: "MIT"
+          - name: "GPL v2"
+            value: "GPL-2.0"
+          - name: "Apache 2.0"
+            value: "Apache-2.0"
+    result: "License: {{license}}"
+```
+
+**Test Commands**:
+```bash
+TemplateBuilder template-with-inputlist.yaml
+```
+
+**Test Scenarios**:
+1. InputList with multiple options; select first, middle, last
+2. Variable substitution in result uses selected value
+3. InputList with one option (single choice)
+4. Non-interactive run: variable gets default or empty per existing rules
+5. InputList without options or invalid type (error or validation message)

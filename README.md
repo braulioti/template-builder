@@ -56,12 +56,12 @@ template-builder/
 
 ## Release Calendar
 
-| Date         | Description                                                   | Version | Status     |
-|--------------|---------------------------------------------------------------|---------|------------|
-| Feb 5, 2026  | Created a new version in C++ including multi-platform support | 0.1.0   | Published  |
-| Mar 10, 2026 | This release focuses on enhancing the Template Builder CLI with repository support, improved command-line interface, and better installation management. The main goals are to enable users to download samples from a repository, list available templates, and improve the overall user experience with better help documentation and installation handling.                                                              | 0.2.0   | Developing |
-| Abr 10, 2026 |                                                               | 0.3.0   | Planned    |
-|              |                                                               | 1.0.0   | On Hold    |
+| Date         | Description                                                                                                                                                                                                                                                                                                                                                    | Version | Status     |
+|--------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------|------------|
+| Feb 5, 2026  | Created a new version in C++ including multi-platform support                                                                                                                                                                                                                                                                                                  | 0.1.0   | Published  |
+| Mar 10, 2026 | This release focuses on enhancing the Template Builder CLI with repository support, improved command-line interface, and better installation management. The main goals are to enable users to download samples from a repository, list available templates, and improve the overall user experience with better help documentation and installation handling. | 0.2.0   | Developing |
+| Abr 10, 2026 |                                                                                                                                                                                                                                                                                                                                                                | 0.3.0   | Planned    |
+|              |                                                                                                                                                                                                                                                                                                                                                                | 1.0.0   | On Hold    |
 
 ### Status legend
 

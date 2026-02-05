@@ -35,10 +35,11 @@ This release focuses on enhancing the Template Builder CLI with repository suppo
   - Easier to extend with new parameters
   - Improved code organization
 
-#### 5. ZIP File Extraction
-- **Feature**: Extract ZIP archives to specific directories
-- **Description**: Support for extracting ZIP files (downloaded samples or templates) to user-specified directories
-- **Use Case**: Handle compressed template packages and sample distributions
+#### 5. ZIP File Extraction (YAML-driven)
+- **Feature**: Extract ZIP archives as defined in the YAML template
+- **Description**: A new `extract` section in the YAML lists ZIP files and destination paths. A dedicated builder (e.g. **ExtractBuilder**) interprets these entries during template processing and performs the extraction. There is no separate CLI command for extraction.
+- **YAML structure**: An `extract` key containing a sequence of items, each with a zip source (path or URI) and a destination `path`. The parser loads these entries and the ExtractBuilder executes each extraction (creating destination directories as needed, preserving structure).
+- **Use Case**: Handle compressed template packages and sample distributions within the same template run as files, folders, and remote files.
 
 #### 6. MSI Installer Enhancement
 - **Feature**: Installation detection and upgrade suggestion
@@ -83,6 +84,42 @@ This release focuses on enhancing the Template Builder CLI with repository suppo
   - Easier template discovery and management
   - Support for repository-based template installation
 
+#### 9. InputList Prompt Type
+- **Feature**: New prompt input type for single-selection from a list
+- **Description**: **InputList** allows the user to choose one item from a list of options (unlike Checklist, which allows multiple selections). The selected option’s value is stored in the associated variable.
+- **YAML structure**: Same `inputs` structure as existing prompts, with `type: InputList` and `options` (list of `name`/`value`). One option is selected by the user; the variable receives that option’s `value`.
+- **Use Case**: License type, single framework choice, theme variant, etc.
+- **Example**:
+  ```yaml
+  inputs:
+    - variable: license
+      input: "Choose license: "
+      type: InputList
+      options:
+        - name: "MIT"
+          value: "MIT"
+        - name: "GPL v2"
+          value: "GPL-2.0"
+        - name: "Apache 2.0"
+          value: "Apache-2.0"
+  ```
+
+#### 10. Frontend CSS refactor
+- **Feature**: Refactor CSS/SCSS in component files
+- **Description**: Refactor the styles that currently live in component files (`*.component.scss` in `app/components` and `app/pages`). Consolidate shared styles into global or shared stylesheets (e.g. under `src/styles/`), reduce duplication (variables, mixins, common layout/theme), and keep component-scoped styles only where encapsulation is needed.
+- **Benefits**: Easier maintenance, consistent theming, smaller bundle where shared styles are reused.
+
+#### 11. Project Logo and Branding
+- **Feature**: Create and integrate the project logo across the product
+- **Description**: In this version the project logo will be created and added in three forms:
+  - **Favicon**: Use the logo as the favicon of the web application (Angular frontend)
+  - **Project image**: Use the logo as the project/social image (e.g. repository image, Open Graph, branding assets)
+  - **ASCII Art in the CLI**: Display the logo as ASCII art when the CLI starts (e.g. in the banner shown by the main program)
+- **Benefits**: 
+  - Consistent visual identity
+  - Recognizable branding in the CLI, web UI, and repository
+  - Improved professional appearance
+
 ## Technologies and Tools
 
 ### New Dependencies
@@ -104,7 +141,7 @@ This release focuses on enhancing the Template Builder CLI with repository suppo
 All features from v0.1.0 are maintained:
 - ✅ YAML file parsing version 1.0
 - ✅ Variable management (string type)
-- ✅ Interactive prompts (InputString, Checklist, ArrayList)
+- ✅ Interactive prompts (InputString, Checklist, ArrayList, InputList)
 - ✅ File generation (static and dynamic)
 - ✅ Directory creation
 - ✅ Template functions (upper, lower, replace)
@@ -165,6 +202,9 @@ The repository will need to support:
 12. ✅ All existing functionality remains intact
 13. ✅ Unit tests for new features
 14. ✅ Documentation updated
+15. ✅ Project logo created and integrated as favicon (web), project image, and ASCII art (CLI)
+16. ✅ InputList prompt type implemented (single selection from list)
+17. ✅ Frontend component CSS refactored (shared styles consolidated, duplication reduced)
 
 ## Implementation Notes
 
@@ -186,7 +226,7 @@ TemplateBuilder -h
 TemplateBuilder --help
 
 # Extract ZIP file
-TemplateBuilder --extract archive.zip --output /path/to/destination
+TemplateBuilder template.yaml   # template includes extract section; ExtractBuilder performs extraction
 
 # Existing usage (still supported)
 TemplateBuilder path/to/template.yaml
@@ -249,6 +289,26 @@ variables:
 - Metadata is shown in repository sample information
 - All fields are optional for backward compatibility
 - Templates without `template` section continue to work normally
+
+### InputList Prompt Type
+
+- **PromptType**: Add `ptInputList` (or equivalent) to the enum; parser maps YAML `InputList` to this type
+- **YAML**: Same `options` format as Checklist/ArrayList (sequence of `name`/`value`). Required for InputList
+- **CLI behavior**: Display the prompt text and the list of options; user selects one item (e.g. by number or arrow keys); store the selected option’s `value` in the variable
+- **Backward compatibility**: Existing templates unchanged; InputList is additive
+
+### Frontend CSS refactor
+
+- **Scope**: Component SCSS in `app/components` (header, menu, main, sidebar, footer) and `app/pages` (build-template-*, home, changelog, installation, terms-of-use, using-template)
+- **Target**: Shared styles (variables, mixins, layout, theme) moved to `src/styles/` or similar; component files keep only styles that must be encapsulated
+- **Validation**: Build succeeds, visual regression check (or manual verification) after refactor
+
+### Project Logo and Branding
+
+- **Logo asset**: Create the project logo (e.g. SVG/PNG) suitable for favicon, social/repo image, and ASCII conversion
+- **Favicon**: Add the logo as favicon in the Angular app (e.g. in `index.html` and/or `angular.json` assets)
+- **Project image**: Use the logo as the repository/project image and in Open Graph or other branding assets
+- **CLI ASCII art**: Replace or augment the current text banner in the CLI (e.g. in `template-builder.cpp`) with an ASCII art version of the logo shown at startup
 
 ## Timeline
 

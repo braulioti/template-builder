@@ -8,7 +8,7 @@
 export const environment = {
   production: false,
   appTitle: 'Template Builder',
-  appVersion: '0.1.0',
+  appVersion: '0.2.0',
   apiUrl: '',
   apiTimeout: 30000,
   enableAnalytics: false,

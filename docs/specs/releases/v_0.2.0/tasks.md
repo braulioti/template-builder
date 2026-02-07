@@ -3,13 +3,13 @@
 ## Command-Line Argument Service
 
 ### ArgumentParserService.hpp/cpp
-- [ ] Create ArgumentParserService class
-- [ ] Implement argument parsing (short and long forms)
-- [ ] Implement parameter validation
-- [ ] Implement help text generation
-- [ ] Implement routing to appropriate handlers
-- [ ] Add error handling for invalid arguments
-- [ ] Add support for `-h` / `--help`
+- [x] Create ArgumentParserService class
+- [x] Implement argument parsing (short and long forms)
+- [x] Implement parameter validation
+- [x] Implement help text generation
+- [x] Implement routing to appropriate handlers (YAML path, help)
+- [x] Add error handling for invalid arguments
+- [x] Add support for `-h` / `--help`
 - [ ] Add support for `-r` / `--repository <sample-name>`
 - [ ] Add support for `-l` / `--list`
 - [ ] Add unit tests for argument parsing
@@ -76,24 +76,24 @@
 ## Template Details Metadata
 
 ### TemplateDetails Type
-- [ ] Create TemplateDetails class/struct
-- [ ] Define fields: name, author, email, url, installParameter
+- [x] Create TemplateDetails class/struct (DetailsBuilder exibe name, author, email, url, language)
+- [ ] Define fields: name, author, email, url, installParameter (atual: name, author, email, url, language no YAML raiz)
 - [ ] Implement getters and setters
 - [ ] Add validation for email format (optional)
 - [ ] Add validation for URL format (optional)
-- [ ] Make all fields optional for backward compatibility
+- [x] Make all fields optional for backward compatibility
 - [ ] Add unit tests for TemplateDetails
 
 ### ParseYAML Service Updates for Template Details
-- [ ] Add LoadTemplateDetails method
-- [ ] Parse `template` section from YAML
-- [ ] Extract template.name field
-- [ ] Extract template.author field
-- [ ] Extract template.email field
-- [ ] Extract template.url field
+- [x] Add LoadTemplateDetails method (displayTemplateMetadataIfApplicable)
+- [ ] Parse `template` section from YAML (atual: name, author, email, url, language no raiz do YAML)
+- [x] Extract template.name field (m_doc["name"])
+- [x] Extract template.author field (m_doc["author"])
+- [x] Extract template.email field (m_doc["email"])
+- [x] Extract template.url field (m_doc["url"])
 - [ ] Extract template.installParameter field
-- [ ] Handle missing template section (backward compatibility)
-- [ ] Handle missing optional fields gracefully
+- [x] Handle missing template section (backward compatibility)
+- [x] Handle missing optional fields gracefully
 - [ ] Add unit tests for parsing template section
 - [ ] Add unit tests for backward compatibility
 
@@ -106,11 +106,11 @@
 - [ ] Add unit tests for metadata display
 
 ### Display and Output
-- [ ] Create method to format template metadata
-- [ ] Display template info during processing (optional)
+- [x] Create method to format template metadata (DetailsBuilder::displayAll)
+- [x] Display template info during processing (optional)
 - [ ] Include metadata in help/listing output
-- [ ] Format author information nicely
-- [ ] Handle missing metadata fields gracefully
+- [x] Format author information nicely
+- [x] Handle missing metadata fields gracefully
 
 ## InputList Prompt Type
 
@@ -149,13 +149,13 @@
 ## Main Program Updates
 
 ### main.cpp updates
-- [ ] Integrate ArgumentParserService
-- [ ] Add routing for `-h` / `--help` command
+- [x] Integrate ArgumentParserService
+- [x] Add routing for `-h` / `--help` command
 - [ ] Add routing for `-l` / `--list` command
 - [ ] Add routing for `-r` / `--repository` command
-- [ ] Maintain existing YAML processing flow (extraction is triggered by YAML `extract` section, not CLI)
-- [ ] Update error messages
-- [ ] Add version display
+- [x] Maintain existing YAML processing flow (extraction is triggered by YAML `extract` section, not CLI)
+- [x] Update error messages
+- [x] Add version display
 - [ ] Integrate enhanced version validation
 - [ ] Test all command combinations
 
@@ -259,5 +259,5 @@
 - [ ] Remove commented/debug code
 - [ ] Validate no memory leaks
 - [ ] Performance testing for download and extraction
-- [ ] Review and update tasks.md marking completed
+- [x] Review and update tasks.md marking completed
 - [ ] Prepare PR/Merge for main branch

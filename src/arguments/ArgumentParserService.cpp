@@ -3,6 +3,18 @@
 
 namespace TemplateBuilder {
 
+namespace {
+bool isHelp(const std::string& arg) {
+    return arg == "-h" || arg == "--help";
+}
+bool isInteractive(const std::string& arg) {
+    return arg == "-i" || arg == "--interactive";
+}
+bool isYamlPath(const std::string& arg) {
+    return !arg.empty() && arg[0] != '-';
+}
+} // namespace
+
 ArgumentParserResult ArgumentParserService::parse(int argc, char* argv[]) {
     ArgumentParserResult result;
     if (argc < 2) {
@@ -10,14 +22,14 @@ ArgumentParserResult ArgumentParserService::parse(int argc, char* argv[]) {
     }
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
-        if (arg == "-h" || arg == "--help") {
+        if (isHelp(arg)) {
             result.showHelp = true;
             result.valid = true;
             return result;
         }
-        if (arg == "-i" || arg == "--interactive") {
+        if (isInteractive(arg)) {
             result.forceInteractive = true;
-        } else if (!arg.empty() && arg[0] != '-') {
+        } else if (isYamlPath(arg)) {
             result.yamlFilePath = arg;
             result.valid = true;
             return result;

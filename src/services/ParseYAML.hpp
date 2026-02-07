@@ -8,6 +8,7 @@
 #include "types/PromptType.hpp"
 #include "types/FileType.hpp"
 #include "types/RemoteFileType.hpp"
+#include "builders/DetailsBuilder.hpp"
 #include "builders/FileBuilder.hpp"
 #include "builders/FolderBuilder.hpp"
 #include "builders/RemoteFileBuilder.hpp"
@@ -29,6 +30,10 @@ public:
 
     // Main method to build all files, folders, and remote files
     void buildAll();
+
+    // Display template metadata (name, author, email, url, language) when version != 0.1
+    // Call before buildAll to show details below the CLI banner
+    void displayTemplateMetadataIfApplicable();
 
     // Getters
     [[nodiscard]] const std::string& getVersion() const noexcept { return m_version; }
@@ -74,6 +79,7 @@ private:
     std::vector<std::unique_ptr<FileData>> m_files;
     std::vector<std::unique_ptr<FileData>> m_folders;
     std::vector<std::unique_ptr<RemoteFileData>> m_remoteFiles;
+    std::unique_ptr<DetailsBuilder> m_detailsBuilder;
     std::unique_ptr<FileBuilder> m_fileBuilder;
     std::unique_ptr<FolderBuilder> m_folderBuilder;
     std::unique_ptr<RemoteFileBuilder> m_remoteFileBuilder;

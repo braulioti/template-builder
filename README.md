@@ -1,4 +1,4 @@
-﻿# Template Builder - Version: 0.2.0
+# [Template Builder - Version: 0.2.0](https://templatebuilder.brau.io)
 
 [![X: @_brau_io](https://img.shields.io/badge/contact-@_brau_io-blue.svg?style=flat)](https://x.com/_brau_io)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/f69823e9d31f443d89212528e308c716)](https://app.codacy.com/gh/braulioti/template-builder/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
@@ -10,6 +10,8 @@
 [![Licence](https://img.shields.io/github/license/Ileriayo/markdown-badges?style=for-the-badge)](./LICENSE)
 
 Template Builder is a CLI tool that allows users to create custom project templates from YAML configuration files. The tool generates ready-made project structures by creating folders, generating files, and collecting user input through interactive CLI prompts defined in YAML files.
+
+**[Official site: templatebuilder.brau.io](https://templatebuilder.brau.io)**
 
 Template Builder is created and maintained by [Bráulio Figueiredo](https://brau.io).
 
@@ -38,20 +40,24 @@ Template Builder is created and maintained by [Bráulio Figueiredo](https://brau
 
 ```
 template-builder/
-├── .github/                   # GitHub Actions workflows (CI/CD)
-├── src/                       # Source code (C++)
-├── tests/                     # Unit tests
-├── samples/                   # Example YAML templates
-├── docs/                      # Project documentation
-├── installer/                 # Installation scripts and configurations
-├── libs/                      # Files necessary for generating Windows installer
-├── old_src/                   # Legacy Pascal source code (reference)
-├── CMakeLists.txt            # CMake build configuration
-├── README.md                 # Main documentation
-├── CHANGELOG.md              # Change history
-├── CONTRIBUTING.md           # Contribution guide
-├── TROUBLESHOOTING.md        # Troubleshooting guide
-└── LICENSE                   # Project license
+├── .github/             # GitHub Actions workflows (CI/CD)
+├── backend/             # Backend placeholder
+├── docker/              # Docker configuration
+├── docs/                # Project documentation and specs
+├── frontend/            # Angular web application
+├── installer/           # Windows MSI installer (WiX)
+├── libs/                # DLLs and dependencies for Windows installer
+├── samples/             # Example YAML templates
+├── src/                 # C++ source code
+├── tests/               # Unit tests (Google Test)
+├── CMakeLists.txt       # CMake build configuration
+├── docker-compose.yml   # Docker Compose configuration
+├── Dockerfile           # Docker image definition
+├── README.md            # Main documentation
+├── CHANGELOG.md         # Change history
+├── CONTRIBUTING.md      # Contribution guide
+├── TROUBLESHOOTING.md   # Troubleshooting guide
+└── LICENSE              # Project license
 ```
 
 ## Release Calendar
@@ -61,6 +67,7 @@ template-builder/
 | Feb 5, 2026  | Created a new version in C++ including multi-platform support                                                                                                                                                                                                                                                                                                  | 0.1.0   | Published  |
 | Mar 10, 2026 | This release focuses on enhancing the Template Builder CLI with repository support, improved command-line interface, and better installation management. The main goals are to enable users to download samples from a repository, list available templates, and improve the overall user experience with better help documentation and installation handling. | 0.2.0   | Developing |
 | Abr 10, 2026 |                                                                                                                                                                                                                                                                                                                                                                | 0.3.0   | Planned    |
+| Mai 10, 2026 |                                                                                                                                                                                                                                                                                                                                                                | 0.4.0   | Planned    |
 |              |                                                                                                                                                                                                                                                                                                                                                                | 1.0.0   | On Hold    |
 
 ### Status legend
@@ -149,7 +156,7 @@ Execute the application with a YAML template file:
 
 **Linux/macOS**:
 ```bash
-./cmake-build-debug/bin/TemplateBuilder samples/wordpress-theme.yaml
+./cmake-build-debug/bin/TemplateBuilder samples/template-wordpress-pt-br.yaml
 ```
 
 **Windows**:
@@ -159,7 +166,7 @@ cmake-build-debug\bin\TemplateBuilder.exe samples\wordpress-theme.yaml
 
 **Note:** If running from an IDE (e.g. CLion) and prompts do not appear, add the `-i` flag to force interactive mode:
 ```bash
-./cmake-build-debug/bin/TemplateBuilder -i samples/wordpress-theme.yaml
+./cmake-build-debug/bin/TemplateBuilder -i samples/template-wordpress-pt-br.yaml
 ```
 
 The application will:

@@ -5,6 +5,7 @@
 This release focuses on enhancing the Template Builder CLI with repository support, improved command-line interface, and better installation management. The main goals are to enable users to download samples from a repository, list available templates, and improve the overall user experience with better help documentation and installation handling.
 
 ### Feature
+- Created global attributes for the YAML file (name, author, email, url, language) displayed in the CLI before builder operations (version 0.2 or later).
 
 ### Deprecated
 

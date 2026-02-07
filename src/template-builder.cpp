@@ -5,13 +5,13 @@
 #include <string>
 #include <cstdlib>
 #include "template-builder.hpp"
+#include "arguments/ArgumentParserService.hpp"
 
 #ifdef _WIN32
 #include <windows.h>
 #include <io.h>
 #include <fcntl.h>
 #endif
-#include <curl/curl.h>
 
 int main(int argc, char* argv[]) {
 #ifdef _WIN32
@@ -30,16 +30,15 @@ int main(int argc, char* argv[]) {
     std::cout << "* Generate project templates using YAML files     *" << std::endl;
     std::cout << "***************************************************" << std::endl;
     std::cout << std::endl;
-    auto* info = curl_version_info(CURLVERSION_NOW);
 
-    std::string yamlFilePath;
-    bool forceInteractive = false;
-    if (!validateArguments(argc, argv, yamlFilePath, forceInteractive)) {
-        showUsage(argv[0]);
-        return 1;
+    TemplateBuilder::ArgumentParserService parser;
+    auto result = parser.parse(argc, argv);
+    if (result.showHelp || !result.valid) {
+        TemplateBuilder::ArgumentParserService::showUsage(argv[0]);
+        return result.showHelp ? 0 : 1;
     }
 
-    if (forceInteractive) {
+    if (result.forceInteractive) {
 #ifdef _WIN32
         _putenv_s("TEMPLATE_BUILDER_INTERACTIVE", "1");
 #else
@@ -48,6 +47,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Check if file exists
+    const std::string& yamlFilePath = result.getYamlFilePath();
     if (!fileExists(yamlFilePath)) {
         std::cerr << "Error: File not found: " << yamlFilePath << std::endl;
         return 1;

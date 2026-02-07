@@ -48,6 +48,7 @@ ParserYAML::ParserYAML(const std::string& fileName) {
 }
 
 void ParserYAML::initialize() {
+    m_detailsBuilder = std::make_unique<DetailsBuilder>();
     m_fileBuilder = std::make_unique<FileBuilder>();
     m_folderBuilder = std::make_unique<FolderBuilder>();
     m_remoteFileBuilder = std::make_unique<RemoteFileBuilder>();
@@ -247,6 +248,19 @@ void ParserYAML::loadRemoteFiles(const YAML::Node& root) {
 
         m_remoteFiles.push_back(std::move(remoteObj));
     }
+}
+
+void ParserYAML::displayTemplateMetadataIfApplicable() {
+    if (toLower(m_version) == "0.1") {
+        return;
+    }
+    std::string name = m_doc["name"] ? m_doc["name"].as<std::string>() : "";
+    std::string author = m_doc["author"] ? m_doc["author"].as<std::string>() : "";
+    std::string email = m_doc["email"] ? m_doc["email"].as<std::string>() : "";
+    std::string url = m_doc["url"] ? m_doc["url"].as<std::string>() : "";
+    std::string language = m_doc["language"] ? m_doc["language"].as<std::string>() : (m_doc["idioma"] ? m_doc["idioma"].as<std::string>() : "");
+
+    m_detailsBuilder->displayAll(name, author, email, url, language);
 }
 
 void ParserYAML::buildFolders() {

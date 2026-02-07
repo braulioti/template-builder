@@ -1,0 +1,6 @@
+version: 0.2
+
+name: "Sample File"
+author: "Template Builder"
+url: "https://templatebuilder.brau.io"
+installParameter: "sample"

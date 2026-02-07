@@ -116,6 +116,7 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
         target_sources(${TEST_NAME} PRIVATE
             ${CMAKE_SOURCE_DIR}/src/template-builder-lib.cpp
             ${CMAKE_SOURCE_DIR}/src/services/ParseYAML.cpp
+            ${CMAKE_SOURCE_DIR}/src/builders/DetailsBuilder.cpp
             ${CMAKE_SOURCE_DIR}/src/builders/FileBuilder.cpp
             ${CMAKE_SOURCE_DIR}/src/builders/FolderBuilder.cpp
             ${CMAKE_SOURCE_DIR}/src/builders/RemoteFileBuilder.cpp
@@ -158,6 +159,7 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
     elseif(${TEST_NAME} STREQUAL "test_ParseYAML")
         target_sources(${TEST_NAME} PRIVATE
             ${CMAKE_SOURCE_DIR}/src/services/ParseYAML.cpp
+            ${CMAKE_SOURCE_DIR}/src/builders/DetailsBuilder.cpp
             ${CMAKE_SOURCE_DIR}/src/builders/FileBuilder.cpp
             ${CMAKE_SOURCE_DIR}/src/builders/FolderBuilder.cpp
             ${CMAKE_SOURCE_DIR}/src/builders/RemoteFileBuilder.cpp
@@ -168,6 +170,14 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
             ${CMAKE_SOURCE_DIR}/src/types/RemoteFileType.cpp
             ${CMAKE_SOURCE_DIR}/src/types/PromptType.cpp
             ${CMAKE_SOURCE_DIR}/src/types/VariableType.cpp
+        )
+    elseif(${TEST_NAME} STREQUAL "test_DetailsBuilder")
+        target_sources(${TEST_NAME} PRIVATE
+            ${CMAKE_SOURCE_DIR}/src/builders/DetailsBuilder.cpp
+        )
+    elseif(${TEST_NAME} STREQUAL "test_ArgumentParserService")
+        target_sources(${TEST_NAME} PRIVATE
+            ${CMAKE_SOURCE_DIR}/src/arguments/ArgumentParserService.cpp
         )
     elseif(${TEST_NAME} STREQUAL "test_CLINavigate")
         target_sources(${TEST_NAME} PRIVATE
@@ -216,6 +226,8 @@ add_unit_test(test_RemoteFileBuilder test_RemoteFileBuilder.cpp)
 add_unit_test(test_ParseYAML test_ParseYAML.cpp)
 add_unit_test(test_CLINavigate test_CLINavigate.cpp)
 add_unit_test(test_CLIFunctions test_CLIFunctions.cpp)
+add_unit_test(test_DetailsBuilder test_DetailsBuilder.cpp)
+add_unit_test(test_ArgumentParserService test_ArgumentParserService.cpp)
 
 # Message
 message(STATUS "Unit tests configuration: Tests will be built when BUILD_TESTS is ON")

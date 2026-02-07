@@ -114,12 +114,14 @@ set(SOURCES
     src/types/FileType.cpp
     src/types/RemoteFileType.cpp
     src/builders/PromptBuilder.cpp
+    src/builders/DetailsBuilder.cpp
     src/builders/FileBuilder.cpp
     src/builders/FolderBuilder.cpp
     src/builders/RemoteFileBuilder.cpp
     src/services/ParseYAML.cpp
     src/cli-utils/CLINavigate.cpp
     src/cli-utils/CLIFunctions.cpp
+    src/arguments/ArgumentParserService.cpp
 )
 
 # Headers
@@ -131,12 +133,14 @@ set(HEADERS
     src/types/FileType.hpp
     src/types/RemoteFileType.hpp
     src/builders/PromptBuilder.hpp
+    src/builders/DetailsBuilder.hpp
     src/builders/FileBuilder.hpp
     src/builders/FolderBuilder.hpp
     src/builders/RemoteFileBuilder.hpp
     src/services/ParseYAML.hpp
     src/cli-utils/CLINavigate.hpp
     src/cli-utils/CLIFunctions.hpp
+    src/arguments/ArgumentParserService.hpp
 )
 
 # Create executable

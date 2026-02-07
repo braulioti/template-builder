@@ -76,6 +76,7 @@ This release focuses on enhancing the Template Builder CLI with repository suppo
     author: "Author Name"
     email: "author@example.com"
     url: "https://author-website.com"
+    language: "pt-BR"
     installParameter: "template-name"
   ```
 - **Benefits**: 

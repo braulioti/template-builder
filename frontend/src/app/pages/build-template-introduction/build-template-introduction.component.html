@@ -20,5 +20,71 @@ files:
 
     <p>To generate the folder and file, run the following in a terminal, in the same directory as <code>hello.yaml</code>:</p>
     <pre><code>TemplateBuilder hello.yaml</code></pre>
+
+    <h2>Template Details (version 0.2 or later)</h2>
+    <p>Template details are optional metadata fields displayed in the CLI right after the banner and before any builder operations (folders, files, prompts). They help users identify the template—project name, author, contact info, and language—without opening the YAML file. All fields are optional and are shown only when present at the root of the YAML.</p>
+
+    <h2>Attributes</h2>
+    <div class="table-wrapper">
+      <table class="attributes">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Required</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>name</code></td>
+            <td>optional</td>
+            <td>Project or template name.</td>
+          </tr>
+          <tr>
+            <td><code>author</code></td>
+            <td>optional</td>
+            <td>Author or maintainer name.</td>
+          </tr>
+          <tr>
+            <td><code>email</code></td>
+            <td>optional</td>
+            <td>Author email address.</td>
+          </tr>
+          <tr>
+            <td><code>url</code></td>
+            <td>optional</td>
+            <td>Author or project URL.</td>
+          </tr>
+          <tr>
+            <td><code>language</code></td>
+            <td>optional</td>
+            <td>Template or content language (e.g. <code>pt-BR</code>, <code>en</code>). The field <code>idioma</code> is also supported.</td>
+          </tr>
+          <tr>
+            <td><code>installParameter</code></td>
+            <td>required (versions above 0.2)</td>
+            <td>Parameter name used for repository installation (e.g. <code>TemplateBuilder -r my-template</code>). Required for templates with version greater than 0.2.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Example</h2>
+    <p>Below is a template with version <code>0.2</code> and template details at the root. When you run the template, the CLI displays these details before creating folders and files.</p>
+    <pre><code>version: 0.2
+
+name: "My WordPress Theme"
+author: "Jane Doe"
+email: "jane@example.com"
+url: "https://example.com"
+language: "en"
+installParameter: "my-wordpress-theme"
+
+folders:
+  - path: "assets"
+
+files:
+  - path: "style.css"
+    content: "/* Theme: My WordPress Theme */"</code></pre>
   </div>
 </section>

@@ -44,6 +44,9 @@ int processYamlFile(const std::string& yamlFilePath) {
         // Create parser and load YAML file
         TemplateBuilder::ParserYAML parser(yamlFilePath);
 
+        // Display template metadata (name, author, email, url, language) below the banner when version != 0.1
+        parser.displayTemplateMetadataIfApplicable();
+
         // Build all files, folders, and remote files
         // buildAll handles exceptions internally and continues processing
         parser.buildAll();

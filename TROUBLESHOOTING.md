@@ -264,7 +264,7 @@ If you're using vcpkg to manage dependencies, follow these steps to install curl
 
 ```bash
 # Linux/macOS
-./cmake-build-debug/bin/TemplateBuilder -i samples/wordpress-theme.yaml
+./cmake-build-debug/bin/TemplateBuilder -i samples/template-wordpress-pt-br.yaml
 ```
 
 In CLion: Run → Edit Configurations → add `-i` to Program arguments (before the YAML file path).

@@ -26,7 +26,7 @@ jobs:
         working-directory: build
         run: |
           $exePath = "bin\${{ matrix.config }}\TemplateBuilder.exe"
-          $yamlPath = "${{ github.workspace }}\samples\readme.yaml"
+          $yamlPath = "${{ github.workspace }}\samples\sample.yaml"
           if (Test-Path $exePath) {
             if (Test-Path $yamlPath) {
               & $exePath $yamlPath
@@ -93,8 +93,8 @@ jobs:
       
       - name: Test
         working-directory: build
-        run: ./bin/TemplateBuilder ${{ github.workspace }}/samples/readme.yaml
-      
+        run: ./bin/TemplateBuilder ../samples/sample.yaml
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -120,8 +120,8 @@ jobs:
       
       - name: Test
         working-directory: build
-        run: ./bin/TemplateBuilder ${{ github.workspace }}/samples/readme.yaml
-      
+        run: ./bin/TemplateBuilder ../samples/sample.yaml
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -147,8 +147,8 @@ jobs:
       
       - name: Test
         working-directory: build
-        run: ./bin/TemplateBuilder ${{ github.workspace }}/samples/readme.yaml
-      
+        run: ./bin/TemplateBuilder ../samples/sample.yaml
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:

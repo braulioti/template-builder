@@ -120,6 +120,7 @@ set(SOURCES
     src/builders/RemoteFileBuilder.cpp
     src/services/ParseYAML.cpp
     src/cli-utils/CLINavigate.cpp
+    src/cli-utils/CLINavigateKeys.cpp
     src/cli-utils/CLIFunctions.cpp
     src/services/ArgumentParserService.cpp
     src/services/arguments/ArgumentList.cpp
@@ -141,6 +142,7 @@ set(HEADERS
     src/builders/RemoteFileBuilder.hpp
     src/services/ParseYAML.hpp
     src/cli-utils/CLINavigate.hpp
+    src/cli-utils/CLINavigateKeys.hpp
     src/cli-utils/CLIFunctions.hpp
     src/services/ArgumentParserService.hpp
     src/services/arguments/ArgumentList.hpp

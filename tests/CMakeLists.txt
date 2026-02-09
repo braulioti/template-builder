@@ -122,6 +122,7 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
             ${CMAKE_SOURCE_DIR}/src/builders/RemoteFileBuilder.cpp
             ${CMAKE_SOURCE_DIR}/src/builders/PromptBuilder.cpp
             ${CMAKE_SOURCE_DIR}/src/cli-utils/CLINavigate.cpp
+            ${CMAKE_SOURCE_DIR}/src/cli-utils/CLINavigateKeys.cpp
             ${CMAKE_SOURCE_DIR}/src/cli-utils/CLIFunctions.cpp
             ${CMAKE_SOURCE_DIR}/src/types/FileType.cpp
             ${CMAKE_SOURCE_DIR}/src/types/RemoteFileType.cpp
@@ -132,6 +133,7 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
         target_sources(${TEST_NAME} PRIVATE
             ${CMAKE_SOURCE_DIR}/src/builders/PromptBuilder.cpp
             ${CMAKE_SOURCE_DIR}/src/cli-utils/CLINavigate.cpp
+            ${CMAKE_SOURCE_DIR}/src/cli-utils/CLINavigateKeys.cpp
             ${CMAKE_SOURCE_DIR}/src/cli-utils/CLIFunctions.cpp
             ${CMAKE_SOURCE_DIR}/src/types/PromptType.cpp
             ${CMAKE_SOURCE_DIR}/src/types/VariableType.cpp
@@ -141,6 +143,7 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
             ${CMAKE_SOURCE_DIR}/src/builders/FileBuilder.cpp
             ${CMAKE_SOURCE_DIR}/src/builders/PromptBuilder.cpp
             ${CMAKE_SOURCE_DIR}/src/cli-utils/CLINavigate.cpp
+            ${CMAKE_SOURCE_DIR}/src/cli-utils/CLINavigateKeys.cpp
             ${CMAKE_SOURCE_DIR}/src/cli-utils/CLIFunctions.cpp
             ${CMAKE_SOURCE_DIR}/src/types/FileType.cpp
             ${CMAKE_SOURCE_DIR}/src/types/PromptType.cpp
@@ -165,6 +168,7 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
             ${CMAKE_SOURCE_DIR}/src/builders/RemoteFileBuilder.cpp
             ${CMAKE_SOURCE_DIR}/src/builders/PromptBuilder.cpp
             ${CMAKE_SOURCE_DIR}/src/cli-utils/CLINavigate.cpp
+            ${CMAKE_SOURCE_DIR}/src/cli-utils/CLINavigateKeys.cpp
             ${CMAKE_SOURCE_DIR}/src/cli-utils/CLIFunctions.cpp
             ${CMAKE_SOURCE_DIR}/src/types/FileType.cpp
             ${CMAKE_SOURCE_DIR}/src/types/RemoteFileType.cpp
@@ -188,12 +192,14 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
         target_sources(${TEST_NAME} PRIVATE
             ${CMAKE_SOURCE_DIR}/src/services/arguments/ArgumentList.cpp
             ${CMAKE_SOURCE_DIR}/src/cli-utils/CLINavigate.cpp
+            ${CMAKE_SOURCE_DIR}/src/cli-utils/CLINavigateKeys.cpp
             ${CMAKE_SOURCE_DIR}/src/types/PromptType.cpp
             ${CMAKE_SOURCE_DIR}/src/types/VariableType.cpp
         )
     elseif(${TEST_NAME} STREQUAL "test_CLINavigate")
         target_sources(${TEST_NAME} PRIVATE
             ${CMAKE_SOURCE_DIR}/src/cli-utils/CLINavigate.cpp
+            ${CMAKE_SOURCE_DIR}/src/cli-utils/CLINavigateKeys.cpp
             ${CMAKE_SOURCE_DIR}/src/types/PromptType.cpp
             ${CMAKE_SOURCE_DIR}/src/types/VariableType.cpp
         )

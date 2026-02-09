@@ -12,7 +12,8 @@ public:
 
     /**
      * Blocks until a key is read; returns the corresponding Key.
-     * Safe to call in a loop: each call reads exactly one key event; no buffer accumulation.
+     * Safe to call in a loop: each call uses a fixed-size buffer with bounds checks (CWE-120);
+     * no buffer accumulation or unbounded input.
      */
     static Key read();
 };

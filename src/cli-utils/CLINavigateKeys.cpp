@@ -54,14 +54,17 @@ namespace {
 constexpr size_t READ_BUFFER_SIZE = 1;
 
 /**
- * Reads exactly one byte into *byteOut. No loop; buffer size equals read count.
+ * Reads up to one byte into *byteOut. Buffer size and read request are tied to avoid CWE-120.
  * Returns 1 on success, 0 on EOF/timeout, -1 on error.
  */
 int readOneByte(unsigned char* byteOut) {
     unsigned char buf[READ_BUFFER_SIZE];
-    const ssize_t requestSize = static_cast<ssize_t>(READ_BUFFER_SIZE);
-    const ssize_t n = read(STDIN_FILENO, buf, requestSize);
-    if (n != 1) return (n < 0) ? -1 : 0;
+    const size_t bufSize = sizeof(buf);
+    const ssize_t n = read(STDIN_FILENO, buf, bufSize);
+    if (n < 0) return -1;
+    if (n == 0) return 0;
+    /* CWE-120: ensure kernel did not write past buffer before using buf */
+    if (n > static_cast<ssize_t>(bufSize)) return -1;
     *byteOut = buf[0];
     return 1;
 }

@@ -1,6 +1,7 @@
 #include "cli-utils/CLINavigate.hpp"
 #include "cli-utils/CLINavigateKeys.hpp"
 #include <iostream>
+#include <optional>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -15,6 +16,35 @@ namespace TemplateBuilder {
 namespace {
 
 constexpr size_t LIST_WINDOW_SIZE = 6;
+
+struct ListKeyOutcome {
+    size_t nextIndex;
+    bool done;
+    std::optional<size_t> returnValue;
+};
+
+ListKeyOutcome applyListKey(CLINavigateKeys::Key key, size_t currentIndex, size_t itemCount) {
+    ListKeyOutcome out{currentIndex, false, std::nullopt};
+    switch (key) {
+        case CLINavigateKeys::Key::Up:
+            if (currentIndex > 0) out.nextIndex = currentIndex - 1;
+            break;
+        case CLINavigateKeys::Key::Down:
+            if (currentIndex < itemCount - 1) out.nextIndex = currentIndex + 1;
+            break;
+        case CLINavigateKeys::Key::Enter:
+            out.done = true;
+            out.returnValue = currentIndex;
+            break;
+        case CLINavigateKeys::Key::Escape:
+            out.done = true;
+            out.returnValue = std::nullopt;
+            break;
+        default:
+            break;
+    }
+    return out;
+}
 
 /** For display: show only the part after ';' if present, otherwise the whole string. */
 static std::string displayPartOfItem(const std::string& item) {
@@ -97,9 +127,7 @@ void CLINavigate::runChecklistLoop(ChecklistLoopParams& params) {
 }
 
 std::optional<size_t> CLINavigate::selectFromList(const std::vector<std::string>& items) {
-    if (items.empty()) {
-        return std::nullopt;
-    }
+    if (items.empty()) return std::nullopt;
     size_t currentIndex = 0;
     const size_t windowSize = (items.size() < LIST_WINDOW_SIZE) ? items.size() : LIST_WINDOW_SIZE;
     const size_t lineCount = windowSize + 1;
@@ -108,21 +136,9 @@ std::optional<size_t> CLINavigate::selectFromList(const std::vector<std::string>
         renderListSelection(items, currentIndex);
         const CLINavigateKeys::Key key = CLINavigateKeys::read();
         clearDisplayedLines(lineCount);
-
-        switch (key) {
-            case CLINavigateKeys::Key::Up:
-                if (currentIndex > 0) --currentIndex;
-                break;
-            case CLINavigateKeys::Key::Down:
-                if (currentIndex < items.size() - 1) ++currentIndex;
-                break;
-            case CLINavigateKeys::Key::Enter:
-                return currentIndex;
-            case CLINavigateKeys::Key::Escape:
-                return std::nullopt;
-            case CLINavigateKeys::Key::None:
-                break;
-        }
+        ListKeyOutcome outcome = applyListKey(key, currentIndex, items.size());
+        if (outcome.done) return outcome.returnValue;
+        currentIndex = outcome.nextIndex;
     }
 }
 

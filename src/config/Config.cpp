@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cctype>
 #include <vector>
+#include <unordered_map>
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
@@ -79,53 +80,46 @@ void Config::set(const std::string& section, const std::string& key, const std::
     m_values[section + "." + key] = value;
 }
 
-void Config::load() {
-    m_values.clear();
-    std::ifstream f(m_configPath);
-    if (!f) return;
+namespace {
 
-    std::string currentSection;
-    std::string line;
-
-    while (std::getline(f, line)) {
-        line = trim(line);
-        if (line.empty() || line[0] == '#' || line[0] == ';') continue;
-
-        if (line[0] == '[') {
-            size_t end = line.find(']');
-            if (end != std::string::npos) {
-                currentSection = trim(line.substr(1, end - 1));
-            }
-            continue;
+void processIniLine(const std::string& line, std::string& currentSection,
+                    std::unordered_map<std::string, std::string>& values) {
+    if (line.empty() || line[0] == '#' || line[0] == ';') return;
+    if (line[0] == '[') {
+        size_t end = line.find(']');
+        if (end != std::string::npos) {
+            currentSection = trim(line.substr(1, end - 1));
         }
-
-        size_t eq = line.find('=');
-        if (eq != std::string::npos) {
-            std::string key = trim(line.substr(0, eq));
-            std::string value = trim(line.substr(eq + 1));
-            if (!key.empty()) {
-                std::string fullKey = currentSection.empty() ? key : currentSection + "." + key;
-                m_values[fullKey] = value;
-            }
-        }
+        return;
     }
+    size_t eq = line.find('=');
+    if (eq == std::string::npos) return;
+    std::string key = trim(line.substr(0, eq));
+    if (key.empty()) return;
+    std::string value = trim(line.substr(eq + 1));
+    std::string fullKey = currentSection.empty() ? key : currentSection + "." + key;
+    values[fullKey] = value;
 }
 
-void Config::save() const {
-    std::unordered_map<std::string, std::vector<std::pair<std::string, std::string>>> bySection;
-    for (const auto& [fullKey, value] : m_values) {
+using SectionMap = std::unordered_map<std::string, std::vector<std::pair<std::string, std::string>>>;
+
+SectionMap buildBySection(const std::unordered_map<std::string, std::string>& values) {
+    SectionMap bySection;
+    for (const auto& [fullKey, value] : values) {
         size_t dot = fullKey.find('.');
         std::string section = (dot != std::string::npos) ? fullKey.substr(0, dot) : "";
         std::string key = (dot != std::string::npos) ? fullKey.substr(dot + 1) : fullKey;
         bySection[section].emplace_back(key, value);
     }
+    return bySection;
+}
 
-    std::ofstream f(m_configPath);
+void writeSectionsToFile(const SectionMap& bySection, const std::filesystem::path& path) {
+    std::ofstream f(path);
     if (!f) return;
-
     bool first = true;
     if (bySection.count("")) {
-        for (const auto& [k, v] : bySection[""]) f << k << "=" << v << "\n";
+        for (const auto& [k, v] : bySection.at("")) f << k << "=" << v << "\n";
         first = false;
     }
     for (const auto& [section, pairs] : bySection) {
@@ -135,6 +129,24 @@ void Config::save() const {
         f << "[" << section << "]\n";
         for (const auto& [k, v] : pairs) f << k << "=" << v << "\n";
     }
+}
+
+} // namespace
+
+void Config::load() {
+    m_values.clear();
+    std::ifstream f(m_configPath);
+    if (!f) return;
+    std::string currentSection;
+    std::string line;
+    while (std::getline(f, line)) {
+        processIniLine(trim(line), currentSection, m_values);
+    }
+}
+
+void Config::save() const {
+    SectionMap bySection = buildBySection(m_values);
+    writeSectionsToFile(bySection, m_configPath);
 }
 
 } // namespace TemplateBuilder

@@ -1,0 +1,21 @@
+<!-- Banner -->
+<section id="banner">
+  <div class="content">
+    <header>
+      <h1>TemplateBuilder Argument List</h1>
+    </header>
+    <p>Reference for command-line arguments supported by the TemplateBuilder CLI. Usage: <code>TemplateBuilder [options] &lt;file.yaml&gt;</code></p>
+
+    <h2><code>-h</code>, <code>--help</code></h2>
+    <p>Shows the help message and exits. Displays the list of available options, the usage syntax, and the URL used for the templates list (when using <code>-l</code>). Use this option when you need a quick reminder of how to run TemplateBuilder or which arguments are supported.</p>
+
+    <h2><code>-i</code>, <code>--interactive</code></h2>
+    <p>Forces interactive mode so that prompts defined in the template are shown and the user can enter values. This is useful when running TemplateBuilder from an IDE or from an environment where stdin is not attached to a terminal; in those cases, prompts are normally skipped and default or empty values are used. With <code>-i</code>, the program will wait for user input for each prompt.</p>
+
+    <h2><code>-l</code>, <code>--list</code></h2>
+    <p>Downloads the templates list from the configured URL (by default the TemplateBuilder repository), displays it in an interactive menu where you can move with the Up/Down arrow keys and press Enter to select an item. The selected line (the part before the semicolon in each list entry) is then printed to the console. Use this option to discover available templates or to get the identifier or URL of a template before running it. The list URL can be changed in <code>config.ini</code> in the same directory as the executable (section <code>ARGUMENTS</code>, key <code>ListURL</code>).</p>
+
+    <h2><code>&lt;file.yaml&gt;</code></h2>
+    <p>Path to the YAML template file to run. This is a positional argument: you pass the path to your <code>.yaml</code> file after any options. TemplateBuilder will read the file, resolve variables and prompts (if in interactive mode), and generate the folders and files defined in the template. The path can be relative to the current directory or absolute. If the file does not exist, the program reports an error and exits with a non-zero code.</p>
+  </div>
+</section>

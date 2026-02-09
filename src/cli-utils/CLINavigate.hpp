@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <optional>
 #include "types/PromptType.hpp"
 
 namespace TemplateBuilder {
@@ -22,6 +23,13 @@ public:
     ~CLINavigate() = default;
 
     static void runChecklistLoop(ChecklistLoopParams& params);
+
+    /**
+     * Displays a list of items and lets the user choose one with Up/Down arrows.
+     * Enter confirms the selection. Returns the selected index, or std::nullopt if
+     * the list is empty or selection was cancelled (Escape).
+     */
+    static std::optional<size_t> selectFromList(const std::vector<std::string>& items);
 
 private:
 };

@@ -88,3 +88,9 @@ TEST_F(CLINavigateTest, RunChecklistLoopPreservesSelectedSize) {
     EXPECT_TRUE(selected[2]);
 #endif
 }
+
+TEST_F(CLINavigateTest, SelectFromList_WithEmptyList_ReturnsNullopt) {
+    std::vector<std::string> items;
+    auto result = CLINavigate::selectFromList(items);
+    EXPECT_FALSE(result.has_value());
+}

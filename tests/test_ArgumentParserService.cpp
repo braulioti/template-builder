@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
-#include "../src/arguments/ArgumentParserService.hpp"
+#include "../src/config/ConfigConstants.hpp"
+#include "../src/services/ArgumentParserService.hpp"
 #include <functional>
 #include <sstream>
 
@@ -8,7 +9,7 @@ using namespace TemplateBuilder;
 class ArgumentParserServiceTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        service = std::make_unique<ArgumentParserService>();
+        service = std::make_unique<ArgumentParserService>(ConfigConstants::DEFAULT_LIST_URL);
     }
 
     std::string captureStdout(std::function<void()> action) {
@@ -90,6 +91,33 @@ TEST_F(ArgumentParserServiceTest, Parse_WithHelpLong_ReturnsShowHelp) {
     EXPECT_TRUE(result.showHelp);
 }
 
+TEST_F(ArgumentParserServiceTest, Parse_WithListShort_ReturnsShowList) {
+    int argc = 2;
+    char arg0[] = "TemplateBuilder";
+    char arg1[] = "-l";
+    char* argv[] = {arg0, arg1};
+
+    auto result = service->parse(argc, argv);
+
+    EXPECT_TRUE(result.valid);
+    EXPECT_TRUE(result.showList);
+    EXPECT_FALSE(result.showHelp);
+    EXPECT_TRUE(result.yamlFilePath.empty());
+}
+
+TEST_F(ArgumentParserServiceTest, Parse_WithListLong_ReturnsShowList) {
+    int argc = 2;
+    char arg0[] = "TemplateBuilder";
+    char arg1[] = "--list";
+    char* argv[] = {arg0, arg1};
+
+    auto result = service->parse(argc, argv);
+
+    EXPECT_TRUE(result.valid);
+    EXPECT_TRUE(result.showList);
+    EXPECT_FALSE(result.showHelp);
+}
+
 TEST_F(ArgumentParserServiceTest, Parse_WithInsufficientArgs_ReturnsInvalid) {
     int argc = 1;
     char arg0[] = "TemplateBuilder";
@@ -115,8 +143,8 @@ TEST_F(ArgumentParserServiceTest, Parse_YamlPathBeforeFlags_ExtractsPath) {
 }
 
 TEST_F(ArgumentParserServiceTest, ShowUsage_PrintsHelp) {
-    std::string output = captureStdout([]() {
-        ArgumentParserService::showUsage("TemplateBuilder");
+    std::string output = captureStdout([this]() {
+        service->showUsage("TemplateBuilder");
     });
 
     EXPECT_TRUE(output.find("Usage:") != std::string::npos);
@@ -124,5 +152,8 @@ TEST_F(ArgumentParserServiceTest, ShowUsage_PrintsHelp) {
     EXPECT_TRUE(output.find("file.yaml") != std::string::npos);
     EXPECT_TRUE(output.find("-i") != std::string::npos);
     EXPECT_TRUE(output.find("--interactive") != std::string::npos);
+    EXPECT_TRUE(output.find("-l") != std::string::npos);
+    EXPECT_TRUE(output.find("--list") != std::string::npos);
     EXPECT_TRUE(output.find("--help") != std::string::npos);
+    EXPECT_TRUE(output.find(ConfigConstants::DEFAULT_LIST_URL) != std::string::npos);
 }

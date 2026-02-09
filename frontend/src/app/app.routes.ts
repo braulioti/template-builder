@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { HomeComponent } from './pages/home/home.component';
 import { InstallationComponent } from './pages/installation/installation.component';
 import { UsingTemplateComponent } from './pages/using-template/using-template.component';
+import { TemplatebuilderArgumentListComponent } from './pages/templatebuilder-argument-list/templatebuilder-argument-list.component';
 import { ChangelogComponent } from './pages/changelog/changelog.component';
 import { TermsOfUseComponent } from './pages/terms-of-use/terms-of-use.component';
 import { BuildTemplateIntroductionComponent } from './pages/build-template-introduction/build-template-introduction.component';
@@ -23,6 +24,7 @@ export const routes: Routes = [
       { path: '', component: HomeComponent },
       { path: 'installation', component: InstallationComponent },
       { path: 'using-template', component: UsingTemplateComponent },
+      { path: 'templatebuilder-argument-list', component: TemplatebuilderArgumentListComponent },
       { path: 'changelog', component: ChangelogComponent },
       { path: 'terms-of-use', component: TermsOfUseComponent },
       {

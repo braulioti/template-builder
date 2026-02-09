@@ -1,5 +1,6 @@
 #include "cli-utils/CLIFunctions.hpp"
 #include <algorithm>
+#include <cctype>
 #include <stdexcept>
 
 namespace TemplateBuilder {
@@ -13,6 +14,50 @@ std::string trimArg(const std::string& s) {
         t.erase(t.find_last_not_of(" \t\n\r") + 1);
     }
     return t;
+}
+
+std::string toLowerCaseString(std::string s) {
+    std::transform(s.begin(), s.end(), s.begin(),
+                  [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+    return s;
+}
+
+void expectArgCount(const std::string& functionName, size_t expected, size_t actual) {
+    if (actual != expected) {
+        throw std::runtime_error("Function '" + functionName + "' expects " +
+                                 std::to_string(expected) + " argument(s), got " + std::to_string(actual));
+    }
+}
+
+std::string executeCaseTransform(const std::string& functionName,
+                                 const std::vector<std::string>& arguments,
+                                 int (*charTransform)(int)) {
+    expectArgCount(functionName, 1, arguments.size());
+    std::string result = arguments[0];
+    std::transform(result.begin(), result.end(), result.begin(),
+                  [charTransform](unsigned char c) { return static_cast<char>(charTransform(c)); });
+    return result;
+}
+
+std::string executeUpperImpl(const std::vector<std::string>& arguments) {
+    return executeCaseTransform("upper", arguments, std::toupper);
+}
+
+std::string executeLowerImpl(const std::vector<std::string>& arguments) {
+    return executeCaseTransform("lower", arguments, std::tolower);
+}
+
+std::string executeReplaceImpl(const std::vector<std::string>& arguments) {
+    expectArgCount("replace", 3, arguments.size());
+    std::string result = arguments[2];
+    const std::string& search = arguments[0];
+    const std::string& replacement = arguments[1];
+    size_t pos = 0;
+    while ((pos = result.find(search, pos)) != std::string::npos) {
+        result.replace(pos, search.length(), replacement);
+        pos += replacement.length();
+    }
+    return result;
 }
 
 bool isQuotedString(const std::string& s) {
@@ -133,46 +178,11 @@ std::string CLIFunctions::parseFunctionExpression(const std::string& expression,
 }
 
 std::string CLIFunctions::executeFunction(const std::string& functionName, const std::vector<std::string>& arguments) {
-    size_t argCount = arguments.size();
-
-    // Convert function name to lowercase for comparison
-    std::string lowerFunctionName = functionName;
-    std::transform(lowerFunctionName.begin(), lowerFunctionName.end(), lowerFunctionName.begin(),
-                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-
-    if (lowerFunctionName == "upper") {
-        if (argCount != 1) {
-            throw std::runtime_error("Function 'upper' expects 1 argument, got " + std::to_string(argCount));
-        }
-        std::string result = arguments[0];
-        std::transform(result.begin(), result.end(), result.begin(),
-                       [](unsigned char c) { return static_cast<char>(std::toupper(c)); });
-        return result;
-    } else if (lowerFunctionName == "lower") {
-        if (argCount != 1) {
-            throw std::runtime_error("Function 'lower' expects 1 argument, got " + std::to_string(argCount));
-        }
-        std::string result = arguments[0];
-        std::transform(result.begin(), result.end(), result.begin(),
-                       [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-        return result;
-    } else if (lowerFunctionName == "replace") {
-        if (argCount != 3) {
-            throw std::runtime_error("Function 'replace' expects 3 arguments, got " + std::to_string(argCount));
-        }
-        std::string result = arguments[2];
-        std::string search = arguments[0];
-        std::string replacement = arguments[1];
-
-        size_t pos = 0;
-        while ((pos = result.find(search, pos)) != std::string::npos) {
-            result.replace(pos, search.length(), replacement);
-            pos += replacement.length();
-        }
-        return result;
-    } else {
-        throw std::runtime_error("Unknown function: " + functionName);
-    }
+    const std::string lowerName = toLowerCaseString(functionName);
+    if (lowerName == "upper") return executeUpperImpl(arguments);
+    if (lowerName == "lower") return executeLowerImpl(arguments);
+    if (lowerName == "replace") return executeReplaceImpl(arguments);
+    throw std::runtime_error("Unknown function: " + functionName);
 }
 
 enum class UnquotedAction { Continue, Break, ProcessedAndBreak };
@@ -211,20 +221,12 @@ UnquotedAction handleCloseParenInUnquoted(FunctionExpressionParams& params, Proc
     return UnquotedAction::Continue;
 }
 
-UnquotedAction processUnquotedChar(FunctionExpressionParams& params, ProcessUnquotedContext& ctx) {
+UnquotedAction handleUnquotedCharInTemplate(FunctionExpressionParams& params, ProcessUnquotedContext& ctx) {
     const char c = ctx.result[ctx.j];
-    if (c == '"' || c == '\'') {
-        return handleQuoteInUnquoted(params, ctx);
-    }
-    if (c == '(') {
-        return handleOpenParenInUnquoted(params, ctx);
-    }
-    if (c == ')') {
-        return handleCloseParenInUnquoted(params, ctx);
-    }
-    if (isClosingBraces(ctx) && !params.foundFunc) {
-        return UnquotedAction::Break;
-    }
+    if (c == '"' || c == '\'') return handleQuoteInUnquoted(params, ctx);
+    if (c == '(') return handleOpenParenInUnquoted(params, ctx);
+    if (c == ')') return handleCloseParenInUnquoted(params, ctx);
+    if (isClosingBraces(ctx) && !params.foundFunc) return UnquotedAction::Break;
     return UnquotedAction::Continue;
 }
 
@@ -259,7 +261,7 @@ static bool processOneExpression(std::string& result, std::function<std::string(
         while (j + 1 < result.length()) {
             if (!params.inQuotes) {
                 ProcessUnquotedContext ctx(result, j, i, startPos, funcStart, parseFunctionExpr);
-                UnquotedAction action = processUnquotedChar(params, ctx);
+                UnquotedAction action = handleUnquotedCharInTemplate(params, ctx);
                 if (action == UnquotedAction::ProcessedAndBreak) {
                     return true;
                 }

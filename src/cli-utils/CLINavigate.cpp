@@ -1,60 +1,71 @@
 #include "cli-utils/CLINavigate.hpp"
+#include "cli-utils/CLINavigateKeys.hpp"
 #include <iostream>
-#include <thread>
-#include <chrono>
+#include <optional>
 
 #ifdef _WIN32
 #include <windows.h>
-// Undefine Windows macros that conflict with C++ standard library
 #undef max
 #undef min
 #endif
+#include <thread>
+#include <chrono>
 
 namespace TemplateBuilder {
 
-#ifdef _WIN32
 namespace {
 
-bool readConsoleKey(unsigned short& key, bool& keyPressed) {
-    keyPressed = false;
-    HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
-    if (hStdin == INVALID_HANDLE_VALUE) {
-        return false;
+constexpr size_t LIST_WINDOW_SIZE = 6;
+
+struct ListKeyOutcome {
+    size_t nextIndex;
+    bool done;
+    std::optional<size_t> returnValue;
+};
+
+ListKeyOutcome applyListKey(CLINavigateKeys::Key key, size_t currentIndex, size_t itemCount) {
+    ListKeyOutcome out{currentIndex, false, std::nullopt};
+    switch (key) {
+        case CLINavigateKeys::Key::Up:
+            if (currentIndex > 0) out.nextIndex = currentIndex - 1;
+            break;
+        case CLINavigateKeys::Key::Down:
+            if (currentIndex < itemCount - 1) out.nextIndex = currentIndex + 1;
+            break;
+        case CLINavigateKeys::Key::Enter:
+            out.done = true;
+            out.returnValue = currentIndex;
+            break;
+        case CLINavigateKeys::Key::Escape:
+            out.done = true;
+            out.returnValue = std::nullopt;
+            break;
+        default:
+            break;
     }
+    return out;
+}
 
-    INPUT_RECORD inputRecord;
-    DWORD numRead;
+/** For display: show only the part after ';' if present, otherwise the whole string. */
+static std::string displayPartOfItem(const std::string& item) {
+    const size_t pos = item.find(';');
+    return (pos != std::string::npos) ? item.substr(pos + 1) : item;
+}
 
-    if (!PeekConsoleInput(hStdin, &inputRecord, 1, &numRead)) {
-        return false;
+void renderListSelection(const std::vector<std::string>& items, size_t currentIndex) {
+    const size_t n = items.size();
+    const size_t windowSize = (n < LIST_WINDOW_SIZE) ? n : LIST_WINDOW_SIZE;
+    const size_t startIndex = (currentIndex + 1 > windowSize) ? currentIndex - (windowSize - 1) : 0;
+
+    for (size_t i = 0; i < windowSize; ++i) {
+        const size_t itemIndex = startIndex + i;
+        std::cout << (itemIndex == currentIndex ? "> " : "  ");
+        std::cout << displayPartOfItem(items[itemIndex]) << std::endl;
     }
-
-    if (numRead == 0) {
-        return false;
-    }
-
-    if (ReadConsoleInput(hStdin, &inputRecord, 1, &numRead)) {
-        if (inputRecord.EventType == KEY_EVENT && inputRecord.Event.KeyEvent.bKeyDown) {
-            key = inputRecord.Event.KeyEvent.wVirtualKeyCode;
-            keyPressed = true;
-            return true;
-        }
-    }
-
-    return false;
+    std::cout << "Use Up/Down arrows to navigate, Enter to select" << std::endl;
 }
 
 } // namespace
-#else
-namespace {
-
-bool readConsoleKey(unsigned short& key, bool& keyPressed) {
-    keyPressed = false;
-    return false;
-}
-
-} // namespace
-#endif
 
 namespace {
 
@@ -74,36 +85,31 @@ void clearDisplayedLines(size_t lineCount) {
     }
 }
 
-#ifdef _WIN32
-void handleKeyPress(ChecklistLoopParams& params, unsigned short key) {
+static void handleChecklistKey(ChecklistLoopParams& params, CLINavigateKeys::Key key) {
     const auto& options = params.promptInput->getOptions();
-    if (key == VK_UP && params.currentIndex > 0) {
-        --params.currentIndex;
-    } else if (key == VK_DOWN && params.currentIndex < options.size() - 1) {
-        ++params.currentIndex;
-    } else if (key == VK_SPACE) {
-        params.selected[params.currentIndex] = !params.selected[params.currentIndex];
-    } else if (key == VK_RETURN) {
-        params.done = true;
+    switch (key) {
+        case CLINavigateKeys::Key::Up:
+            if (params.currentIndex > 0) --params.currentIndex;
+            break;
+        case CLINavigateKeys::Key::Down:
+            if (params.currentIndex < options.size() - 1) ++params.currentIndex;
+            break;
+        case CLINavigateKeys::Key::Space:
+            params.selected[params.currentIndex] = !params.selected[params.currentIndex];
+            break;
+        case CLINavigateKeys::Key::Enter:
+            params.done = true;
+            break;
+        default:
+            break;
     }
 }
 
-bool processSingleKeyInput(ChecklistLoopParams& params) {
-    unsigned short key = 0;
-    bool keyPressed = false;
-    if (!readConsoleKey(key, keyPressed)) {
-        return false;
-    }
+#ifdef _WIN32
+static void waitForAndProcessChecklistKey(ChecklistLoopParams& params) {
     const auto& options = params.promptInput->getOptions();
     clearDisplayedLines(options.size() + 1);
-    handleKeyPress(params, key);
-    return true;
-}
-
-void waitForAndProcessKey(ChecklistLoopParams& params) {
-    while (!processSingleKeyInput(params)) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    }
+    handleChecklistKey(params, CLINavigateKeys::read());
 }
 #endif
 
@@ -113,10 +119,26 @@ void CLINavigate::runChecklistLoop(ChecklistLoopParams& params) {
     while (!params.done) {
         renderChecklist(params);
 #ifdef _WIN32
-        waitForAndProcessKey(params);
+        waitForAndProcessChecklistKey(params);
 #else
         params.done = true;
 #endif
+    }
+}
+
+std::optional<size_t> CLINavigate::selectFromList(const std::vector<std::string>& items) {
+    if (items.empty()) return std::nullopt;
+    size_t currentIndex = 0;
+    const size_t windowSize = (items.size() < LIST_WINDOW_SIZE) ? items.size() : LIST_WINDOW_SIZE;
+    const size_t lineCount = windowSize + 1;
+
+    while (true) {
+        renderListSelection(items, currentIndex);
+        const CLINavigateKeys::Key key = CLINavigateKeys::read();
+        clearDisplayedLines(lineCount);
+        ListKeyOutcome outcome = applyListKey(key, currentIndex, items.size());
+        if (outcome.done) return outcome.returnValue;
+        currentIndex = outcome.nextIndex;
     }
 }
 

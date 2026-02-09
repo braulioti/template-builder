@@ -11,7 +11,7 @@
 - [x] Add error handling for invalid arguments
 - [x] Add support for `-h` / `--help`
 - [ ] Add support for `-r` / `--repository <sample-name>`
-- [ ] Add support for `-l` / `--list`
+- [x] Add support for `-l` / `--list`
 - [ ] Add unit tests for argument parsing
 - [ ] Add unit tests for validation
 - [ ] Add unit tests for help generation
@@ -77,7 +77,7 @@
 
 ### TemplateDetails Type
 - [x] Create TemplateDetails class/struct (DetailsBuilder exibe name, author, email, url, language)
-- [ ] Define fields: name, author, email, url, installParameter (atual: name, author, email, url, language no YAML raiz)
+- [ ] Define fields: name, author, email, url (atual: name, author, email, url, language no YAML raiz)
 - [ ] Implement getters and setters
 - [ ] Add validation for email format (optional)
 - [ ] Add validation for URL format (optional)
@@ -91,7 +91,6 @@
 - [x] Extract template.author field (m_doc["author"])
 - [x] Extract template.email field (m_doc["email"])
 - [x] Extract template.url field (m_doc["url"])
-- [ ] Extract template.installParameter field
 - [x] Handle missing template section (backward compatibility)
 - [x] Handle missing optional fields gracefully
 - [ ] Add unit tests for parsing template section
@@ -101,7 +100,6 @@
 - [ ] Include template metadata in sample listing
 - [ ] Display author information in list output
 - [ ] Display template name in list output
-- [ ] Use installParameter for repository downloads
 - [ ] Format metadata display in listing command
 - [ ] Add unit tests for metadata display
 

@@ -183,6 +183,10 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
         target_sources(${TEST_NAME} PRIVATE
             ${CMAKE_SOURCE_DIR}/src/services/ArgumentParserService.cpp
             ${CMAKE_SOURCE_DIR}/src/services/arguments/ArgumentList.cpp
+            ${CMAKE_SOURCE_DIR}/src/cli-utils/CLINavigate.cpp
+            ${CMAKE_SOURCE_DIR}/src/cli-utils/CLINavigateKeys.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/PromptType.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/VariableType.cpp
         )
     elseif(${TEST_NAME} STREQUAL "test_Config")
         target_sources(${TEST_NAME} PRIVATE

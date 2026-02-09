@@ -370,19 +370,26 @@ jobs:
             exit 0
           fi
           
-          # Upload C++ coverage (partial - multiple reports)
-          bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
-            --project-token "${{ secrets.CODACY_PROJECT_TOKEN }}" \
-            --language CPP \
-            -r build-coverage/coverage.info \
-            --partial
+          # Use absolute path so Codacy reporter finds the file regardless of cwd
+          CPP_COVERAGE="${{ github.workspace }}/build-coverage/coverage.info"
+          
+          # Upload C++ coverage (partial - multiple reports) only if file exists
+          if [ -f "$CPP_COVERAGE" ] && [ -s "$CPP_COVERAGE" ]; then
+            bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
+              --project-token "${{ secrets.CODACY_PROJECT_TOKEN }}" \
+              --language CPP \
+              -r "$CPP_COVERAGE" \
+              --partial
+          else
+            echo "⚠️  C++ coverage file not found or empty at $CPP_COVERAGE, skipping CPP upload"
+          fi
           
           # Upload TypeScript/Angular coverage (partial - multiple reports)
           if [ -f frontend/coverage/lcov.info ]; then
             bash <(curl -Ls https://coverage.codacy.com/get.sh) report \
               --project-token "${{ secrets.CODACY_PROJECT_TOKEN }}" \
               --language TypeScript \
-              -r frontend/coverage/lcov.info \
+              -r "${{ github.workspace }}/frontend/coverage/lcov.info" \
               --partial
           else
             echo "⚠️  Angular coverage file not found, skipping TypeScript upload"

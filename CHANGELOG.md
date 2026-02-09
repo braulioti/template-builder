@@ -6,12 +6,14 @@ This release focuses on enhancing the Template Builder CLI with repository suppo
 
 ### Feature
 - Created global attributes for the YAML file (name, author, email, url, language) displayed in the CLI before builder operations (version 0.2 or later).
+- Added CLI option `-l` / `--list` to download the templates list from a configurable URL (config: `ARGUMENTS.ListURL`), with interactive selection (Up/Down, Enter) and display of the selected value.
 
 ### Deprecated
 
 ### Fix
 
 ### Documentation
+- Added Angular documentation page "TemplateBuilder Argument List" under Quick Start, with detailed sections for each CLI argument (`-h`, `-i`, `-l`, `<file.yaml>`).
 
 ## [Version 0.1.0] - 2026-02-05
 

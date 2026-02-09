@@ -66,7 +66,6 @@ This release focuses on enhancing the Template Builder CLI with repository suppo
 - **Description**: 
   - Add `template` section to YAML format with metadata
   - Include author name, email, and website URL
-  - Include installation parameter name for repository downloads
   - Display template information during processing or listing
 - **YAML Structure**:
   ```yaml
@@ -77,7 +76,6 @@ This release focuses on enhancing the Template Builder CLI with repository suppo
     email: "author@example.com"
     url: "https://author-website.com"
     language: "pt-BR"
-    installParameter: "template-name"
   ```
 - **Benefits**: 
   - Better template organization and identification
@@ -156,7 +154,6 @@ All features from v0.1.0 are maintained:
   - `template.author`: Author name
   - `template.email`: Author email address
   - `template.url`: Author website URL
-  - `template.installParameter`: Parameter name for repository installation
 
 ### Backward Compatibility
 
@@ -273,7 +270,6 @@ template:
   author: "John Doe"
   email: "john.doe@example.com"
   url: "https://johndoe.com"
-  installParameter: "wordpress-theme"
 variables:
   # ... rest of template
 ```
@@ -283,7 +279,6 @@ variables:
 - `template.author`: Name of the template author (optional)
 - `template.email`: Email address of the author (optional)
 - `template.url`: Website URL of the author (optional)
-- `template.installParameter`: Parameter name used for repository installation (e.g., `-r wordpress-theme`) (optional)
 
 **Usage**:
 - Template metadata is displayed when listing samples (`-l` command)

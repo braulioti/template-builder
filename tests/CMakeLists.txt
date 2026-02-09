@@ -177,7 +177,19 @@ function(add_unit_test TEST_NAME TEST_SOURCE)
         )
     elseif(${TEST_NAME} STREQUAL "test_ArgumentParserService")
         target_sources(${TEST_NAME} PRIVATE
-            ${CMAKE_SOURCE_DIR}/src/arguments/ArgumentParserService.cpp
+            ${CMAKE_SOURCE_DIR}/src/services/ArgumentParserService.cpp
+            ${CMAKE_SOURCE_DIR}/src/services/arguments/ArgumentList.cpp
+        )
+    elseif(${TEST_NAME} STREQUAL "test_Config")
+        target_sources(${TEST_NAME} PRIVATE
+            ${CMAKE_SOURCE_DIR}/src/config/Config.cpp
+        )
+    elseif(${TEST_NAME} STREQUAL "test_ArgumentList")
+        target_sources(${TEST_NAME} PRIVATE
+            ${CMAKE_SOURCE_DIR}/src/services/arguments/ArgumentList.cpp
+            ${CMAKE_SOURCE_DIR}/src/cli-utils/CLINavigate.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/PromptType.cpp
+            ${CMAKE_SOURCE_DIR}/src/types/VariableType.cpp
         )
     elseif(${TEST_NAME} STREQUAL "test_CLINavigate")
         target_sources(${TEST_NAME} PRIVATE
@@ -228,6 +240,8 @@ add_unit_test(test_CLINavigate test_CLINavigate.cpp)
 add_unit_test(test_CLIFunctions test_CLIFunctions.cpp)
 add_unit_test(test_DetailsBuilder test_DetailsBuilder.cpp)
 add_unit_test(test_ArgumentParserService test_ArgumentParserService.cpp)
+add_unit_test(test_Config test_Config.cpp)
+add_unit_test(test_ArgumentList test_ArgumentList.cpp)
 
 # Message
 message(STATUS "Unit tests configuration: Tests will be built when BUILD_TESTS is ON")

@@ -5,7 +5,9 @@
 #include <string>
 #include <cstdlib>
 #include "template-builder.hpp"
-#include "arguments/ArgumentParserService.hpp"
+#include "config/Config.hpp"
+#include "config/ConfigConstants.hpp"
+#include "services/ArgumentParserService.hpp"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -31,11 +33,20 @@ int main(int argc, char* argv[]) {
     std::cout << "***************************************************" << std::endl;
     std::cout << std::endl;
 
-    TemplateBuilder::ArgumentParserService parser;
+    TemplateBuilder::Config config;
+    std::string listUrl = config.get(
+        TemplateBuilder::ConfigConstants::SECTION_ARGUMENTS,
+        TemplateBuilder::ConfigConstants::KEY_LIST_URL,
+        TemplateBuilder::ConfigConstants::DEFAULT_LIST_URL);
+    TemplateBuilder::ArgumentParserService parser(listUrl);
     auto result = parser.parse(argc, argv);
     if (result.showHelp || !result.valid) {
-        TemplateBuilder::ArgumentParserService::showUsage(argv[0]);
+        parser.showUsage(argv[0]);
         return result.showHelp ? 0 : 1;
+    }
+
+    if (result.showList) {
+        return parser.fetchAndPrintList() ? 0 : 1;
     }
 
     if (result.forceInteractive) {

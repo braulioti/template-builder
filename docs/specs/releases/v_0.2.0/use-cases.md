@@ -469,7 +469,6 @@ https://github.com/braulioti/template-builder/releases
   - `template.author` → stored
   - `template.email` → stored
   - `template.url` → stored
-  - `template.installParameter` → stored
 - **UC27b**: Only present fields are parsed, missing fields are optional
 - **UC27c**: Template processes normally without template section (backward compatible)
 - **UC27d/UC27e**: Invalid formats are accepted but may be validated (optional validation)
@@ -483,7 +482,6 @@ template:
   author: "John Doe"
   email: "john.doe@example.com"
   url: "https://johndoe.com"
-  installParameter: "wordpress-theme"
 variables:
   # ... rest of template
 
@@ -533,7 +531,6 @@ variables:
    - Author name
    - Author email (if available)
    - Author URL (if available)
-   - Install parameter
 
 **Expected Result**: 
 - **UC28a**: List displays template metadata in readable format:
@@ -554,7 +551,7 @@ variables:
   ```
 - **UC28b**: Download command shows template info before downloading
 - **UC28c**: Processing may optionally display template info
-- **UC28d**: Templates without metadata show only install parameter
+- **UC28d**: Templates without metadata show minimal info (backward compatibility)
 
 **Test Commands**:
 ```bash
@@ -567,7 +564,6 @@ TemplateBuilder template-with-metadata.yaml
 - Template name is clearly visible
 - Author information is formatted nicely
 - Email and URL are displayed if available
-- Install parameter is shown for easy copy-paste
 - Missing fields don't break the display
 - Format is consistent and readable
 
@@ -576,8 +572,7 @@ TemplateBuilder template-with-metadata.yaml
 2. List samples with partial metadata
 3. List samples without metadata (backward compatibility)
 4. Verify formatting is readable and consistent
-5. Verify install parameter is correctly displayed
-6. Verify email and URL are clickable/accessible if possible
+5. Verify email and URL are clickable/accessible if possible
 
 ---
 

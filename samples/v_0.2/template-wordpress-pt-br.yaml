@@ -5,7 +5,6 @@ author: "Bráulio Figueiredo"
 email: "braulio@braulioti.com.br"
 url: "https://brau.io"
 language: "pt-BR"
-installParameter: "template-wordpress-pt-br"
 
 variables:
   - name: projectName

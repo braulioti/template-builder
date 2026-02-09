@@ -121,7 +121,9 @@ set(SOURCES
     src/services/ParseYAML.cpp
     src/cli-utils/CLINavigate.cpp
     src/cli-utils/CLIFunctions.cpp
-    src/arguments/ArgumentParserService.cpp
+    src/services/ArgumentParserService.cpp
+    src/services/arguments/ArgumentList.cpp
+    src/config/Config.cpp
 )
 
 # Headers
@@ -140,7 +142,10 @@ set(HEADERS
     src/services/ParseYAML.hpp
     src/cli-utils/CLINavigate.hpp
     src/cli-utils/CLIFunctions.hpp
-    src/arguments/ArgumentParserService.hpp
+    src/services/ArgumentParserService.hpp
+    src/services/arguments/ArgumentList.hpp
+    src/config/Config.hpp
+    src/config/ConfigConstants.hpp
 )
 
 # Create executable
